@@ -1,11 +1,10 @@
 # From udemy cmake ch3
-# I added CPM.cmake, assets/
+# I added assets/
 ################################
 ###########  FILES  ############
 ################################
 *.pptx
 CMakeUserPresets.json
-CPM.cmake 
 .mypy_cache 
 
 ################################
