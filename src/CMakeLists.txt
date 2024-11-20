@@ -1,0 +1,3 @@
+add_subdirectory(lib_geom)
+add_subdirectory(lib_eng)
+add_subdirectory(app_editor)
