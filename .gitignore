@@ -1,5 +1,5 @@
 # From udemy cmake ch3
-# I added CPM.cmake, assets/, external/
+# I added CPM.cmake, assets/
 ################################
 ###########  FILES  ############
 ################################
@@ -14,6 +14,8 @@ CPM.cmake
 build/
 assets/
 html/
+#external/glad
+#external/stb_img
 
 
 ################################

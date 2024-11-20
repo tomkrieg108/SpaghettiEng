@@ -40,7 +40,8 @@ cpmaddpackage(
   NAME glfw
   GITHUB_REPOSITORY glfw/glfw
   GIT_TAG 3.4
-  OPTIONS "GLFW_BUILD_SHARED_LIBS OFF"  # Build as a static library (does by default anyway)
+  # OPTIONS "GLFW_BUILD_SHARED_LIBS OFF"  # Build as a static library (does by default anyway)
+  OPTIONS "GLFW_BUILD_SHARED_LIBS OFF" "GLFW_BUILD_WAYLAND OFF"
   # For linux, need this: OPTIONS "GLFW_BUILD_SHARED_LIBS OFF" "GLFW_BUILD_WAYLAND OFF"  
 )
 
