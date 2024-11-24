@@ -48,6 +48,8 @@ set(APP_EDITOR "app_editor")
 add_subdirectory(src) 
 add_subdirectory(external)   
 
+# Build type - preprocessor macro is compiler dependent, so set here 
+# Need to use generator expression for multi-config generators (MSVC)
 target_compile_definitions(${LIB_GEOM} PRIVATE 
   $<$<CONFIG:Debug>:SPG_DEBUG>
   $<$<CONFIG:Release>:SPG_RELEASE>
@@ -60,3 +62,50 @@ target_compile_definitions(${APP_EDITOR} PRIVATE
   $<$<CONFIG:Debug>:SPG_DEBUG>
   $<$<CONFIG:Release>:SPG_RELEASE>
 )
+
+#platform detection.  This can actually be done in code - consistent amoung compilker
+if(WIN32)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(STATUS "Platform is Windows 64")
+    target_compile_definitions(${LIB_GEOM} PRIVATE SPG_WIN)
+    target_compile_definitions(${LIB_ENG} PRIVATE SPG_WIN)
+    target_compile_definitions(${APP_EDITOR} PRIVATE SPG_WIN)
+  else()
+    message(STATUS "Platform is Windows 32")
+  endif()
+elseif((UNIX AND NOT APPLE))
+  message(STATUS "Platform is Linux")
+  target_compile_definitions(${LIB_GEOM} PRIVATE SPG_LINUX)
+  target_compile_definitions(${LIB_ENG} PRIVATE SPG_LINUX)
+  target_compile_definitions(${APP_EDITOR} PRIVATE SPG_LINUX)
+elseif(APPLE)  
+  message(STATUS "Platform is Apple - unsupported")
+else()
+  message(STATUS "Platform unknown")
+endif()
+
+#compiler detection
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+   message(STATUS "Compiler is MSVC")
+  #target_compile_options(myproject PRIVATE /W4)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  message(STATUS "Compiler is GNU")
+  #target_compile_options(myproject PRIVATE -Wall -Wextra)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")  
+  message(STATUS "Compiler is Clang") 
+  #target_compile_options(myproject PRIVATE -Wall -Wextra)
+endif()
+
+#architecture detection
+if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+  message(STATUS "Architecture: x86_64")
+  #target_compile_definitions(my_target PRIVATE ARCH_X86_64)
+elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL "M_X64")
+  message(STATUS "Architecture: M_X64")  
+  #target_compile_definitions(my_target PRIVATE ARCH_X86_64)
+elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+  message(STATUS "Architecture: ARM64")
+  #target_compile_definitions(my_target PRIVATE ARCH_ARM64)
+endif()
+
+
