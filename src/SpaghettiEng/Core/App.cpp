@@ -16,14 +16,20 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "core1.h"
-#include "core2.h"
-#include "geom.h"
-#include "eng/eng.h"
+#include "Geom.h"
+#include "App.h"
+
 
 void EngLibHello()
 {
-  glm::vec3 v{1.0,2.0,3.0};
+
+#ifdef SPG_DEBUG
+  std::cout << "SPG_DEGUG DEFINED\n";
+#elif defined(SPG_RELEASE)
+  std::cout << "SPG_RELEASE DEFINED\n";
+#endif
+
+  glm::vec3 v{1.0,2.0,3.6};
 
   std::cout << "\nHello from Eng Lib\n";
   std::cout << "External libs linked into Eng Lib:\n";
@@ -48,7 +54,5 @@ void EngLibHello()
 
   std::cout << "\n";
 
-  HelloFromEngCore1();
-  HelloFromEngCore2();
   GeomLibHello();
 }

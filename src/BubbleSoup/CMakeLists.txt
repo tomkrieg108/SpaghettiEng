@@ -1,5 +1,5 @@
-set(EDITOR_SOURCES "editor.cpp")
-set(EDITOR_HEADERS "editor.h")
+set(EDITOR_SOURCES "BubbleSoup.cpp")
+set(EDITOR_HEADERS "BubbleSoup.h")
 set(EDITOR_INCLUDES "./")
 
 add_executable(${APP_EDITOR} ${EDITOR_SOURCES} ${EDITOR_HEADERS})

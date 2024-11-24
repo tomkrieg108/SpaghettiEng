@@ -1,7 +1,7 @@
 
 struct GLFWwindow;
 
-namespace bbl
+namespace spg
 {
   class Window
   {

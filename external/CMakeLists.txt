@@ -1,8 +1,35 @@
-add_subdirectory(glad)
-add_subdirectory(stb_img)
-#add_subdirectory(imgui)
 
-#imgui (git submodule)
+#--------------------------------------------------------------
+# Glad
+#--------------------------------------------------------------
+add_library(${EXT_GLAD} STATIC 
+  "./glad/src/gl.c" 
+  "./glad/include/glad/gl.h" 
+  "./glad/include/KHR/khrplatform.h"
+)
+target_include_directories(${EXT_GLAD} PUBLIC
+  "./glad/include"
+)
+target_link_libraries(${EXT_GLAD} ) 
+
+
+#--------------------------------------------------------------
+# stb_image
+#--------------------------------------------------------------
+add_library(${EXT_STB_IMG} STATIC 
+  "./stb_imgage/stb_image.cpp"
+  "./stb_imgage/stb_image.h"
+)
+target_include_directories(${EXT_STB_IMG} PUBLIC
+  "./stb_imgage"
+  "."
+)
+target_link_libraries(${EXT_STB_IMG}) 
+
+
+#--------------------------------------------------------------
+#imgui - docking branch (git submodule)
+#--------------------------------------------------------------
 add_library(${EXT_IMGUI} STATIC
   "./imgui/imconfig.h"
   "./imgui/imgui.cpp"
@@ -20,12 +47,14 @@ add_library(${EXT_IMGUI} STATIC
   "./imgui/backends/imgui_impl_glfw.cpp"
   "./imgui/backends/imgui_impl_glfw.h"
 )
-
 target_include_directories(${EXT_IMGUI} PUBLIC
   "./imgui"
-  "./imgui//backends"
+  "./imgui/backends"
+  "./"
 )
 
-#need to link against glfw so that imgui picks up the include directies for glfw
-# This should automatically add the GLFW include directories to imgui's build context because CMake propagates the GLFW include paths when you link against GLFW::GLFW.
+#[[
+Need to link against glfw so that imgui picks up the include directories for glfw
+CMake propagates the GLFW include paths when you link against glfw, so this should automatically add the GLFW include directories to imgui's build context. 
+]]
 target_link_libraries(${EXT_IMGUI} PUBLIC glfw)

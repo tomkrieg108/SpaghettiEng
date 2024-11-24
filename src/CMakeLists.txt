@@ -1,3 +1,3 @@
-add_subdirectory(lib_geom)
-add_subdirectory(lib_eng)
-add_subdirectory(app_editor)
+add_subdirectory(Geom)
+add_subdirectory(SpaghettiEng)
+add_subdirectory(BubbleSoup)

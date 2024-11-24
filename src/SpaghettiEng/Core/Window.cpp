@@ -6,16 +6,18 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include "eng_window.h"
 
-namespace bbl
+#include "Log.h"
+#include "Window.h"
+
+namespace spg
 {
-
   constexpr auto WINDOW_WIDTH = std::uint32_t{1280};
   constexpr auto WINDOW_HEIGHT = std::uint32_t{720};
 
   Window::Window()
   {
+    Log::Init();
   }
 
   Window::~Window()
@@ -82,6 +84,9 @@ namespace bbl
     const char *glsl_version = "#version 150";
     ImGui_ImplGlfw_InitForOpenGL(m_handle, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
+
+    LOG_INFO("WINDOW CREATED:");
+    LOG_WARN("BuffWidth: {}, BuffHeight: {}", buff_width, buff_height);
   }
 
   void Window::RenderLoop()

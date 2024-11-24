@@ -6,8 +6,9 @@
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-#include "editor.h"
-#include "eng/eng.h"
+
+#include "SpaghettiEng/SpaghettiEng.h"
+#include "BubbleSoup.h"
 
 void EditorPrintHello()
 {
@@ -33,7 +34,7 @@ int main()
   EditorPrintHello();
   EngLibHello();
 
-  bbl::Window window;
+  spg::Window window;
   window.Init();
   window.RenderLoop();
 
