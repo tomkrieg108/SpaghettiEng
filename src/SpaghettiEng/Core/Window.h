@@ -1,17 +1,19 @@
 
 struct GLFWwindow;
 
-namespace spg
+namespace Spg
 {
   class Window
   {
   public:
     Window();
     ~Window();
-    void Init();
+    void Initialise();
     void RenderLoop();
+    void Shutdown();
 
   private:
-    GLFWwindow* m_handle = nullptr;
+    void SetWindowEventCallbacks();
+    GLFWwindow* m_window_handle = nullptr;
   };
 }

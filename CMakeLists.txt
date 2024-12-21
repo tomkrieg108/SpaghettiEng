@@ -45,6 +45,7 @@ set(LIB_ENG "lib_eng")
 set(LIB_GEOM "lib_geom")
 set(APP_EDITOR "app_editor")
 
+#processed depth-first
 add_subdirectory(src) 
 add_subdirectory(external)   
 
@@ -63,49 +64,53 @@ target_compile_definitions(${APP_EDITOR} PRIVATE
   $<$<CONFIG:Release>:SPG_RELEASE>
 )
 
-#platform detection.  This can actually be done in code - consistent amoung compilker
+#platform detection.  This can also be done in code - #deinfes consistent between compilers
 if(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(STATUS "Platform is Windows 64")
-    target_compile_definitions(${LIB_GEOM} PRIVATE SPG_WIN)
-    target_compile_definitions(${LIB_ENG} PRIVATE SPG_WIN)
-    target_compile_definitions(${APP_EDITOR} PRIVATE SPG_WIN)
+    message(STATUS "Cmake Msg: Platform is Windows 64-bit")
+    target_compile_definitions(${LIB_GEOM} PRIVATE SPG_WIN64)
+    target_compile_definitions(${LIB_ENG} PRIVATE SPG_WIN64)
+    target_compile_definitions(${APP_EDITOR} PRIVATE SPG_WIN64)
   else()
-    message(STATUS "Platform is Windows 32")
+    message(FATAL_ERROR "Cmake Msg: Unsupported platform detected: Windows 32-bit")
   endif()
 elseif((UNIX AND NOT APPLE))
-  message(STATUS "Platform is Linux")
+  message(STATUS "Cmake Msg: Platform is Linux")
   target_compile_definitions(${LIB_GEOM} PRIVATE SPG_LINUX)
   target_compile_definitions(${LIB_ENG} PRIVATE SPG_LINUX)
   target_compile_definitions(${APP_EDITOR} PRIVATE SPG_LINUX)
 elseif(APPLE)  
-  message(STATUS "Platform is Apple - unsupported")
+  message(FATAL_ERROR "Cmake Msg: Unsupported platform detected: Apple")
 else()
-  message(STATUS "Platform unknown")
+  message(FATAL_ERROR "Cmake Msg: Unsupported platform detected: Unknown platform")
 endif()
 
 #compiler detection
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-   message(STATUS "Compiler is MSVC")
+   message(STATUS "Cmake Msg: Compiler is MSVC")
   #target_compile_options(myproject PRIVATE /W4)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  message(STATUS "Compiler is GNU")
+  message(STATUS "Cmake Msg: Compiler is GNU")
   #target_compile_options(myproject PRIVATE -Wall -Wextra)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")  
-  message(STATUS "Compiler is Clang") 
+  message(STATUS "Cmake Msg: Compiler is Clang") 
   #target_compile_options(myproject PRIVATE -Wall -Wextra)
 endif()
 
-#architecture detection
+#architecture detection - these variables are compiler independent supposedly
+# but CMAKE_SYSTEM_PROCESSOR variable not set for windows
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-  message(STATUS "Architecture: x86_64")
+  message(STATUS "Cmake Msg: Architecture: x86_64")
   #target_compile_definitions(my_target PRIVATE ARCH_X86_64)
 elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL "M_X64")
-  message(STATUS "Architecture: M_X64")  
+  message(STATUS "Cmake Msg: Architecture: M_X64")  
   #target_compile_definitions(my_target PRIVATE ARCH_X86_64)
 elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
-  message(STATUS "Architecture: ARM64")
+  message(STATUS "Cmake Msg: Architecture: ARM64")
   #target_compile_definitions(my_target PRIVATE ARCH_ARM64)
+else()
+  message(STATUS "Cmake Msg: Cmake Detected Architecture:")
+  message(STATUS CMAKE_SYSTEM_PROCESSOR) 
 endif()
 
 

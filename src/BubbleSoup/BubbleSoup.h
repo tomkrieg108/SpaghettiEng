@@ -1,2 +1,6 @@
 #pragma once
-void EditorPrintHello();
+
+namespace Bbl
+{
+  void EditorPrintHello();
+}

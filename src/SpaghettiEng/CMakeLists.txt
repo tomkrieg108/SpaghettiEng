@@ -2,27 +2,30 @@
 add_library(${LIB_ENG} STATIC)
 
 target_sources(${LIB_ENG} PRIVATE 
-  "./Core/App.cpp"
+  "./Core/Application.cpp"
   "./Core/Window.cpp"
+  "./Core/Log.cpp"
   )
 
-  target_sources(${LIB_ENG} PRIVATE
-    "./Core/App.h"
-    "./Core/Window.h"
-    "./Core/Log.h"
-  )
+target_sources(${LIB_ENG} PRIVATE
+  "./Core/Base.h"
+  "./Core/ArchitectureDetection.h"
+  "./Core/Application.h"
+  "./Core/Window.h"
+  "./Core/Log.h"
+  "./Events/Events.h"
+  "./Events/EventManager.h"
+)
 
-  target_sources(${LIB_ENG} PUBLIC 
-    "./Include/SpaghettiEng/SpaghettiEng.h"
-  )
-
-#add_subdirectory(Core)
-#add_subdirectory("./Include/SpaghettiEng")
+target_sources(${LIB_ENG} PUBLIC 
+  "./Include/SpaghettiEng/SpaghettiEng.h"
+)
 
 # Headers here are not publicly exposed
 target_include_directories(${LIB_ENG}  PRIVATE 
   "./"
   "./Core"
+  "./Events"
 ) 
 
 # Headers here are publicly exposed to other targets

@@ -1,7 +1,9 @@
 
 target_sources(${LIB_ENG} PUBLIC 
-  "./App.cpp"
-  "./App.h"
+  "./Application.cpp"
+  "./Application.h"
+  "./ArchitectureDetection.h"
+  "./Base.h"
   "./Window.cpp"
   "./Window.h"
   "./Log.h"

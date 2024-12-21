@@ -1,3 +1,8 @@
 #pragma once
-void GeomLibHello();
+
+namespace Geom
+{
+  void GeomLibHello();
+}
+
 
