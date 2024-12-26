@@ -5,39 +5,127 @@
 
 //external libs
 //should be available because they were linked as public in Geom lib, which links to eng_lib
+//only for void EngLibHello()
 #include <cxxopts.hpp>
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
 #include <stb_image.h>
 #include <glm/glm.hpp>
+#include <spdlog/spdlog.h>
 
+//only for ImGui::ShowDemoWindow();
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "Base.h"
-#include "Log.h"
+
+
+#include "Events/EventManager.h"
+#include "ImGuiLayer/ImGuiLayer.h"
+
+//#include "Base.h" //in Application.h
+//#include "Log.h" //in Base.h
 #include "Geom.h"
 #include "Window.h"
 #include "Application.h"
 
 namespace Spg
 {
+  static void OnMousePress(EventMouseButtonPressed& e)
+  {
+    LOG_WARN("App: Mouse Pressed {},{}", e.x, e.y);
+  }
+  static void OnMouseRelease(EventMouseButtonReleased& e)
+  {
+   LOG_WARN("App: Mouse Released {},{}", e.x, e.y);
+  }
+
+  static void OnMouseMoved(EventMouseMoved& e)
+  {
+    LOG_WARN("App Mouse Moved: {},{}: ", e.delta_x, e.delta_y);
+  }
+
+  static void OnMouseScrolled(EventMouseScrolled& e)
+  {
+    LOG_WARN("App Mouse scrolled: {},{}: ", e.x_offset, e.y_offset);
+  }
+
+  static void OnWindowResized(EventWindowResize& e)
+  {
+    LOG_WARN("App Window FB resize: {},{}: ", e.buffer_height, e.buffer_height);
+  }
+
+  static void OnWindowClosed(EventWindowClose& e)
+  {
+    LOG_WARN("App Window closed");
+  }
+
+  Application::Application() 
+  {
+  }
+
   void Application::Initialise()
   {
     Log::Initialise();
-    m_window = std::make_unique<Window>();
-    m_window->Initialise();
+    EventManager::Initialise(); 
+    m_window = CreateScope<Window>();
+    ImGuiLayer::Initialise(*m_window);
+    SetEventHandlers();
+  }
+
+  void Application::SetEventHandlers()
+  {
+    EventManager::AddHandler(OnMousePress);
+    EventManager::AddHandler(OnMouseRelease);
+    EventManager::AddHandler(OnMouseMoved);
+    EventManager::AddHandler(OnMouseScrolled);
+    EventManager::AddHandler(OnWindowResized);
+    EventManager::AddHandler(this, &Application::OnWindowClosed);
+    EventManager::AddHandler(this, &Application::OnKeyPressed);
+    //EventManager::AddHandler(OnWindowClosed);
+  }
+
+  void Application::OnWindowClosed(EventWindowClose& e)
+  {
+    LOG_WARN("App Window closed **");
+    m_running = false;
+    e.handled = true;   
+  }
+  void Application::OnKeyPressed(EventKeyPressed& e)
+  {
+    LOG_WARN("Escape pressed **");
+    if(e.key == GLFW_KEY_ESCAPE)
+    {
+      m_running = false;
+      e.handled = true;   
+    }
   }
 
   void Application::Run()
   {
-    m_window->RenderLoop();
+    //m_window->RenderLoop();
+    LOG_INFO("App loop starting");
+    while(m_running)
+    {
+      m_window->ClearBuffers();
+      m_window->PollEvents();
+      
+      if(m_window->IsMinimised())
+        continue;
+      
+      ImGuiLayer::PreRender();
+      ImGui::ShowDemoWindow();
+      ImGuiLayer::PostRender();
+        
+      m_window->SwapBuffers();
+
+      EventManager::DispatchQueuedEvents();
+    }
   }
 
   void Application::Shutdown()
   {
+    ImGuiLayer::Shutdown();
     m_window->Shutdown();
   }
 

@@ -4,7 +4,7 @@ add_library(${LIB_GEOM} STATIC
 )
 
 target_include_directories(${LIB_GEOM} PRIVATE 
-  "./"
+  "."
 )
 
 target_include_directories(${LIB_GEOM} PUBLIC 
