@@ -22,7 +22,7 @@ namespace Spg
   {
   }
 
-  void Window::Initialise(const Params& params)
+  void Window::Initialise()
   {
     glfwSetErrorCallback(ErrorCallback);
 
@@ -38,7 +38,7 @@ namespace Spg
 		glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
 		glfwWindowHint(GLFW_CENTER_CURSOR, GL_TRUE);
 
-    m_window_handle = glfwCreateWindow(params.width,params.height,params.title.c_str(),nullptr,nullptr);
+    m_window_handle = glfwCreateWindow(m_params.width,m_params.height,m_params.title.c_str(),nullptr,nullptr);
     if (!m_window_handle)
 		{
       LOG_ERROR("GLFW window creation failed");
@@ -59,7 +59,7 @@ namespace Spg
     glViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
 
     SetVSyncEnabled(m_params.vsync_enabled);
-    SetCursorEnabled(params.cursor_enabled);
+    SetCursorEnabled(m_params.cursor_enabled);
     glfwSetWindowUserPointer(m_window_handle, this);  
     SetWindowEventCallbacks();
 

@@ -20,7 +20,7 @@ namespace Spg
   public:
     Window();
     ~Window();
-    void Initialise(const Params& params = Params());
+    void Initialise();
     void Shutdown();
 
     void UpdateSize();
@@ -40,7 +40,7 @@ namespace Spg
 
   private:
     void SetWindowEventCallbacks();
-    Params m_params;
+    Params m_params = Params();
     GLFWwindow* m_window_handle = nullptr;
   };
 }
