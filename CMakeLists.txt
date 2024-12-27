@@ -64,7 +64,7 @@ target_compile_definitions(${APP_EDITOR} PRIVATE
   $<$<CONFIG:Release>:SPG_RELEASE>
 )
 
-#platform detection.  This can also be done in code - #deinfes consistent between compilers
+#platform detection.  This can also be done in code (#defines consistent between compilers), but this allows for linking in different libs depending on platform
 if(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(STATUS "Cmake Msg: Platform is Windows 64-bit")
@@ -85,7 +85,7 @@ else()
   message(FATAL_ERROR "Cmake Msg: Unsupported platform detected: Unknown platform")
 endif()
 
-#compiler detection
+#compiler detection - can set compiler flags accordingly
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
    message(STATUS "Cmake Msg: Compiler is MSVC")
   #target_compile_options(myproject PRIVATE /W4)

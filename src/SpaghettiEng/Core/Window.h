@@ -1,4 +1,6 @@
 
+#include <string>
+
 struct GLFWwindow;
 
 namespace Spg

@@ -63,15 +63,19 @@ namespace Spg
       {
         EventType type;    
 
-        //Todo - some of these events are prpobably not needed - try to make as few as possible
-        using EventVariant = 
-        std::variant<EventWindowClose, EventWindowResize, EventWindowMove, EventWindowFocusChange, EventWindowHoverChange, EventWindowIconifyChange, EventViewportResize, EventMouseButtonPressed, EventMouseButtonReleased, EventMouseMoved, EventMouseScrolled,EventKeyPressed, EventKeyReleased, EventKeyTyped>;
+       
+        // using EventVariant = 
+        //  std::variant<EventWindowClose, EventWindowResize, EventWindowMove, EventWindowFocusChange, EventWindowHoverChange, EventWindowIconifyChange, EventViewportResize, EventMouseButtonPressed, EventMouseButtonReleased, EventMouseMoved, EventMouseScrolled,EventKeyPressed, EventKeyReleased, EventKeyTyped>;
+
+        //These are the only ones we care about for now
+        using EventVariant = std::variant<EventWindowClose, EventWindowResize, EventMouseButtonPressed, EventMouseButtonReleased, EventMouseMoved, EventMouseScrolled, EventKeyPressed, EventKeyReleased>;
 
         EventVariant event;
       };
 
     public:
-    
+
+      //todo - constructors should be private or deleted
       EventManager();
 
       template<typename T, typename E>

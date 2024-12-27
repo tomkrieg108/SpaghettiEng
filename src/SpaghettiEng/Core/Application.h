@@ -16,6 +16,8 @@ namespace Spg
     void Initialise();
     void Run();
     void Shutdown();
+    static Application& Get();
+    Window& GetWindow();
 
   private:
     void SetEventHandlers();
@@ -24,6 +26,8 @@ namespace Spg
 
     Scope<Window> m_window = nullptr;
     bool m_running = true; 
+
+    static Application* s_instance;
   };
 
   void EngLibHello();

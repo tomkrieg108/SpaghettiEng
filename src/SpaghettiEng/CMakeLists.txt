@@ -5,6 +5,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/Application.cpp"
   "./Core/Window.cpp"
   "./Core/Log.cpp"
+  "./Core/Input.cpp"
 
   "./Events/EventManager.cpp"
 
@@ -17,6 +18,9 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/Application.h"
   "./Core/Window.h"
   "./Core/Log.h"
+  "./Core/Input.h"
+  "./Core/KeyCodes.h"
+  "./Core/MouseCodes.h"
   
   "./Events/Events.h"
   "./Events/EventManager.h"
@@ -25,7 +29,7 @@ target_sources(${LIB_ENG} PRIVATE
 )
 
 target_sources(${LIB_ENG} PUBLIC 
-  "./Include/SpaghettiEng/SpaghettiEng.h"
+  "./SpaghettiEng.h"
 )
 
 # changed from PRIVATE to PUBLIC - was getting compiler errors (not finding header files)
@@ -38,8 +42,7 @@ target_include_directories(${LIB_ENG}  PUBLIC
 
 # Headers here are publicly exposed to other targets
 target_include_directories(${LIB_ENG}  PUBLIC 
-  "${CMAKE_CURRENT_SOURCE_DIR}/Include"
-  "${CMAKE_CURRENT_SOURCE_DIR}/Include/SpaghettiEng"
+  "${CMAKE_CURRENT_SOURCE_DIR}"
 ) 
 
 target_link_libraries(${LIB_ENG} PUBLIC OpenGL::GL)
@@ -49,5 +52,3 @@ target_link_libraries(${LIB_ENG} PUBLIC glm::glm-header-only)
 target_link_libraries(${LIB_ENG} PUBLIC ${LIB_GEOM} ) #This also links to GLM
 target_link_libraries(${LIB_ENG} PUBLIC ${EXT_STB_IMG} )
 target_link_libraries(${LIB_ENG} PUBLIC ${EXT_IMGUI} ) # Also links to glfw
-
-#target_compile_options(${LIB_ENG} PRIVATE -E -H)

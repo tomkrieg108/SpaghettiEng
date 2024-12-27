@@ -4,5 +4,3 @@ namespace Geom
 {
   void GeomLibHello();
 }
-
-

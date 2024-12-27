@@ -1,15 +1,10 @@
 add_library(${LIB_GEOM} STATIC 
-  "./Geom.cpp"
-  "./Include/Geom/Geom.h"
-)
-
-target_include_directories(${LIB_GEOM} PRIVATE 
-  "."
+  "Geom.cpp"
+  "Geom.h"
 )
 
 target_include_directories(${LIB_GEOM} PUBLIC 
-  "./Include"
-  "./Include/Geom"
+  "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 target_link_libraries(${LIB_GEOM} PUBLIC 

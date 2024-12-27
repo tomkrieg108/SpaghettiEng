@@ -4,13 +4,14 @@
 #include "ImGuiLayer/ImGuiLayer.h"
 #include "Events/EventManager.h"
 #include "Log.h"
+#include "Input.h"
 #include "Window.h"
 
 namespace Spg
 {
   static void ErrorCallback(int error, const char* description)
   {
-	  LOG_ERROR("GLFW Error: {}", description);
+	  SPG_ERROR("GLFW Error: {}", description);
   }
 
   Window::Window()
@@ -28,7 +29,7 @@ namespace Spg
 
     if(!glfwInit())
     {
-      LOG_ERROR("GLFW initalisation failed");
+      SPG_ERROR("GLFW initalisation failed");
       glfwTerminate();
     }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -41,7 +42,7 @@ namespace Spg
     m_window_handle = glfwCreateWindow(m_params.width,m_params.height,m_params.title.c_str(),nullptr,nullptr);
     if (!m_window_handle)
 		{
-      LOG_ERROR("GLFW window creation failed");
+      SPG_ERROR("GLFW window creation failed");
 			glfwTerminate();
 		}
 
@@ -49,13 +50,15 @@ namespace Spg
 		int status = gladLoadGL(glfwGetProcAddress);
 		if (!status)
 		{
-      LOG_ERROR("OpenGL Initialisation failed");
+      SPG_ERROR("OpenGL Initialisation failed");
 			glfwDestroyWindow(m_window_handle);
 			glfwTerminate();
 		}
 
     glfwGetWindowSize(m_window_handle, &m_params.width, &m_params.height);
     glfwGetFramebufferSize(m_window_handle, &m_params.buffer_width, &m_params.buffer_height);
+
+    //todo - put in gl class
     glViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
 
     SetVSyncEnabled(m_params.vsync_enabled);
@@ -63,12 +66,12 @@ namespace Spg
     glfwSetWindowUserPointer(m_window_handle, this);  
     SetWindowEventCallbacks();
 
-    LOG_INFO("WINDOW CREATED");
-    LOG_WARN("BuffWidth: {}, BuffHeight: {}", m_params.buffer_width, m_params.buffer_height);
-    LOG_WARN("Width: {}, Height: {}", m_params.width, m_params.height);
+    SPG_INFO("WINDOW CREATED");
+    SPG_INFO("BuffWidth: {}, BuffHeight: {}", m_params.buffer_width, m_params.buffer_height);
+    SPG_INFO("Width: {}, Height: {}", m_params.width, m_params.height);
   }
 
-  void Window::UpdateSize() {glfwGetFramebufferSize(m_window_handle, &m_params.buffer_width, &m_params.buffer_height);}
+  
   void Window::PollEvents() const {glfwPollEvents();}
   void Window::SwapBuffers() const {glfwSwapBuffers(m_window_handle);}
   void Window::MakeContextCurrent() const {glfwMakeContextCurrent(m_window_handle);}
@@ -78,6 +81,13 @@ namespace Spg
   bool Window::IsMinimised() const {return (bool)glfwGetWindowAttrib(m_window_handle, GLFW_ICONIFIED);}
   bool Window::IsMaximised() const {return (bool)glfwGetWindowAttrib(m_window_handle, GLFW_MAXIMIZED);}
   GLFWwindow* Window::GetWindowHandle() const {return m_window_handle;}
+
+  void Window::UpdateSize() 
+  {
+    glfwGetFramebufferSize(m_window_handle, &m_params.buffer_width, &m_params.buffer_height);
+    //todo - put in gl class
+    glViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
+  }
 
   void Window::ClearBuffers() const
   {
@@ -109,16 +119,12 @@ namespace Spg
 
   void Window::Shutdown()
   {
-    // ImGui_ImplOpenGL3_Shutdown();
-    // ImGui_ImplGlfw_Shutdown();
-    // ImGui::DestroyContext();
-
     glfwDestroyWindow(m_window_handle);
     glfwTerminate();
 
     #ifdef SPG_DEBUG
-      LOG_INFO("Max event queue size: {}", EventManager::GetMaxQueueSize());
-      LOG_INFO("Current event queue size: {}", EventManager::GetCurrentQueueSize());
+      SPG_INFO("Max event queue size: {}", EventManager::GetMaxQueueSize());
+      SPG_INFO("Current event queue size: {}", EventManager::GetCurrentQueueSize());
     #endif    
   }
   
@@ -128,8 +134,6 @@ namespace Spg
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
       EventWindowClose e;
       EventManager::Dispatch(e);
-      //EventManager::Enqueue(e);
-      //LOG_TRACE("Window closed");
     });
 
     glfwSetWindowSizeCallback(m_window_handle, [](GLFWwindow* handle, int width, int height) {
@@ -143,9 +147,7 @@ namespace Spg
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));  
       window->UpdateSize();
       EventWindowResize e{width,height};
-      EventManager::Dispatch(e);
-      //EventManager::Enqueue(e);
-      //LOG_TRACE("Frame Buffer Resize {} {}", width, height);        
+      EventManager::Dispatch(e);   
     });
 
     glfwSetWindowPosCallback(m_window_handle, [](GLFWwindow* handle, int xpos, int ypos) {
@@ -182,8 +184,6 @@ namespace Spg
     });
 
     glfwSetKeyCallback(m_window_handle, [](GLFWwindow* handle, int key, int code, int action, int mode){
-      // if(ImGui::GetIO().WantCaptureKeyboard)
-      //   return;
       if(ImGuiLayer::WantCaptureKeyboard())  
         return;
 
@@ -202,19 +202,16 @@ namespace Spg
       {
         EventKeyPressed e{key,true};
         EventManager::Enqueue(e);     
-      }
-      LOG_TRACE("Key pressed/released: {}", key);  
+      } 
     });
 
     glfwSetCharCallback(m_window_handle, [](GLFWwindow* handle, unsigned int keycode){
        Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-       LOG_TRACE("Char typed: {}", keycode);  
+       //SPG_TRACE("Char typed: {}", keycode);  
     });
     
     glfwSetMouseButtonCallback(m_window_handle, [](GLFWwindow* handle, int button, int action, int mods)
     {
-      // if (ImGui::GetIO().WantCaptureMouse)
-	    //   return;
       if(ImGuiLayer::WantCaptureMouse())  
         return;
 
@@ -235,8 +232,6 @@ namespace Spg
     });
 
     glfwSetScrollCallback(m_window_handle, [](GLFWwindow* handle, double xoffset, double yoffset){
-      // if (ImGui::GetIO().WantCaptureMouse)
-	    //   return;
       if(ImGuiLayer::WantCaptureMouse())  
         return;
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
@@ -245,12 +240,16 @@ namespace Spg
     });
 
     glfwSetCursorPosCallback(m_window_handle, [](GLFWwindow* handle, double xpos, double ypos) {
-      // if (ImGui::GetIO().WantCaptureMouse)
-	    //    return;
       if(ImGuiLayer::WantCaptureMouse())  
-        return;   
+        return; 
+
+      if (!Input::GetMouseFirstMoved())
+		    Input::SetMouseFirstMoved();
+
 		  Window* win = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-      EventMouseMoved e{(float)xpos,(float)ypos,0,0};
+      float x_new = (float)(xpos);
+      float y_new = (float)(ypos);
+      EventMouseMoved e{x_new,y_new,Input::GetMouseDeltaX(x_new),Input::GetMouseDeltaY(y_new)};
       EventManager::Enqueue(e);
     });
   }

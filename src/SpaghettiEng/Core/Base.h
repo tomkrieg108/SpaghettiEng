@@ -9,11 +9,12 @@
   #define SPG_ENABLE_ASSERTS
   #ifdef _MSC_VER
     #define SPG_DEBUGBREAK() __debugbreak()
+    //#define SPG_DEBUGBREAK()
   #elif defined(__GNUC__) || defined(__clang__)
     //__GNUC__ is defined for GCC, MinGW, Cygwin)
-    #define SPG_DEBUGBREAK() __builtin_trap()
-    //#include <csignal>
-    //#define SPG_DEBUGBREAK() raise(SIGTRAP)
+    //#define SPG_DEBUGBREAK() __builtin_trap()
+    #include <csignal>
+    #define SPG_DEBUGBREAK() raise(SIGTRAP)
   #else
     #error "Platform does not support debugbreak just yet"
   #endif
@@ -30,7 +31,7 @@
 #ifdef SPG_ENABLE_ASSERTS
   #define SPG_ASSERT(check) \
     if(!(check)) { \
-        LOG_ERROR("Debug assertion failed. File: {}, Line {}", __FILE__, __LINE__); \
+        SPG_ERROR("Debug assertion failed. File: {}, Line {}", __FILE__, __LINE__); \
         SPG_DEBUGBREAK(); \
     }
 #else

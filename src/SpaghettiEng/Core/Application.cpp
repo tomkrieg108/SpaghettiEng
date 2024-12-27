@@ -33,32 +33,39 @@ namespace Spg
 {
   static void OnMousePress(EventMouseButtonPressed& e)
   {
-    LOG_WARN("App: Mouse Pressed {},{}", e.x, e.y);
+    SPG_WARN("App: Mouse Pressed: {},{}", e.x, e.y);
   }
   static void OnMouseRelease(EventMouseButtonReleased& e)
   {
-   LOG_WARN("App: Mouse Released {},{}", e.x, e.y);
+   SPG_WARN("App: Mouse Released: {},{}", e.x, e.y);
   }
 
   static void OnMouseMoved(EventMouseMoved& e)
   {
-    LOG_WARN("App Mouse Moved: {},{}: ", e.delta_x, e.delta_y);
+    SPG_WARN("App Mouse Moved: [{},{}], [{},{}] ", e.x, e.y, e.delta_x, e.delta_y);
   }
 
   static void OnMouseScrolled(EventMouseScrolled& e)
   {
-    LOG_WARN("App Mouse scrolled: {},{}: ", e.x_offset, e.y_offset);
+    SPG_WARN("App Mouse scrolled: {},{} ", e.x_offset, e.y_offset);
   }
 
   static void OnWindowResized(EventWindowResize& e)
   {
-    LOG_WARN("App Window FB resize: {},{}: ", e.buffer_height, e.buffer_height);
+    SPG_WARN("App Window FB resize: {},{} ", e.buffer_width, e.buffer_height);
   }
 
   static void OnWindowClosed(EventWindowClose& e)
   {
-    LOG_WARN("App Window closed");
+    SPG_WARN("App Window closed");
   }
+
+  static void OnKeyReleased(EventKeyReleased& e)
+  {
+    SPG_WARN("App Key released: {} ", e.key);
+  }
+
+  Application* Application::s_instance = nullptr;
 
   Application::Application() 
   {
@@ -66,12 +73,26 @@ namespace Spg
 
   void Application::Initialise()
   {
+    SPG_ASSERT(s_instance == nullptr);
+    
     Log::Initialise();
     EventManager::Initialise(); 
     m_window = CreateScope<Window>();
     ImGuiLayer::Initialise(*m_window);
     SetEventHandlers();
+    s_instance = this;
+    SPG_ASSERT(1);
   }
+
+  Application& Application::Get()
+  {
+    return *s_instance;
+  }
+
+   Window& Application::GetWindow()
+   {
+      return *m_window;
+   }
 
   void Application::SetEventHandlers()
   {
@@ -80,20 +101,20 @@ namespace Spg
     EventManager::AddHandler(OnMouseMoved);
     EventManager::AddHandler(OnMouseScrolled);
     EventManager::AddHandler(OnWindowResized);
+    EventManager::AddHandler(OnKeyReleased);
     EventManager::AddHandler(this, &Application::OnWindowClosed);
     EventManager::AddHandler(this, &Application::OnKeyPressed);
-    //EventManager::AddHandler(OnWindowClosed);
   }
 
   void Application::OnWindowClosed(EventWindowClose& e)
   {
-    LOG_WARN("App Window closed **");
+    SPG_WARN("App Window closed **");
     m_running = false;
     e.handled = true;   
   }
   void Application::OnKeyPressed(EventKeyPressed& e)
   {
-    LOG_WARN("Escape pressed **");
+    SPG_WARN("Key pressed ** {} ", e.key);
     if(e.key == GLFW_KEY_ESCAPE)
     {
       m_running = false;
@@ -103,22 +124,27 @@ namespace Spg
 
   void Application::Run()
   {
-    //m_window->RenderLoop();
-    LOG_INFO("App loop starting");
+    SPG_WARN("App loop starting");
+
+    auto delta_time = 0.0;
+    auto last_time = glfwGetTime();
+
     while(m_running)
     {
+      auto now = glfwGetTime(); //in seconds
+      delta_time = now - last_time;
+      last_time = now;
+
       m_window->ClearBuffers();
       m_window->PollEvents();
       
-      if(m_window->IsMinimised())
-        continue;
-      
-      ImGuiLayer::PreRender();
-      ImGui::ShowDemoWindow();
-      ImGuiLayer::PostRender();
-        
+      if(!m_window->IsMinimised())
+      {
+        ImGuiLayer::PreRender();
+        ImGui::ShowDemoWindow();
+        ImGuiLayer::PostRender();
+      }
       m_window->SwapBuffers();
-
       EventManager::DispatchQueuedEvents();
     }
   }
@@ -162,8 +188,6 @@ namespace Spg
     std::cout << "IMGUI: " << IMGUI_VERSION << "\n";
     std::cout << "vec3 value is: " << v.x << "," << v.y << "," << v.z << "\n";
     std::cout << "\n";
-
-    SPG_ASSERT(1);
     std::cout << "####################################################\n\n";
   }
 

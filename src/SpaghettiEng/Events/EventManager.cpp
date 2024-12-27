@@ -22,7 +22,7 @@ namespace Spg
 
     void EventManager::Initialise()
     {
-       LOG_INFO("Initialising Event Manager V2");
+       SPG_INFO("Initialising Event Manager V2");
     }
 
     void EventManager::DispatchQueuedEvents()

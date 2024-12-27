@@ -1,6 +1,4 @@
 
-
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -12,7 +10,6 @@
 
 namespace Spg
 {
-
   void ImGuiLayer::Initialise(const Window& window)
   {
     SPG_ASSERT(window.GetWindowHandle() != nullptr);
