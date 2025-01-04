@@ -15,19 +15,19 @@ namespace Geom
   {
     std::cout << "Hello from Geom Lib!\n";
     #ifdef SPG_DEBUG
-      std::cout << "GEOM: SPG_DEBUG\n";
+      std::cout << "GEOM: SPG_DEBUG defined\n";
     #elif defined(SPG_RELEASE)
-        std::cout << "GEOM: SPG_DEBUG\n";
+        std::cout << "GEOM: SPG_RELEASE defined\n";
     #endif  
 
     #ifdef _WIN32
-      std::cout << "GEOM: WIN\n";
+      std::cout << "GEOM: WIN platform\n";
     #elif defined(__linux__)
-      std::cout << "GEOM: LINUX\n";
+      std::cout << "GEOM: LINUX platform\n";
     #endif
 
     #if defined(__x86_64__) || defined(_M_X64)
-      std::cout << "GEOM: x86_64\n";
+      std::cout << "GEOM: x86_64 architecture\n";
     #endif
     std::cout << "External libs linked into Geom Lib:\n";
     std::cout << "JSON:" << NLOHMANN_JSON_VERSION_MAJOR << "." << NLOHMANN_JSON_VERSION_MINOR << "."

@@ -18,19 +18,19 @@ namespace Bbl
     std::cout << "Hello From App\n";
     
     #ifdef SPG_DEBUG
-      std::cout << "APP: SPG_DEBUG\n";
+      std::cout << "APP: SPG_DEBUG defined\n";
     #elif defined(SPG_RELEASE)
-        std::cout << "APP: SPG_DEBUG\n";
+        std::cout << "APP: SPG_RELEASE defined\n";
     #endif  
 
     #ifdef _WIN32
-      std::cout << "APP: WIN\n";
+      std::cout << "APP: WIN platform\n";
     #elif defined(__linux__)
-      std::cout << "APP: LINUX\n";
+      std::cout << "APP: LINUX platform\n";
     #endif
 
     #if defined(__x86_64__) || defined(_M_X64)
-      std::cout << "APP: x86_64\n";
+      std::cout << "APP: x86_64 architecture\n";
     #endif
 
     std::cout << "External libs linked into App exe:\n";

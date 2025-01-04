@@ -159,19 +159,19 @@ namespace Spg
   {
     std::cout << "\nHello from Eng Lib\n";
     #ifdef SPG_DEBUG
-      std::cout << "ENG: SPG_DEGUG DEFINED\n";
+      std::cout << "ENG: SPG_DEGUG defined\n";
     #elif defined(SPG_RELEASE)
-      std::cout << "ENG: SPG_RELEASE DEFINED\n";
+      std::cout << "ENG: SPG_RELEASE defined\n";
     #endif
 
     #ifdef _WIN32
-      std::cout << "ENG: WIN\n";
+      std::cout << "ENG: WIN platform\n";
     #elif defined(__linux__)
-      std::cout << "ENG: LINUX\n";
+      std::cout << "ENG: LINUX platform\n";
     #endif
 
     #if defined(__x86_64__) || defined(_M_X64)
-      std::cout << "ENG: x86_64\n";
+      std::cout << "ENG: x86_64 architecture\n";
     #endif
 
     glm::vec3 v{1.0,2.0,3.6};
