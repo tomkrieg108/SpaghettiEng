@@ -2,6 +2,7 @@
 #include <glad/gl.h>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include "Core/Base.h"
 #include "GL32Shader.h"
 
@@ -30,7 +31,8 @@ namespace Spg
 
   static GLShaderInfo Compile(uint32_t type, const std::string& filepath, const std::string& source_code)
   {
-    
+    GLShaderInfo shader_info;
+    return shader_info;
   }
 
 }
