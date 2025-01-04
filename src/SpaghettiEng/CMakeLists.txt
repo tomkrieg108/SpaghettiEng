@@ -10,6 +10,8 @@ target_sources(${LIB_ENG} PRIVATE
   "./Events/EventManager.cpp"
 
   "./ImGuiLayer/ImGuiLayer.cpp"
+
+  "./OpenGL32/GL32Shader.cpp"
   )
 
 target_sources(${LIB_ENG} PRIVATE
@@ -26,6 +28,8 @@ target_sources(${LIB_ENG} PRIVATE
   "./Events/EventManager.h"
 
   "./ImGuiLayer/ImGuiLayer.h"
+
+  "./OpenGL32/GL32Shader.h"
 )
 
 target_sources(${LIB_ENG} PUBLIC 
@@ -38,6 +42,7 @@ target_include_directories(${LIB_ENG}  PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/Core"
   "${CMAKE_CURRENT_SOURCE_DIR}/Events"
   "${CMAKE_CURRENT_SOURCE_DIR}/ImGuiLayer"
+  "${CMAKE_CURRENT_SOURCE_DIR}/OpenGL32"
 ) 
 
 # Headers here are publicly exposed to other targets
