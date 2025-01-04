@@ -22,7 +22,7 @@ namespace Spg
   public:
     Window();
     ~Window();
-    void Initialise();
+    void Initialise(const std::string& title = std::string(""));
     void Shutdown();
 
     void UpdateSize();
@@ -38,7 +38,7 @@ namespace Spg
     float GetAspectRatio() const;
     GLFWwindow* GetWindowHandle() const;
     void MakeContextCurrent() const;
-    const Params& GetParams() const;
+    Params& GetParams();
 
   private:
     void SetWindowEventCallbacks();

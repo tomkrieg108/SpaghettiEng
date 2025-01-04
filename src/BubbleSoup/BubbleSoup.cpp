@@ -8,12 +8,27 @@
 #include <spdlog/spdlog.h>
 
 #include "Geom/Geom.h"
-#include "SpaghettiEng/SpaghettiEng.h"
 #include "BubbleSoup.h"
 
-namespace Bbl
+using namespace std::string_literals;
+
+namespace Spg
 {
-  void EditorPrintHello()
+  DefaultLayer::DefaultLayer(const std::string& name) : Layer(name)  {}
+
+  void DefaultLayer::OnImGuiRender()
+  {
+    ImGui::Begin(m_name.c_str());
+    if (ImGui::CollapsingHeader("Gui For this layer"))
+    {
+      ImGui::Text("Data and controls for this layer goes here");
+    }
+    ImGui::End();
+  }
+
+  BubbleSoup::BubbleSoup(const std::string& title) : Application(title) {}
+
+  void AppPrintHello()
   {
     std::cout << "Hello From App\n";
     
@@ -49,11 +64,14 @@ int main()
 {
   Geom::GeomLibHello();
   Spg::EngLibHello();
-  Bbl::EditorPrintHello();
+  Spg::AppPrintHello();
 
-  Spg::Application app;
-  app.Initialise();
-  app.Run();
-  app.Shutdown();
+  Spg::BubbleSoup bubble_soup("Bubble Soup"s);
+  Spg::DefaultLayer* default_layer = new Spg::DefaultLayer(std::string("Default Layer"));
+  bubble_soup.PushLayer(default_layer);
+  bubble_soup.Initialise();
+  bubble_soup.Run();
+  bubble_soup.PopLayer(default_layer);
+  bubble_soup.Shutdown();
   return 0;
 }

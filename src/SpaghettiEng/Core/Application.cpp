@@ -23,8 +23,6 @@
 #include "Events/EventManager.h"
 #include "ImGuiLayer/ImGuiLayer.h"
 
-//#include "Base.h" //in Application.h
-//#include "Log.h" //in Base.h
 #include "Geom.h"
 #include "Window.h"
 #include "Application.h"
@@ -67,9 +65,7 @@ namespace Spg
 
   Application* Application::s_instance = nullptr;
 
-  Application::Application() 
-  {
-  }
+  Application::Application(const std::string& title) : m_app_title(title) {}
 
   void Application::Initialise()
   {
@@ -78,6 +74,7 @@ namespace Spg
     Log::Initialise();
     EventManager::Initialise(); 
     m_window = CreateScope<Window>();
+    m_window->Initialise(m_app_title);
     ImGuiLayer::Initialise(*m_window);
     SetEventHandlers();
     s_instance = this;
@@ -89,10 +86,22 @@ namespace Spg
     return *s_instance;
   }
 
-   Window& Application::GetWindow()
-   {
-      return *m_window;
-   }
+  Window& Application::GetWindow()
+  {
+    return *m_window;
+  }
+
+  void Application::PushLayer(Layer* layer)
+  {
+    m_layer_stack.PushLayer(layer);
+    layer->OnAttach();
+  }
+
+  void Application::PopLayer(Layer* layer)
+  {
+    layer->OnDetach();
+    m_layer_stack.PopLayer(layer); 
+  }
 
   void Application::SetEventHandlers()
   {
@@ -140,7 +149,13 @@ namespace Spg
       
       if(!m_window->IsMinimised())
       {
+        for (Layer* layer : m_layer_stack)
+		      layer->OnUpdate(delta_time);
+
         ImGuiLayer::PreRender();
+        ImGuiAppRender();
+        for (Layer* layer : m_layer_stack)
+		      layer->OnImGuiRender();
         ImGui::ShowDemoWindow();
         ImGuiLayer::PostRender();
       }
@@ -153,6 +168,23 @@ namespace Spg
   {
     ImGuiLayer::Shutdown();
     m_window->Shutdown();
+  }
+
+  void Application::ImGuiAppRender()
+  {
+    auto& params = m_window->GetParams();
+   
+    ImGui::Begin("App");
+    if (ImGui::CollapsingHeader("Window: Size,Framerate"))
+    {
+      ImGui::Text("Width,Height %d %d : ", params.width, params.height);
+      ImGui::Text("Buff Width, Buff Height %d %d : ", params.buffer_width, params.buffer_height);
+      ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().
+      Framerate);
+      ImGui::Checkbox("VSync Enable: ", &(params.vsync_enabled));
+      m_window->SetVSyncEnabled(params.vsync_enabled);
+    }
+    ImGui::End();
   }
 
   void EngLibHello()

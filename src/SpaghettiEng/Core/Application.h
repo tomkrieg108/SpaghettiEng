@@ -1,5 +1,6 @@
 #pragma once
 #include "Base.h" //for Scope
+#include "Layer.h"
 
 namespace Spg
 {
@@ -10,22 +11,29 @@ namespace Spg
   class Application
   {
   public:
-    Application();
+    Application(const std::string& title = "Spaghetti App");
     virtual ~Application() = default;
 
     void Initialise();
     void Run();
     void Shutdown();
-    static Application& Get();
+    void PushLayer(Layer* layer);
+    void PopLayer(Layer* layer);
     Window& GetWindow();
 
+    static Application& Get();
+    
   private:
     void SetEventHandlers();
     void OnWindowClosed(EventWindowClose& e);
     void OnKeyPressed(EventKeyPressed& e);
+    void ImGuiAppRender();
 
+  private:
     Scope<Window> m_window = nullptr;
-    bool m_running = true; 
+    LayerStack m_layer_stack;
+    bool m_running = true;
+    std::string m_app_title = std::string("");
 
     static Application* s_instance;
   };

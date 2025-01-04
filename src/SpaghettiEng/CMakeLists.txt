@@ -6,6 +6,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/Window.cpp"
   "./Core/Log.cpp"
   "./Core/Input.cpp"
+  "./Core/Layer.cpp"
 
   "./Events/EventManager.cpp"
 
@@ -21,6 +22,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/Window.h"
   "./Core/Log.h"
   "./Core/Input.h"
+  "./Core/Layer.h"
   "./Core/KeyCodes.h"
   "./Core/MouseCodes.h"
   

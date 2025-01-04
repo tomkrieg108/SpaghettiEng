@@ -16,14 +16,13 @@ namespace Spg
 
   Window::Window()
   {
-    Initialise();
   }
 
   Window::~Window()
   {
   }
 
-  void Window::Initialise()
+  void Window::Initialise(const std::string& title)
   {
     glfwSetErrorCallback(ErrorCallback);
 
@@ -39,13 +38,14 @@ namespace Spg
 		glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
 		glfwWindowHint(GLFW_CENTER_CURSOR, GL_TRUE);
 
-    m_window_handle = glfwCreateWindow(m_params.width,m_params.height,m_params.title.c_str(),nullptr,nullptr);
+    m_window_handle = glfwCreateWindow(m_params.width,m_params.height,title.c_str(),nullptr,nullptr);
     if (!m_window_handle)
 		{
       SPG_ERROR("GLFW window creation failed");
 			glfwTerminate();
 		}
-
+    m_params.title = title;
+    
     glfwMakeContextCurrent(m_window_handle);
 		int status = gladLoadGL(glfwGetProcAddress);
 		if (!status)
@@ -75,7 +75,7 @@ namespace Spg
   void Window::PollEvents() const {glfwPollEvents();}
   void Window::SwapBuffers() const {glfwSwapBuffers(m_window_handle);}
   void Window::MakeContextCurrent() const {glfwMakeContextCurrent(m_window_handle);}
-  const Window::Params& Window::GetParams() const {return m_params;}
+  Window::Params& Window::GetParams() {return m_params;}
   bool Window::IsVSyncEnabled() const { return m_params.vsync_enabled; }
   bool Window::IsCursorEnabled() const { return m_params.cursor_enabled; }
   bool Window::IsMinimised() const {return (bool)glfwGetWindowAttrib(m_window_handle, GLFW_ICONIFIED);}
