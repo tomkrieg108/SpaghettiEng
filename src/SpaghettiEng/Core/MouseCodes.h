@@ -1,5 +1,5 @@
 #pragma once
-#include <cstdint>
+
 namespace Spg
 {
   using MouseCode = uint16_t;

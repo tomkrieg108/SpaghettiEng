@@ -1,9 +1,7 @@
 
 #include <glad/gl.h>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include "Core/Base.h"
+#include <Common/Common.h>
+#include "Core/Application.h"
 #include "GL32Shader.h"
 
 using namespace std::string_literals;

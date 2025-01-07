@@ -1,6 +1,4 @@
 
-#include <algorithm>
-
 #include "Layer.h"
 
 namespace Spg

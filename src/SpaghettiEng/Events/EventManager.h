@@ -1,14 +1,8 @@
 #pragma once
 
-#include <type_traits>
-#include <variant>
-#include <array>
-#include <queue>
-#include <iostream>
-
-#include "Core/Base.h"
+//#include "Core/Base.h"
+#include <Common/Common.h>
 #include "Events.h"
-
 
 namespace Spg
 {

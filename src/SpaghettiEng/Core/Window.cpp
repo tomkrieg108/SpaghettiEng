@@ -1,9 +1,10 @@
-#include <iostream>
+//#include <iostream>
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include "ImGuiLayer/ImGuiLayer.h"
 #include "Events/EventManager.h"
-#include "Log.h"
+//#include "Log.h"
+#include "Application.h"
 #include "Input.h"
 #include "Window.h"
 
@@ -14,12 +15,23 @@ namespace Spg
 	  SPG_ERROR("GLFW Error: {}", description);
   }
 
+  uint32_t Window::s_window_count = 0;
+
   Window::Window()
   {
   }
 
   Window::~Window()
   {
+  }
+
+  Scope<Window> Window::Create()
+  {
+    SPG_ASSERT(Window::s_window_count == 0);
+    auto window = CreateScope<Window>();
+    window->Initialise();
+    s_window_count++;
+    return window;
   }
 
   void Window::Initialise(const std::string& title)
@@ -82,7 +94,7 @@ namespace Spg
   bool Window::IsMaximised() const {return (bool)glfwGetWindowAttrib(m_window_handle, GLFW_MAXIMIZED);}
   GLFWwindow* Window::GetWindowHandle() const {return m_window_handle;}
 
-  void Window::UpdateSize() 
+  void Window::UpdateViewport() 
   {
     glfwGetFramebufferSize(m_window_handle, &m_params.buffer_width, &m_params.buffer_height);
     //todo - put in gl class
@@ -145,7 +157,7 @@ namespace Spg
 
     glfwSetFramebufferSizeCallback(m_window_handle, [](GLFWwindow* handle, int width, int height){
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));  
-      window->UpdateSize();
+      window->UpdateViewport();
       EventWindowResize e{width,height};
       EventManager::Dispatch(e);   
     });

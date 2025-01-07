@@ -41,6 +41,7 @@ find_package(OpenGL REQUIRED) # Add OpenGL (usually available system-wide)
 set(EXT_GLAD "lib_glad")
 set(EXT_STB_IMG "lib_stb_image")
 set(EXT_IMGUI "lib_imgui_docking")
+set(LIB_COMMON "lib_common")
 set(LIB_ENG "lib_eng")
 set(LIB_GEOM "lib_geom")
 set(APP_EDITOR "app_editor")
@@ -51,6 +52,10 @@ add_subdirectory(external)
 
 # Build type - preprocessor macro is compiler dependent, so set here 
 # Need to use generator expression for multi-config generators (MSVC)
+target_compile_definitions(${LIB_COMMON} PRIVATE 
+  $<$<CONFIG:Debug>:SPG_DEBUG>
+  $<$<CONFIG:Release>:SPG_RELEASE>
+)
 target_compile_definitions(${LIB_GEOM} PRIVATE 
   $<$<CONFIG:Debug>:SPG_DEBUG>
   $<$<CONFIG:Release>:SPG_RELEASE>
@@ -68,6 +73,7 @@ target_compile_definitions(${APP_EDITOR} PRIVATE
 if(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(STATUS "Cmake Msg: Platform is Windows 64-bit")
+    target_compile_definitions(${LIB_COMMON} PRIVATE SPG_WIN64)
     target_compile_definitions(${LIB_GEOM} PRIVATE SPG_WIN64)
     target_compile_definitions(${LIB_ENG} PRIVATE SPG_WIN64)
     target_compile_definitions(${APP_EDITOR} PRIVATE SPG_WIN64)
@@ -76,6 +82,7 @@ if(WIN32)
   endif()
 elseif((UNIX AND NOT APPLE))
   message(STATUS "Cmake Msg: Platform is Linux")
+  target_compile_definitions(${LIB_COMMON} PRIVATE SPG_LINUX)
   target_compile_definitions(${LIB_GEOM} PRIVATE SPG_LINUX)
   target_compile_definitions(${LIB_ENG} PRIVATE SPG_LINUX)
   target_compile_definitions(${APP_EDITOR} PRIVATE SPG_LINUX)
@@ -112,5 +119,30 @@ else()
   message(STATUS "Cmake Msg: Cmake Detected Architecture:")
   message(STATUS CMAKE_SYSTEM_PROCESSOR) 
 endif()
+
+target_precompile_headers(${LIB_ENG} PRIVATE 
+  <cstdint>
+  <cmath>
+  <iostream>
+  <fstream>
+  <string>
+  <string_view>
+  <sstream>
+  <vector>
+  <array>
+  #<list>
+  <unordered_map>
+  #<unordered_set>
+  #<map>
+  <memory>
+  #<functional>
+  <random>
+  #<utility>
+  <algorithm>
+  <variant>
+  <queue>
+  <type_traits>
+  <numbers>
+)
 
 

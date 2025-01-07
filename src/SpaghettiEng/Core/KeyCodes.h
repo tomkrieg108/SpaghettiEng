@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 namespace Spg
 {
   using KeyCode = uint16_t;

@@ -1,19 +1,22 @@
 #include <iostream>
+#include "Geometry/Geometry.h"
+#include "BubbleSoup.h"
 
 //external libs
-//should be available because they were linked as public in Geom lib and proparated here
+//should be available because they were linked as public in Geom lib and propagated here
 #include <cxxopts.hpp>
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-
-#include "Geom/Geom.h"
-#include "BubbleSoup.h"
-
-using namespace std::string_literals;
+//--------------------------------------------
 
 namespace Spg
 {
+  Application* CreateApplication()
+  {
+    return new BubbleSoup("Bubble Soup"s);
+  }
+
   DefaultLayer::DefaultLayer(const std::string& name) : Layer(name)  {}
 
   void DefaultLayer::OnImGuiRender()
@@ -26,7 +29,17 @@ namespace Spg
     ImGui::End();
   }
 
-  BubbleSoup::BubbleSoup(const std::string& title) : Application(title) {}
+  BubbleSoup::BubbleSoup(const std::string& title) : 
+    Application(title) 
+  {
+    m_default_layer = new Spg::DefaultLayer(std::string("Default Layer"));
+    PushLayer(m_default_layer);
+  }
+
+  BubbleSoup::~BubbleSoup()
+  {
+    PopLayer(m_default_layer);
+  }
 
   void AppPrintHello()
   {
@@ -62,16 +75,15 @@ namespace Spg
 
 int main()
 {
+#ifdef SPG_LIB_LINK_CHECK 
+  Utils::LibCheck();
   Geom::GeomLibHello();
   Spg::EngLibHello();
   Spg::AppPrintHello();
+#endif
 
-  Spg::BubbleSoup bubble_soup("Bubble Soup"s);
-  Spg::DefaultLayer* default_layer = new Spg::DefaultLayer(std::string("Default Layer"));
-  bubble_soup.PushLayer(default_layer);
-  bubble_soup.Initialise();
-  bubble_soup.Run();
-  bubble_soup.PopLayer(default_layer);
-  bubble_soup.Shutdown();
+  auto app = Spg::CreateApplication();
+  app->Run();
+  delete app; //Doesn't call this in release mode!
   return 0;
 }

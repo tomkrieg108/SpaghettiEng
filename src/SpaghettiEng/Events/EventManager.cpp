@@ -1,3 +1,5 @@
+
+#include "Core/Application.h"
 #include "EventManager.h"
 
 namespace Spg
@@ -8,7 +10,6 @@ namespace Spg
 
     static void DefaultHandler(Event& e)
     {
-      std::cout << "Default event callback Events V2\n";
     }
 
     EventManager::EventManager()

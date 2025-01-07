@@ -1,31 +1,30 @@
-#include <iostream>
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
-
-//external libs
-//should be available because they were linked as public in Geom lib, which links to eng_lib
-//only for void EngLibHello()
-#include <cxxopts.hpp>
-#include <fmt/format.h>
-#include <nlohmann/json.hpp>
-#include <stb_image.h>
-#include <glm/glm.hpp>
-#include <spdlog/spdlog.h>
 
 //only for ImGui::ShowDemoWindow();
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-
-
 #include "Events/EventManager.h"
 #include "ImGuiLayer/ImGuiLayer.h"
 
-#include "Geom.h"
+#include "Geometry/Geometry.h"
 #include "Window.h"
 #include "Application.h"
+
+//external libs test
+//should be available because they were linked as public in Geom lib, which links to eng_lib
+//only for void EngLibHello()
+  #include <cxxopts.hpp>
+  #include <fmt/format.h>
+  #include <nlohmann/json.hpp>
+  #include <stb_image.h>
+  #include <glm/glm.hpp>
+  #include <spdlog/spdlog.h>
+//---------------------------------------
+
 
 namespace Spg
 {
@@ -62,32 +61,37 @@ namespace Spg
   {
     SPG_WARN("App Key released: {} ", e.key);
   }
+ 
+ Application* Application::s_instance = nullptr;
 
-  Application* Application::s_instance = nullptr;
-
-  Application::Application(const std::string& title) : m_app_title(title) {}
-
-  void Application::Initialise()
+  Application::Application(const std::string& title) : m_app_title(title) 
   {
     SPG_ASSERT(s_instance == nullptr);
-    
-    Log::Initialise();
+    s_instance = this;
+    m_log = Utils::Logger::Create("ENG");
     EventManager::Initialise(); 
-    m_window = CreateScope<Window>();
-    m_window->Initialise(m_app_title);
+    m_window = Window::Create();
     ImGuiLayer::Initialise(*m_window);
     SetEventHandlers();
-    s_instance = this;
+    
     SPG_ASSERT(1);
+  }
+
+  Application::~Application()
+  {
+    ImGuiLayer::Shutdown();
+    m_window->Shutdown();
   }
 
   Application& Application::Get()
   {
+    SPG_ASSERT(s_instance != nullptr);
     return *s_instance;
   }
 
   Window& Application::GetWindow()
   {
+    SPG_ASSERT(m_window != nullptr);
     return *m_window;
   }
 
@@ -105,12 +109,14 @@ namespace Spg
 
   void Application::SetEventHandlers()
   {
+  #ifdef SPG_CALLBACK_CHECK
     EventManager::AddHandler(OnMousePress);
     EventManager::AddHandler(OnMouseRelease);
     EventManager::AddHandler(OnMouseMoved);
     EventManager::AddHandler(OnMouseScrolled);
     EventManager::AddHandler(OnWindowResized);
     EventManager::AddHandler(OnKeyReleased);
+  #endif
     EventManager::AddHandler(this, &Application::OnWindowClosed);
     EventManager::AddHandler(this, &Application::OnKeyPressed);
   }
@@ -134,7 +140,6 @@ namespace Spg
   void Application::Run()
   {
     SPG_WARN("App loop starting");
-
     auto delta_time = 0.0;
     auto last_time = glfwGetTime();
 
@@ -162,12 +167,6 @@ namespace Spg
       m_window->SwapBuffers();
       EventManager::DispatchQueuedEvents();
     }
-  }
-
-  void Application::Shutdown()
-  {
-    ImGuiLayer::Shutdown();
-    m_window->Shutdown();
   }
 
   void Application::ImGuiAppRender()
@@ -220,7 +219,8 @@ namespace Spg
     std::cout << "IMGUI: " << IMGUI_VERSION << "\n";
     std::cout << "vec3 value is: " << v.x << "," << v.y << "," << v.z << "\n";
     std::cout << "\n";
+
+    std::cout << "double pi      " << std::numbers::pi << std::endl;
     std::cout << "####################################################\n\n";
   }
-
 }

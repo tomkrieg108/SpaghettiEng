@@ -1,5 +1,5 @@
-
-#include <string>
+#pragma once
+#include <Common/Common.h>
 
 struct GLFWwindow;
 
@@ -25,7 +25,6 @@ namespace Spg
     void Initialise(const std::string& title = std::string(""));
     void Shutdown();
 
-    void UpdateSize();
     void ClearBuffers() const;
     void PollEvents() const;
     void SwapBuffers() const;
@@ -40,9 +39,16 @@ namespace Spg
     void MakeContextCurrent() const;
     Params& GetParams();
 
+    static Scope<Window> Create();
+
   private:
     void SetWindowEventCallbacks();
+    void UpdateViewport();
+
+  private:  
     Params m_params = Params();
     GLFWwindow* m_window_handle = nullptr;
+
+    static uint32_t s_window_count;
   };
 }

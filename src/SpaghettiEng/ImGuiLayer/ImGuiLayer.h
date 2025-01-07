@@ -23,20 +23,4 @@ namespace Spg
       static bool WantCaptureMouse();
       static bool WantCaptureKeyboard();
   };
-
-  class ImGuiLayer2 : public Layer
-  {
-    public:
-      void OnAttach() override {};
-      void OnDetach() override {};
-
-      static void Initialise(const Window& window) {};
-      static void PreRender() {};
-      static void PostRender() {};
-      static void Shutdown() {};
-
-      static bool WantCaptureMouse() {};
-      static bool WantCaptureKeyboard() {};
-
-  };
 }
