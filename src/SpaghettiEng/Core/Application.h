@@ -2,10 +2,10 @@
 //#include "Base.h"
 #include <Common/Common.h>
 #include "Layer.h"
+#include "Window.h" //gcc doesn't like Scope<Window> m_window = nullptr; without full declaration of Window class
 
 namespace Spg
 {
-  class Window;
   struct EventWindowClose;
   struct EventKeyPressed;
 
