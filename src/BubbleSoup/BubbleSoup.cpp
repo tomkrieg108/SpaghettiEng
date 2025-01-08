@@ -12,6 +12,8 @@
 
 namespace Spg
 {
+  namespace fs = std::filesystem;
+
   Application* CreateApplication()
   {
     return new BubbleSoup("Bubble Soup"s);
@@ -69,6 +71,7 @@ namespace Spg
               << "\n";
     std::cout << "SPDLOG....:" << SPDLOG_VER_MAJOR << "." << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << "\n";
     std::cout << "\n";
+
     std::cout << "####################################################\n\n";
   }
 }

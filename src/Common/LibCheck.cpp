@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 
 //external libs
 #include <cxxopts.hpp>
@@ -11,6 +12,8 @@
 
 namespace Utils
 {
+  namespace fs = std::filesystem;
+
   void LibCheck()
   {
     {
@@ -44,6 +47,11 @@ namespace Utils
 
     LOG_WARN(logger, "SPDLOG: {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
     LOG_WARN(logger, "That's all the external libs!");
+
+    fs::path current_path = fs::current_path();
+    fs::path source_file_path(__FILE__);
+    LOG_WARN(logger, "Current working directory is: {}", current_path.string());
+    LOG_WARN(logger, "This file is: {}", source_file_path.string());
 
     std::cout << "####################################################\n\n";
   }

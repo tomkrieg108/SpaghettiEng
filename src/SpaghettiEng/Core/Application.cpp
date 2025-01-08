@@ -1,4 +1,6 @@
 
+#include <filesystem>
+
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
@@ -9,6 +11,7 @@
 
 #include "Events/EventManager.h"
 #include "ImGuiLayer/ImGuiLayer.h"
+#include "OpenGL32/GL32Shader.h"
 
 #include "Geometry/Geometry.h"
 #include "Application.h"
@@ -27,6 +30,8 @@
 
 namespace Spg
 {
+  namespace fs = std::filesystem;
+
   static void OnMousePress(EventMouseButtonPressed& e)
   {
     SPG_WARN("App: Mouse Pressed: {},{}", e.x, e.y);
@@ -67,11 +72,21 @@ namespace Spg
   {
     SPG_ASSERT(s_instance == nullptr);
     s_instance = this;
+    Utils::Logger::Initialise();
     m_log = Utils::Logger::Create("ENG");
     EventManager::Initialise(); 
-    m_window = Window::Create();
+    m_window = Window::Create(title);
     ImGuiLayer::Initialise(*m_window);
     SetEventHandlers();
+    SetAssetsPath();
+    
+    //Build test shaders
+    GLShaderBuilder shader_builder;
+    auto pbr_shader = shader_builder.Add(ShaderType::Vertex, "2.1.2.pbr.vs").Add(ShaderType::Fragment, "2.1.2.pbr.fs").Build("PBR Shader");
+    pbr_shader->PrintInfo();
+
+    // auto pbr_shader = shader_builder.Add(ShaderType::Vertex, "2.2.basic_lighting.vs").Add(ShaderType::Fragment, "2.2.basic_lighting.fs").Build("Basic Lighting Shader");
+    // pbr_shader->PrintInfo();
     
     SPG_ASSERT(1);
   }
@@ -118,6 +133,43 @@ namespace Spg
   #endif
     EventManager::AddHandler(this, &Application::OnWindowClosed);
     EventManager::AddHandler(this, &Application::OnKeyPressed);
+  }
+
+  void Application::SetAssetsPath()
+  {
+    // Step 1: Get the current file path
+    fs::path this_file = fs::absolute(fs::path{__FILE__});
+    //SPG_INFO("This file path: {}", this_file.string());
+
+    // Step 2: Resolve the assets path
+    fs::path assets_path = this_file.parent_path() / fs::path{"../../../Assets"};
+    //SPG_INFO("Constructed assets path: {}", assets_path.string());
+
+    // Step 3: Convert to an absolute path for safety
+    assets_path = fs::absolute(assets_path);
+    //SPG_INFO("Absolute assets path: {}", assets_path.string());
+
+    // Step 4: Check if the directory exists
+    if (!fs::exists(assets_path)) {
+        SPG_ERROR("Assets path does not exist: {}", assets_path.string());
+        return;
+    }
+
+    // Step 5: Check if it's a directory
+    if (!fs::is_directory(assets_path)) {
+        SPG_ERROR("Assets path is not a directory: {}", assets_path.string());
+        return;
+    }
+
+    // Step 6: Set the current working directory
+    try {
+        fs::current_path(assets_path);
+    } catch (const fs::filesystem_error& e) {
+        SPG_ERROR("Exception setting CWD to assets path. Msg: {} Error: {}", assets_path.string(), e.what());
+        return;
+    }
+
+    SPG_INFO("Current working directory successfully set to: {}", fs::current_path().string());
   }
 
   void Application::OnWindowClosed(EventWindowClose& e)

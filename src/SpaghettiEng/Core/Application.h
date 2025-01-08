@@ -1,5 +1,5 @@
 #pragma once
-//#include "Base.h"
+
 #include <Common/Common.h>
 #include "Layer.h"
 #include "Window.h" //gcc doesn't like Scope<Window> m_window = nullptr; without full declaration of Window class
@@ -25,6 +25,7 @@ namespace Spg
     
   private:
     void SetEventHandlers();
+    void SetAssetsPath();
     void OnWindowClosed(EventWindowClose& e);
     void OnKeyPressed(EventKeyPressed& e);
     void ImGuiAppRender();
@@ -32,8 +33,9 @@ namespace Spg
   private:
     Scope<Window> m_window = nullptr;
     LayerStack m_layer_stack;
+    std::string m_app_title{""};
     bool m_running = true;
-    std::string m_app_title = std::string("");
+
     static Application* s_instance;
   };
 

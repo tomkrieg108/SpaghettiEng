@@ -9,6 +9,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Events/EventManager.cpp"
   "./ImGuiLayer/ImGuiLayer.cpp"
   "./OpenGL32/GL32Shader.cpp"
+  "./OpenGL32/GL32ShaderUtils.cpp"
   )
 
 target_sources(${LIB_ENG} PRIVATE
@@ -22,6 +23,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Events/EventManager.h"
   "./ImGuiLayer/ImGuiLayer.h"
   "./OpenGL32/GL32Shader.h"
+  "./OpenGL32/GL32ShaderUtils.h"
 )
 
 target_sources(${LIB_ENG} PUBLIC 

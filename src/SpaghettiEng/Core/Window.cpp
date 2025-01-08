@@ -1,9 +1,7 @@
-//#include <iostream>
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include "ImGuiLayer/ImGuiLayer.h"
 #include "Events/EventManager.h"
-//#include "Log.h"
 #include "Application.h"
 #include "Input.h"
 #include "Window.h"
@@ -25,11 +23,11 @@ namespace Spg
   {
   }
 
-  Scope<Window> Window::Create()
+  Scope<Window> Window::Create(const std::string& title)
   {
     SPG_ASSERT(Window::s_window_count == 0);
     auto window = CreateScope<Window>();
-    window->Initialise();
+    window->Initialise(title);
     s_window_count++;
     return window;
   }
@@ -43,8 +41,8 @@ namespace Spg
       SPG_ERROR("GLFW initalisation failed");
       glfwTerminate();
     }
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 		glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);

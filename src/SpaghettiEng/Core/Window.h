@@ -39,7 +39,7 @@ namespace Spg
     void MakeContextCurrent() const;
     Params& GetParams();
 
-    static Scope<Window> Create();
+    static Scope<Window> Create(const std::string& title = std::string(""));
 
   private:
     void SetWindowEventCallbacks();
