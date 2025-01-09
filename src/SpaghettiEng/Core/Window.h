@@ -25,11 +25,14 @@ namespace Spg
     void Initialise(const std::string& title = std::string(""));
     void Shutdown();
 
+    void SetVSyncEnabled(bool enable);
+    void SetCursorEnabled(bool enable);
+    Params& GetParams();
+
     void ClearBuffers() const;
     void PollEvents() const;
     void SwapBuffers() const;
-    void SetVSyncEnabled(bool enable);
-    void SetCursorEnabled(bool enable);
+    
     bool IsCursorEnabled() const;
     bool IsVSyncEnabled() const;
     bool IsMinimised() const;
@@ -37,14 +40,14 @@ namespace Spg
     float GetAspectRatio() const;
     GLFWwindow* GetWindowHandle() const;
     void MakeContextCurrent() const;
-    Params& GetParams();
-
+    
+    static void PrintVideoModes(); 
     static Scope<Window> Create(const std::string& title = std::string(""));
 
   private:
     void SetWindowEventCallbacks();
     void UpdateViewport();
-
+    
   private:  
     Params m_params = Params();
     GLFWwindow* m_window_handle = nullptr;

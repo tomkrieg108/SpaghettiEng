@@ -1,8 +1,6 @@
 
 #include <GLFW/glfw3.h>
 
-
-//#include "Core/Base.h"
 #include <Common/Common.h>
 #include "Core/Window.h"
 #include "ImGuiLayer.h"

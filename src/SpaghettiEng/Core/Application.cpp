@@ -1,16 +1,12 @@
 
 #include <filesystem>
 
-#include <glad/gl.h>
-#include <GLFW/glfw3.h>
-
-//only for ImGui::ShowDemoWindow();
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include <glad/gl.h>    //need to include before <GLFW/glfw3.h>
+#include <GLFW/glfw3.h> //for glfwGetTime(), GLFW_KEY_ESCAPE
 
 #include "Events/EventManager.h"
 #include "ImGuiLayer/ImGuiLayer.h"
+#include "OpenGL32/GL32Context.h"
 #include "OpenGL32/GL32Shader.h"
 
 #include "Geometry/Geometry.h"
@@ -87,7 +83,13 @@ namespace Spg
 
     // auto pbr_shader = shader_builder.Add(ShaderType::Vertex, "2.2.basic_lighting.vs").Add(ShaderType::Fragment, "2.2.basic_lighting.fs").Build("Basic Lighting Shader");
     // pbr_shader->PrintInfo();
+  #ifdef SPG_DEBUG
+    Window::PrintVideoModes();
+    GLContext::PrintGLParams();
+    GLContext::PrintVendorInfo();
+  #endif  
     
+    //For testing
     SPG_ASSERT(1);
   }
 
@@ -107,6 +109,11 @@ namespace Spg
   {
     SPG_ASSERT(m_window != nullptr);
     return *m_window;
+  }
+
+  Utils::SpdLogger Application::GetLogger()
+  {
+    return m_log;
   }
 
   void Application::PushLayer(Layer* layer)
@@ -266,7 +273,7 @@ namespace Spg
               << "\n";
     std::cout << "SPDLOG:" << SPDLOG_VER_MAJOR << "." << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << "\n";
     std::cout << "STB_IMG: "  << STBI_VERSION << "\n";
-    std::cout << "GLFW: " << GLFW_VERSION_MAJOR << "." << GLFW_VERSION_MINOR << "." << GLFW_VERSION_REVISION << "\n";
+    // std::cout << "GLFW: " << GLFW_VERSION_MAJOR << "." << GLFW_VERSION_MINOR << "." << GLFW_VERSION_REVISION << "\n";
     std::cout << "IMGUI: " << IMGUI_VERSION << "\n";
     std::cout << "vec3 value is: " << v.x << "," << v.y << "," << v.z << "\n";
     std::cout << "\n";

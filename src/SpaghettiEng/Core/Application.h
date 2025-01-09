@@ -1,14 +1,12 @@
 #pragma once
 
 #include <Common/Common.h>
+#include "Events/Events.h"
 #include "Layer.h"
-#include "Window.h" //gcc doesn't like Scope<Window> m_window = nullptr; without full declaration of Window class
+#include "Window.h" 
 
 namespace Spg
 {
-  struct EventWindowClose;
-  struct EventKeyPressed;
-
   class Application
   {
   public:
@@ -19,9 +17,9 @@ namespace Spg
     void PushLayer(Layer* layer);
     void PopLayer(Layer* layer);
     Window& GetWindow();
+    Utils::SpdLogger GetLogger();
 
     static Application& Get();
-    Utils::SpdLogger m_log;
     
   private:
     void SetEventHandlers();
@@ -34,6 +32,7 @@ namespace Spg
     Scope<Window> m_window = nullptr;
     LayerStack m_layer_stack;
     std::string m_app_title{""};
+    Utils::SpdLogger m_log;
     bool m_running = true;
 
     static Application* s_instance;
@@ -44,8 +43,8 @@ namespace Spg
   void EngLibHello();
 }
 
-#define SPG_TRACE(...)  LOG_TRACE(Application::Get().m_log, __VA_ARGS__)
-#define SPG_INFO(...)  LOG_INFO(Application::Get().m_log, __VA_ARGS__)
-#define SPG_WARN(...)  LOG_WARN(Application::Get().m_log, __VA_ARGS__)
-#define SPG_ERROR(...)  LOG_ERROR(Application::Get().m_log, __VA_ARGS__)
-#define SPG_CRITICAL(...)  LOG_CRITICAL(Application::Get().m_log, __VA_ARGS__)
+#define SPG_TRACE(...)  LOG_TRACE(Application::Get().GetLogger(), __VA_ARGS__)
+#define SPG_INFO(...)  LOG_INFO(Application::Get().GetLogger(), __VA_ARGS__)
+#define SPG_WARN(...)  LOG_WARN(Application::Get().GetLogger(), __VA_ARGS__)
+#define SPG_ERROR(...)  LOG_ERROR(Application::Get().GetLogger(), __VA_ARGS__)
+#define SPG_CRITICAL(...)  LOG_CRITICAL(Application::Get().GetLogger(), __VA_ARGS__)

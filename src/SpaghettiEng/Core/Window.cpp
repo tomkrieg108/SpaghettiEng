@@ -1,7 +1,7 @@
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include "ImGuiLayer/ImGuiLayer.h"
 #include "Events/EventManager.h"
+#include "OpenGL32/GL32Context.h"
 #include "Application.h"
 #include "Input.h"
 #include "Window.h"
@@ -41,6 +41,7 @@ namespace Spg
       SPG_ERROR("GLFW initalisation failed");
       glfwTerminate();
     }
+    //Todo. Linux does not work with V4.5
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -51,34 +52,23 @@ namespace Spg
     m_window_handle = glfwCreateWindow(m_params.width,m_params.height,title.c_str(),nullptr,nullptr);
     if (!m_window_handle)
 		{
-      SPG_ERROR("GLFW window creation failed");
+      SPG_CRITICAL("GLFW window creation failed. Terminating!");
 			glfwTerminate();
 		}
-    m_params.title = title;
-    
-    glfwMakeContextCurrent(m_window_handle);
-		int status = gladLoadGL(glfwGetProcAddress);
-		if (!status)
-		{
-      SPG_ERROR("OpenGL Initialisation failed");
-			glfwDestroyWindow(m_window_handle);
-			glfwTerminate();
-		}
+    GLContext::Initialise(m_window_handle);
 
+    m_params.title = title;
     glfwGetWindowSize(m_window_handle, &m_params.width, &m_params.height);
     glfwGetFramebufferSize(m_window_handle, &m_params.buffer_width, &m_params.buffer_height);
 
-    //todo - put in gl class
-    glViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
+    GLContext::SetViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
 
     SetVSyncEnabled(m_params.vsync_enabled);
     SetCursorEnabled(m_params.cursor_enabled);
     glfwSetWindowUserPointer(m_window_handle, this);  
     SetWindowEventCallbacks();
 
-    SPG_INFO("WINDOW CREATED");
-    SPG_INFO("BuffWidth: {}, BuffHeight: {}", m_params.buffer_width, m_params.buffer_height);
-    SPG_INFO("Width: {}, Height: {}", m_params.width, m_params.height);
+    SPG_INFO("Window Created.  Buffer width, height: {}, {}", m_params.buffer_width, m_params.buffer_height);
   }
 
   
@@ -95,8 +85,7 @@ namespace Spg
   void Window::UpdateViewport() 
   {
     glfwGetFramebufferSize(m_window_handle, &m_params.buffer_width, &m_params.buffer_height);
-    //todo - put in gl class
-    glViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
+    GLContext::SetViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
   }
 
   void Window::ClearBuffers() const
@@ -262,6 +251,19 @@ namespace Spg
       EventMouseMoved e{x_new,y_new,Input::GetMouseDeltaX(x_new),Input::GetMouseDeltaY(y_new)};
       EventManager::Enqueue(e);
     });
+  }
+
+  void Window::PrintVideoModes()
+  {
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    int count;
+    const GLFWvidmode* modes = glfwGetVideoModes(monitor, &count);
+    //std::cout << "Video modes supported: " << count << "\n\n";
+    SPG_INFO("Video Modes Supported:");
+    for (int i = 0; i < count; i++)
+    {
+        SPG_TRACE("   {}: {}: {}: {}: {}: {}: {}:", i, modes[i].height, modes[i].width, modes[i].redBits, modes[i].blueBits, modes[i].greenBits, modes[i].refreshRate);
+    }
   }
 
 }

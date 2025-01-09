@@ -10,6 +10,9 @@ target_sources(${LIB_ENG} PRIVATE
   "./ImGuiLayer/ImGuiLayer.cpp"
   "./OpenGL32/GL32Shader.cpp"
   "./OpenGL32/GL32ShaderUtils.cpp"
+  "./OpenGL32/GL32Context.cpp"
+  "./OpenGL32/GL32Buffer.cpp"
+  "./OpenGL32/GL32VertexArray.cpp"
   )
 
 target_sources(${LIB_ENG} PRIVATE
@@ -24,6 +27,10 @@ target_sources(${LIB_ENG} PRIVATE
   "./ImGuiLayer/ImGuiLayer.h"
   "./OpenGL32/GL32Shader.h"
   "./OpenGL32/GL32ShaderUtils.h"
+  "./OpenGL32/GL32Context.h"
+  "./OpenGL32/GL32Buffer.h"
+  "./OpenGL32/GL32VertexArray.h"
+  "./OpenGL32/GL32BufferLayout.h"
 )
 
 target_sources(${LIB_ENG} PUBLIC 
