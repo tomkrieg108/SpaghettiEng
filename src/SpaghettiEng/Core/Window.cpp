@@ -1,8 +1,8 @@
 #include <GLFW/glfw3.h>
-#include "ImGuiLayer/ImGuiLayer.h"
+#include "ImGuiContext/ImGuiContext.h"
 #include "Events/EventManager.h"
 #include "OpenGL32/GL32Context.h"
-#include "Application.h"
+#include "OpenGL32/GL32Renderer.h"
 #include "Input.h"
 #include "Window.h"
 
@@ -17,17 +17,18 @@ namespace Spg
 
   Window::Window()
   {
+    Initialise();
   }
 
   Window::~Window()
   {
+    Shutdown();
   }
 
   Scope<Window> Window::Create(const std::string& title)
   {
     SPG_ASSERT(Window::s_window_count == 0);
     auto window = CreateScope<Window>();
-    window->Initialise(title);
     s_window_count++;
     return window;
   }
@@ -38,7 +39,7 @@ namespace Spg
 
     if(!glfwInit())
     {
-      SPG_ERROR("GLFW initalisation failed");
+      SPG_CRITICAL("GLFW initalisation failed");
       glfwTerminate();
     }
     //Todo. Linux does not work with V4.5
@@ -55,14 +56,17 @@ namespace Spg
       SPG_CRITICAL("GLFW window creation failed. Terminating!");
 			glfwTerminate();
 		}
-    GLContext::Initialise(m_window_handle);
+     m_input = new Input(m_window_handle);
+
+    m_graphics_context = new GLContext(m_window_handle);
+    m_graphics_context->Initialise();
 
     m_params.title = title;
     glfwGetWindowSize(m_window_handle, &m_params.width, &m_params.height);
     glfwGetFramebufferSize(m_window_handle, &m_params.buffer_width, &m_params.buffer_height);
 
-    GLContext::SetViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
-
+    GLRenderer::SetViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
+   
     SetVSyncEnabled(m_params.vsync_enabled);
     SetCursorEnabled(m_params.cursor_enabled);
     glfwSetWindowUserPointer(m_window_handle, this);  
@@ -71,27 +75,59 @@ namespace Spg
     SPG_INFO("Window Created.  Buffer width, height: {}, {}", m_params.buffer_width, m_params.buffer_height);
   }
 
-  
-  void Window::PollEvents() const {glfwPollEvents();}
-  void Window::SwapBuffers() const {glfwSwapBuffers(m_window_handle);}
-  void Window::MakeContextCurrent() const {glfwMakeContextCurrent(m_window_handle);}
-  Window::Params& Window::GetParams() {return m_params;}
-  bool Window::IsVSyncEnabled() const { return m_params.vsync_enabled; }
-  bool Window::IsCursorEnabled() const { return m_params.cursor_enabled; }
-  bool Window::IsMinimised() const {return (bool)glfwGetWindowAttrib(m_window_handle, GLFW_ICONIFIED);}
-  bool Window::IsMaximised() const {return (bool)glfwGetWindowAttrib(m_window_handle, GLFW_MAXIMIZED);}
-  GLFWwindow* Window::GetWindowHandle() const {return m_window_handle;}
-
-  void Window::UpdateViewport() 
+  void Window::Shutdown()
   {
-    glfwGetFramebufferSize(m_window_handle, &m_params.buffer_width, &m_params.buffer_height);
-    GLContext::SetViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
+    glfwDestroyWindow(m_window_handle);
+    s_window_count--;
+    if(s_window_count == 0)
+      glfwTerminate();
   }
 
-  void Window::ClearBuffers() const
+  void Window::OnUpdate()
   {
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glfwPollEvents();
+    m_graphics_context->SwapBuffers();
+  }
+
+  const Window::Params& Window::GetParams() const
+  { 
+    return m_params;
+  }
+
+  Window::Params& Window::GetParams()
+  {
+    return m_params;     
+  }
+
+  Input* Window::GetInput()
+  {
+    return m_input;
+  }
+
+  bool Window::IsVSyncEnabled() const 
+  { 
+    return m_params.vsync_enabled; 
+  }
+
+  bool Window::IsCursorEnabled() const 
+  { 
+    return m_params.cursor_enabled; 
+  }
+
+  bool Window::IsMinimised() const 
+  {
+    return (bool)glfwGetWindowAttrib(m_window_handle, GLFW_ICONIFIED);
+  }
+
+  GLFWwindow* Window::GetWindowHandle() const 
+  {
+    return m_window_handle;
+  }
+
+  void Window::Clear() const
+  {
+    GLRenderer::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
+    GLRenderer::ClearBuffers();
   }
 
   float Window::GetAspectRatio() const
@@ -116,17 +152,6 @@ namespace Spg
       m_params.cursor_enabled = enabled;
   }
 
-  void Window::Shutdown()
-  {
-    glfwDestroyWindow(m_window_handle);
-    glfwTerminate();
-
-    #ifdef SPG_DEBUG
-      SPG_INFO("Max event queue size: {}", EventManager::GetMaxQueueSize());
-      SPG_INFO("Current event queue size: {}", EventManager::GetCurrentQueueSize());
-    #endif    
-  }
-  
   void Window::SetWindowEventCallbacks()
   {
     glfwSetWindowCloseCallback(m_window_handle, [](GLFWwindow* handle) {
@@ -144,7 +169,9 @@ namespace Spg
 
     glfwSetFramebufferSizeCallback(m_window_handle, [](GLFWwindow* handle, int width, int height){
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));  
-      window->UpdateViewport();
+      GLRenderer::SetViewport(0,0,width,height);  
+      window->GetParams().buffer_width = width;
+      window->GetParams().buffer_height = height;
       EventWindowResize e{width,height};
       EventManager::Dispatch(e);   
     });
@@ -183,7 +210,7 @@ namespace Spg
     });
 
     glfwSetKeyCallback(m_window_handle, [](GLFWwindow* handle, int key, int code, int action, int mode){
-      if(ImGuiLayer::WantCaptureKeyboard())  
+      if(ImGuiContext::WantCaptureKeyboard())  
         return;
 
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
@@ -211,7 +238,7 @@ namespace Spg
     
     glfwSetMouseButtonCallback(m_window_handle, [](GLFWwindow* handle, int button, int action, int mods)
     {
-      if(ImGuiLayer::WantCaptureMouse())  
+      if(ImGuiContext::WantCaptureMouse())  
         return;
 
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
@@ -231,7 +258,7 @@ namespace Spg
     });
 
     glfwSetScrollCallback(m_window_handle, [](GLFWwindow* handle, double xoffset, double yoffset){
-      if(ImGuiLayer::WantCaptureMouse())  
+      if(ImGuiContext::WantCaptureMouse())  
         return;
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
       EventMouseScrolled e{(float)xoffset,(float)yoffset};
@@ -239,31 +266,18 @@ namespace Spg
     });
 
     glfwSetCursorPosCallback(m_window_handle, [](GLFWwindow* handle, double xpos, double ypos) {
-      if(ImGuiLayer::WantCaptureMouse())  
+      if(ImGuiContext::WantCaptureMouse())  
         return; 
 
-      if (!Input::GetMouseFirstMoved())
-		    Input::SetMouseFirstMoved();
-
 		  Window* win = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+      Input* input = win->GetInput();
+      if(!input->GetMouseFirstMoved())
+        input->SetMouseFirstMoved();
+
       float x_new = (float)(xpos);
       float y_new = (float)(ypos);
-      EventMouseMoved e{x_new,y_new,Input::GetMouseDeltaX(x_new),Input::GetMouseDeltaY(y_new)};
+      EventMouseMoved e{x_new,y_new,input->GetMouseDeltaX(x_new),input->GetMouseDeltaY(y_new)};
       EventManager::Enqueue(e);
     });
   }
-
-  void Window::PrintVideoModes()
-  {
-    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-    int count;
-    const GLFWvidmode* modes = glfwGetVideoModes(monitor, &count);
-    //std::cout << "Video modes supported: " << count << "\n\n";
-    SPG_INFO("Video Modes Supported:");
-    for (int i = 0; i < count; i++)
-    {
-        SPG_TRACE("   {}: {}: {}: {}: {}: {}: {}:", i, modes[i].height, modes[i].width, modes[i].redBits, modes[i].blueBits, modes[i].greenBits, modes[i].refreshRate);
-    }
-  }
-
 }

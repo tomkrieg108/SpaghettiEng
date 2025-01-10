@@ -2,6 +2,7 @@ add_library(${LIB_COMMON} STATIC
 )
 
 target_sources(${LIB_COMMON} PRIVATE 
+  "./SmartPointerUtils.h"
   "./Logger.h"
   "./Logger.cpp"
   "./Common.h"
@@ -16,6 +17,8 @@ target_include_directories(${LIB_COMMON}  PUBLIC
 target_link_libraries(${LIB_COMMON} PUBLIC 
   spdlog::spdlog
 )
+
+target_link_libraries(${LIB_COMMON} PUBLIC glm::glm-header-only) 
 
 #For testing libs only
 target_link_libraries(${LIB_COMMON} PUBLIC 

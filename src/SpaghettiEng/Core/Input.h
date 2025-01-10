@@ -1,30 +1,35 @@
 #pragma once
-
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-//Takes straign from Elysium
+struct GLFWwindow;
+
 namespace Spg
 {
  class Input
   {
   public:
 
-    static void SetMouseFirstMoved();
-    static bool GetMouseFirstMoved();
+    Input(GLFWwindow* glfw_window_handle);
+    ~Input() = default;
 
-    static float GetMouseX();
-    static float GetMouseY();
-    static glm::vec2 GetMousePosition();
+    void SetMouseFirstMoved();
+    bool GetMouseFirstMoved();
+
+    float GetMouseX();
+    float GetMouseY();
+    glm::vec2 GetMousePosition();
    
-    static float GetMouseDeltaX(float new_x);
-    static float GetMouseDeltaY(float new_y);
-    static glm::vec2 GetMouseDelta(float new_x, float new_y);
+    float GetMouseDeltaX(float new_x);
+    float GetMouseDeltaY(float new_y);
+    glm::vec2 GetMouseDelta(float new_x, float new_y);
 
-    static bool IsKeyPressed(int key);
-    static bool IsMousebuttonPressed(int button);
+    bool IsKeyPressed(int key);
+    bool IsMousebuttonPressed(int button);
 
   private:
-    static float m_last_x, m_last_y; //mouse pos prior to the previous mouse move
-    static bool m_mouse_first_moved;
+    float m_last_x =0, m_last_y =0; //mouse pos prior to the previous mouse move
+    bool m_mouse_first_moved =false;
+    GLFWwindow* m_glfw_window_handle = nullptr;
   };
 }

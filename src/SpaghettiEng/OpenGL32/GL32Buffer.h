@@ -4,6 +4,8 @@
 
 namespace Spg
 {
+  //Todo Support for SOA and AOS
+
   class GLVertexBuffer
   {
   public:

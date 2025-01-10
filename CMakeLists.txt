@@ -130,14 +130,29 @@ target_precompile_headers(${LIB_ENG} PRIVATE
   <sstream>
   <vector>
   <array>
-  #<list>
   <unordered_map>
-  #<unordered_set>
-  #<map>
   <memory>
-  #<functional>
   <random>
-  #<utility>
+  <algorithm>
+  <variant>
+  <queue>
+  <type_traits>
+  <numbers>
+)
+
+target_precompile_headers(${APP_EDITOR} PRIVATE 
+  <cstdint>
+  <cmath>
+  <iostream>
+  <fstream>
+  <string>
+  <string_view>
+  <sstream>
+  <vector>
+  <array>
+  <unordered_map>
+  <memory>
+  <random>
   <algorithm>
   <variant>
   <queue>

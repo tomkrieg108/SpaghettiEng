@@ -37,7 +37,7 @@ namespace Utils
     //Utils::Logger::Initialise();
     auto logger = Utils::Logger::Create("UTILS");
     
-    LOG_DEFAULT_WARN("External libs linked into UTILS Lib");
+    SPG_WARN("External libs linked into UTILS Lib");
     std::cout << "JSON:" << NLOHMANN_JSON_VERSION_MAJOR << "." << NLOHMANN_JSON_VERSION_MINOR << "."
               << NLOHMANN_JSON_VERSION_PATCH << "\n";
     std::cout << "FMT:" << FMT_VERSION << "\n";

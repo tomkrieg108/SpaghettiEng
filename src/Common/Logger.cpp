@@ -12,7 +12,7 @@ namespace Utils
     if(s_initialised)
       return;
     spdlog::set_pattern("%^[%T] %n: %v%$");
-    s_default_logger = spdlog::stdout_color_mt("DEFAULT LOG");
+    s_default_logger = spdlog::stdout_color_mt("CORE");
     s_default_logger->set_level(spdlog::level::trace);
     s_initialised = true;
   }

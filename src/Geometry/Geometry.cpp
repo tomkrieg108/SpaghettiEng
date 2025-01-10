@@ -36,7 +36,7 @@ namespace Geom
     //Utils::Logger::Initialise();
     auto logger = Utils::Logger::Create("GEOM");
     
-    LOG_DEFAULT_WARN("External libs linked into Geom Lib");
+    SPG_WARN("External libs linked into Geom Lib");
     std::cout << "JSON:" << NLOHMANN_JSON_VERSION_MAJOR << "." << NLOHMANN_JSON_VERSION_MINOR << "."
               << NLOHMANN_JSON_VERSION_PATCH << "\n";
     std::cout << "FMT:" << FMT_VERSION << "\n";

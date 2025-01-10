@@ -3,11 +3,12 @@
 namespace Spg
 {
   struct Event;
+  struct AppContext;
 
   class Layer
   {
   public:
-    Layer(const std::string& name = "Layer");
+    Layer(const AppContext& app_context, const std::string& name = "Layer");
     virtual ~Layer() = default;
 
     virtual void OnAttach() {}
@@ -17,6 +18,7 @@ namespace Spg
     virtual void OnImGuiRender() {}
     const std::string& GetName() const { return m_name; }
   protected:
+    const AppContext& m_app_conext;
     std::string m_name;
   };
 

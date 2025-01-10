@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "Geometry/Geometry.h"
 #include "BubbleSoup.h"
 
@@ -19,7 +20,49 @@ namespace Spg
     return new BubbleSoup("Bubble Soup"s);
   }
 
-  DefaultLayer::DefaultLayer(const std::string& name) : Layer(name)  {}
+  DefaultLayer::DefaultLayer(const AppContext& app_context, const std::string& name) : 
+    Layer(app_context, name)  
+  {
+    m_logger = Utils::Logger::Create("Default Layer");
+  }
+
+  void DefaultLayer::OnAttach()
+  {
+    EventManager::AddHandler(this, &DefaultLayer::OnMouseMoved);
+    EventManager::AddHandler(this, &DefaultLayer::OnMouseButtonPressed);
+    EventManager::AddHandler(this, &DefaultLayer::OnMouseButtonReleased);
+  }
+
+  void DefaultLayer::OnDetach()
+  {
+  }
+
+  void DefaultLayer::OnMouseMoved(EventMouseMoved& e)
+  {
+    LOG_WARN(m_logger, "Mouse Moved: {} {}", e.delta_x, e.delta_y);
+  }
+
+  void DefaultLayer::OnMouseButtonPressed(EventMouseButtonPressed& e)
+  {
+    LOG_WARN(m_logger, "Mouse Btn Pressed: {}", e.btn);
+    if(e.btn == Mouse::ButtonLeft)
+      LOG_INFO(m_logger,"Left");
+    if(e.btn == Mouse::ButtonRight)
+      LOG_INFO(m_logger,"Right");  
+    if(e.btn == Mouse::ButtonMiddle)
+      LOG_INFO(m_logger,"Middle");  
+  }
+
+  void DefaultLayer::OnMouseButtonReleased(EventMouseButtonReleased& e)
+  {
+    LOG_WARN(m_logger, "Mouse Btn Released: {}", e.btn);
+    if(e.btn == Mouse::ButtonLeft)
+      LOG_INFO(m_logger,"Left");
+    if(e.btn == Mouse::ButtonRight)
+      LOG_INFO(m_logger,"Right");  
+    if(e.btn == Mouse::ButtonMiddle)
+      LOG_INFO(m_logger,"Middle");  
+  }
 
   void DefaultLayer::OnImGuiRender()
   {
@@ -31,11 +74,22 @@ namespace Spg
     ImGui::End();
   }
 
+  //---------------------------------------------------------------------------------
+
   BubbleSoup::BubbleSoup(const std::string& title) : 
     Application(title) 
   {
-    m_default_layer = new Spg::DefaultLayer(std::string("Default Layer"));
+    m_default_layer = new Spg::DefaultLayer(this->m_app_context, std::string("Default Layer"));
     PushLayer(m_default_layer);
+
+    glm::vec2 position = m_camera.GetPosition();
+    glm::mat4 transform = m_camera.GetTransform();
+    glm::mat4 view = m_camera.GetViewMatrix();
+
+    //Todo - compile error
+    //SPG_WARN("Camera Pos: {}", position);
+    //SPG_WARN("Camera Transform: {}", transform);
+    //SPG_WARN("Camera View: {}", view);
   }
 
   BubbleSoup::~BubbleSoup()
@@ -81,7 +135,6 @@ int main()
 #ifdef SPG_LIB_LINK_CHECK 
   Utils::LibCheck();
   Geom::GeomLibHello();
-  Spg::EngLibHello();
   Spg::AppPrintHello();
 #endif
 

@@ -1,15 +1,17 @@
 
 #include <GLFW/glfw3.h>
 #include "Window.h"
-#include "Application.h"
 #include "Input.h"
 
 namespace Spg
 {
-  float Input::m_last_x = 0;
-  float Input::m_last_y = 0;
-  bool  Input::m_mouse_first_moved = false;
-    
+  
+  Input::Input(GLFWwindow* glfw_window_handle) :
+    m_glfw_window_handle{glfw_window_handle}
+  {
+    SPG_ASSERT(m_glfw_window_handle != nullptr)   ; 
+  }
+
   float Input::GetMouseX()
   {
     return GetMousePosition().x;
@@ -22,23 +24,20 @@ namespace Spg
 
   glm::vec2 Input::GetMousePosition()
   {
-    auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetWindowHandle());
     double xpos, ypos;
-    glfwGetCursorPos(window, &xpos, &ypos);
+    glfwGetCursorPos(m_glfw_window_handle, &xpos, &ypos);
     return { (float)xpos, (float)ypos };
   }
 
   bool Input::IsKeyPressed(int key)
   {
-    auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetWindowHandle());
-    auto state = glfwGetKey(window, static_cast<int32_t>(key));
+    auto state = glfwGetKey(m_glfw_window_handle, key);
     return state == GLFW_PRESS;
   }
 
   bool Input::IsMousebuttonPressed(int button)
   {
-    auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetWindowHandle());
-    auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));
+    auto state = glfwGetMouseButton(m_glfw_window_handle, button);
     return state == GLFW_PRESS;
   }
 

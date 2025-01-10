@@ -1,7 +1,7 @@
 
 #include <glad/gl.h>
-#include <GLFW/glfw3.h>       //For APIENTRY
-#include "Core/Application.h"
+#include <GLFW/glfw3.h> 
+#include <Common/Common.h>      
 #include "GL32Context.h"
 
 namespace Spg
@@ -70,14 +70,30 @@ namespace Spg
     SPG_WARN("-----------------------------------------------------");
   }
 
-  void GLContext::Initialise(GLFWwindow* glfw_window_handle)
+  GLContext::GLContext(GLFWwindow* glfw_window_handle) :
+    m_glfw_window_handle{glfw_window_handle}
   {
-    glfwMakeContextCurrent(glfw_window_handle);
+    SPG_ASSERT(m_glfw_window_handle != nullptr);
+  }
+
+  void GLContext::SwapBuffers()
+  {
+    glfwSwapBuffers(m_glfw_window_handle);
+  }
+
+  void GLContext::MakeContextCurrent()
+  {
+    glfwMakeContextCurrent(m_glfw_window_handle);
+  }
+
+  void GLContext::Initialise()
+  {
+    glfwMakeContextCurrent(m_glfw_window_handle);
     int status = gladLoadGL(glfwGetProcAddress);
 		if (!status)
 		{
-      SPG_CRITICAL("OpenGL Initialisation failed. Terminating");
-			glfwDestroyWindow(glfw_window_handle);
+      SPG_CRITICAL("OpenGL (Glad) Initialisation failed. Terminating");
+			glfwDestroyWindow(m_glfw_window_handle);
 			glfwTerminate();
 		}
     SPG_INFO("OpenGL Context Initialised");
@@ -95,12 +111,20 @@ namespace Spg
 #endif
   }
 
-  void GLContext::SetViewport(int32_t top, int32_t left, int32_t width, int32_t height)
+  void GLContext::PrintVideoModes()
   {
-    glViewport(top,left,width,height);
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    int count;
+    const GLFWvidmode* modes = glfwGetVideoModes(monitor, &count);
+    //std::cout << "Video modes supported: " << count << "\n\n";
+    SPG_INFO("Video Modes Supported:");
+    for (int i = 0; i < count; i++)
+    {
+        SPG_TRACE("   {}: {}: {}: {}: {}: {}: {}:", i, modes[i].height, modes[i].width, modes[i].redBits, modes[i].blueBits, modes[i].greenBits, modes[i].refreshRate);
+    }
   }
 
-  void GLContext::PrintVendorInfo()
+  void GLContext::PrintImplInfo()
   {
     SPG_INFO("OpenGL Implementation Info:");
     SPG_TRACE("  Vendor: {}", reinterpret_cast<char const*>(glGetString(GL_VENDOR)));

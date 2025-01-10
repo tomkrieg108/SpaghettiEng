@@ -1,6 +1,10 @@
 #pragma once
 #include "Logger.h"
+#include "SmartPointerUtils.h"
 #include "LibCheck.h"
+
+//#define SPG_LIB_LINK_CHECK
+//#define SPG_CALLBACK_CHECK
 
 //Todo - do this in cmake if possible.  Is this even needed?  See ChatGPT "Cross-platform OpenGL CMake setup"
 #if defined(__x86_64__) || defined(_M_X64)
@@ -38,37 +42,13 @@
 #ifdef SPG_ENABLE_ASSERTS
   #define SPG_ASSERT(check) \
     if(!(check)) { \
-        LOG_DEFAULT_ERROR("Debug assertion failed. File: {}, Line {}", __FILE__, __LINE__); \
+        SPG_ERROR("Debug assertion failed. File: {}, Line {}", __FILE__, __LINE__); \
         SPG_DEBUGBREAK(); \
     }
 #else
   #define SPG_ASSERT(check)
 #endif
 
-#define SPG_LIB_LINK_CHECK
-//#define SPG_CALLBACK_CHECK
-
-namespace Spg
-{
-  template<typename T>
-  using Ref = std::shared_ptr<T>;
-
-  template<typename T>
-  using Scope = std::unique_ptr<T>;
-
-  template<typename T, typename ... Args>
-  constexpr Ref<T> CreateRef(Args&& ... args)
-  {
-    return std::make_shared<T>(std::forward<Args>(args)...);
-  }
-
-  template<typename T, typename ... Args>
-  constexpr Scope<T> CreateScope(Args&& ... args)
-  {
-    return std::make_unique<T>(std::forward<Args>(args)...);
-  }
-
-}
 
 
 

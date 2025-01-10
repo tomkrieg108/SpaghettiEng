@@ -4,15 +4,22 @@ struct GLFWwindow;
 
 namespace Spg
 {
+  //Todo:  Future - defived from a GraphicsContext class
   class GLContext
   {
     public:
-      static void Initialise(GLFWwindow* glfw_window_handle);
-      static void SetViewport(int32_t top, int32_t left, int32_t width, int32_t height);
+      GLContext(GLFWwindow* glfw_window_handle);
+      ~GLContext() = default;
+      void Initialise();
+      void SwapBuffers();
+      void MakeContextCurrent();
+      
+      static void PrintVideoModes(); 
       static void PrintGLParams();
-      static void PrintVendorInfo();
+      static void PrintImplInfo();
 
     private:  
+      GLFWwindow* m_glfw_window_handle = nullptr;    
   };
 
 }

@@ -1,10 +1,13 @@
 #pragma once
-#include <Common/Common.h>
+#include <Common/Common.h> 
 
 struct GLFWwindow;
 
 namespace Spg
 {
+  class Input;
+  class GLContext;
+
   class Window
   {
   public:
@@ -22,35 +25,34 @@ namespace Spg
   public:
     Window();
     ~Window();
-    void Initialise(const std::string& title = std::string(""));
-    void Shutdown();
 
+    void Clear() const;
+    void OnUpdate();
+    
     void SetVSyncEnabled(bool enable);
     void SetCursorEnabled(bool enable);
+    const Params& GetParams() const;
     Params& GetParams();
+    Input* GetInput();
 
-    void ClearBuffers() const;
-    void PollEvents() const;
-    void SwapBuffers() const;
-    
     bool IsCursorEnabled() const;
     bool IsVSyncEnabled() const;
     bool IsMinimised() const;
-    bool IsMaximised() const;
     float GetAspectRatio() const;
     GLFWwindow* GetWindowHandle() const;
-    void MakeContextCurrent() const;
     
-    static void PrintVideoModes(); 
     static Scope<Window> Create(const std::string& title = std::string(""));
 
   private:
+    void Initialise(const std::string& title = std::string(""));
+    void Shutdown();
     void SetWindowEventCallbacks();
-    void UpdateViewport();
     
   private:  
     Params m_params = Params();
     GLFWwindow* m_window_handle = nullptr;
+    GLContext* m_graphics_context = nullptr;
+    Input* m_input = nullptr;
 
     static uint32_t s_window_count;
   };

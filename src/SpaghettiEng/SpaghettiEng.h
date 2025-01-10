@@ -7,6 +7,7 @@
 #include "SpaghettiEng/Core/MouseCodes.h"
 #include "SpaghettiEng/Core/Input.h"
 #include "SpaghettiEng/Core/Layer.h"
-#include "SpaghettiEng/ImGuiLayer/ImGuiLayer.h"
+#include "SpaghettiEng/Events/EventManager.h"
+#include "SpaghettiEng/ImGuiContext/ImGuiContext.h"
 
 

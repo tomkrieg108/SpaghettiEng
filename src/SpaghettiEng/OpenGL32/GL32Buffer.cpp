@@ -6,11 +6,9 @@ namespace Spg
   GLVertexBuffer::GLVertexBuffer(void* const data, uint32_t size, const BufferLayout& layout) :
 	m_layout{ layout }
   {
-    //glCreateBuffers(1, &m_id); //V4.5+
     glGenBuffers(1,&m_id); //v2.0+
     glBindBuffer(GL_ARRAY_BUFFER, m_id);
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);  //v2.0+
-    //glNamedBufferStorage(m_id, size, data, GL_DYNAMIC_STORAGE_BIT); // v4.5+  - works same as above fn
+    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);  //v2.0
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     m_vertex_count = size / layout.GetStride();
   }

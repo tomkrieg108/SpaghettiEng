@@ -1,5 +1,4 @@
 
-#include "Core/Application.h"
 #include "EventManager.h"
 
 namespace Spg
