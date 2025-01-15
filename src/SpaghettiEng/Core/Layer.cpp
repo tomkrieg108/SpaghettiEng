@@ -1,11 +1,11 @@
 
 
-#include "AppContext.h"
+//#include "AppContext.h"
 #include "Layer.h"
 
 namespace Spg
 {
-  Layer::Layer(const AppContext& app_context, const std::string& name)
+  Layer::Layer(AppContext& app_context, const std::string& name)
 	: m_app_conext{app_context}, m_name(name)
   {
   }

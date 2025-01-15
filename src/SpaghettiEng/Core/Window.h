@@ -23,7 +23,7 @@ namespace Spg
     };
 
   public:
-    Window();
+    Window(const std::string& title = std::string(""));
     ~Window();
 
     void Clear() const;
@@ -40,19 +40,15 @@ namespace Spg
     bool IsMinimised() const;
     float GetAspectRatio() const;
     GLFWwindow* GetWindowHandle() const;
-    
-    static Scope<Window> Create(const std::string& title = std::string(""));
 
   private:
-    void Initialise(const std::string& title = std::string(""));
-    void Shutdown();
     void SetWindowEventCallbacks();
     
   private:  
     Params m_params = Params();
     GLFWwindow* m_window_handle = nullptr;
-    GLContext* m_graphics_context = nullptr;
-    Input* m_input = nullptr;
+    GLContext* m_graphics_context = nullptr; //Todo. Scope<GLContext> ?
+    Input* m_input = nullptr; //Todo. Scope<GLContext> ?
 
     static uint32_t s_window_count;
   };

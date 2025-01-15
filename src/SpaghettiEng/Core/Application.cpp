@@ -5,9 +5,12 @@
 #include <GLFW/glfw3.h> //for glfwGetTime(), GLFW_KEY_ESCAPE
 
 #include "Events/EventManager.h"
-#include "ImGuiContext/ImGuiContext.h"
+#include "ImGuiUtils/ImGuiUtils.h"
 #include "OpenGL32/GL32Context.h"
 #include "OpenGL32/GL32Shader.h"
+#include "OpenGL32/GL32Renderer.h"
+#include "Window.h"
+#include "AppContext.h"
 #include "AppLayer.h"
 #include "Application.h"
 
@@ -51,46 +54,40 @@ namespace Spg
  
   Application* Application::s_instance = nullptr;
 
-  void Application::InitialiseAppContext(const std::string& title)
+  void Application::SystemInit()
   {
-    m_app_context.window = Window::Create(title);
-    m_app_context.renderer = GLRenderer::Create();
-    m_app_context.title = title;
-    m_app_context.log = Utils::Logger::Create("ENG");
-    m_app_context.running = true;   
+    //Call this in main() before app is created
+    Utils::Logger::Initialise();
+    EventManager::Initialise(); //todo - does nothing!
   }
 
-  Application::Application(const std::string& title) 
+  Application::Application(const std::string& app_name) :
+    m_app_name{app_name}
   {
     SPG_ASSERT(s_instance == nullptr);
     s_instance = this;
-    
-    Utils::Logger::Initialise();
-    //m_log = Utils::Logger::Create("ENG");
-    EventManager::Initialise(); //todo - does nothing!
-    //m_window = Window::Create(title);
-    //m_renderer = GLRenderer::Create();
     SetEventHandlers();
     SetAssetsPath();
-    
+  
+    m_app_context.Set("Window", CreateRef<Window>(app_name) );
+    m_app_context.Set("GLRenderer", CreateRef<GLRenderer>() );
 
-    InitialiseAppContext(title);
-    ImGuiContext::Initialise(*m_app_context.window);
-    
+    const Window& win = m_app_context.Get<Window>("Window");
+    ImGuiUtils::Initialise(win);
+
+    AppLayer* app_layer = new AppLayer(m_app_context, "App Layer");
+    m_layer_stack.PushOverlay(app_layer);
+
     //Test shader
     GLShaderBuilder shader_builder;
     auto pbr_shader = shader_builder.Add(ShaderType::Vertex, "2.1.2.pbr.vs").Add(ShaderType::Fragment, "2.1.2.pbr.fs").Build("PBR Shader");
    
-    AppLayer* app_layer = new AppLayer(m_app_context, "App Layer");
-    m_layer_stack.PushOverlay(app_layer);
- 
   #ifdef SPG_DEBUG
     pbr_shader->PrintInfo();
     GLContext::PrintVideoModes();
     GLContext::PrintGLParams();
     GLContext::PrintImplInfo();
   #endif  
-
     //For testing
     SPG_ASSERT(1);
   }
@@ -101,7 +98,9 @@ namespace Spg
     SPG_INFO("Max event queue size: {}", EventManager::GetMaxQueueSize());
     SPG_INFO("Current event queue size: {}", EventManager::GetCurrentQueueSize());
   #endif  
-    ImGuiContext::Shutdown();
+    ImGuiUtils::Shutdown();
+
+    //Todo detatch / delete all layers
   }
 
 
@@ -133,6 +132,7 @@ namespace Spg
 
   void Application::SetAssetsPath()
   {
+    //Todo - this will need to be changed.  Currently depends on the location of this source file, which won't work when app is 'deployed'
     fs::path this_file = fs::absolute(fs::path{__FILE__});
     fs::path assets_path = this_file.parent_path() / fs::path{"../../../Assets"};
     assets_path = fs::absolute(assets_path);
@@ -156,7 +156,7 @@ namespace Spg
   void Application::OnWindowClosed(EventWindowClose& e)
   {
     SPG_WARN("App Window closed **");
-    m_app_context.running = false;
+    m_running = false;
     e.handled = true;   
   }
 
@@ -165,7 +165,7 @@ namespace Spg
     SPG_WARN("Key pressed ** {} ", e.key);
     if(e.key == GLFW_KEY_ESCAPE)
     {
-      m_app_context.running = false;
+      m_running = false;
       e.handled = true;   
     }
   }
@@ -176,26 +176,28 @@ namespace Spg
     auto delta_time = 0.0;
     auto last_time = glfwGetTime();
 
-    while(m_app_context.running)
+    Window& win = m_app_context.Get<Window>("Window");
+
+    while(m_running)
     {
       auto now = glfwGetTime(); //in seconds
       delta_time = now - last_time;
       last_time = now;
 
-      m_app_context.window->Clear();
+      win.Clear();
      
-      if(!m_app_context.window->IsMinimised())
+      if(!win.IsMinimised())
       {
         for (Layer* layer : m_layer_stack)
 		      layer->OnUpdate(delta_time);
 
-        ImGuiContext::PreRender();
+        ImGuiUtils::PreRender();
         for (Layer* layer : m_layer_stack)
 		      layer->OnImGuiRender();
-        ImGuiContext::PostRender();
+        ImGuiUtils::PostRender();
       }
 
-      m_app_context.window->OnUpdate();
+      win.OnUpdate();
 
       EventManager::DispatchQueuedEvents();
     }

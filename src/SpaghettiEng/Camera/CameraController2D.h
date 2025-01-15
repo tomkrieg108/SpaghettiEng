@@ -14,6 +14,8 @@ namespace Spg
       void Zoom(float zoom);
       void Rotate(float degrees);
 
+      Camera2D& GetCamera() {return m_camera;}
+
     private:
       Camera2D& m_camera;
   };

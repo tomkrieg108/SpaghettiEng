@@ -1,13 +1,13 @@
 #include <filesystem>
 #include <GLFW/glfw3.h>
 #include "Core/Window.h"
-#include "ImGuiContext.h"
+#include "ImGuiUtils.h"
 
 namespace Spg
 {
   namespace fs = std::filesystem;
 
-  void ImGuiContext::Initialise(const Window& window)
+  void ImGuiUtils::Initialise(const Window& window)
   {
     SPG_ASSERT(window.GetWindowHandle() != nullptr);
     // Setup Dear ImGui context
@@ -33,28 +33,28 @@ namespace Spg
     io.Fonts->AddFontFromFileTTF(font_bold.string().c_str(), fontSize);
     io.Fonts->AddFontFromFileTTF(font_regular.string().c_str(), fontSize);
     ImGui::StyleColorsDark();
-    ImGuiContext::SetDarkThemeColors();
+    ImGuiUtils::SetDarkThemeColors();
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window.GetWindowHandle(), true);
     ImGui_ImplOpenGL3_Init("#version 410");
   }
 
-  void ImGuiContext::Shutdown()
+  void ImGuiUtils::Shutdown()
   {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
   }
 
-  void ImGuiContext::PreRender()
+  void ImGuiUtils::PreRender()
   {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();       
   }
 
-  void ImGuiContext::PostRender()
+  void ImGuiUtils::PostRender()
   {
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Render();
@@ -69,19 +69,19 @@ namespace Spg
     }
   }
 
-  bool ImGuiContext::WantCaptureMouse()
+  bool ImGuiUtils::WantCaptureMouse()
   {
     auto& io = ImGui::GetIO();
     return (bool)(io.WantCaptureMouse);
   }
 
-  bool ImGuiContext::WantCaptureKeyboard()
+  bool ImGuiUtils::WantCaptureKeyboard()
   {
     auto& io = ImGui::GetIO();
     return (bool)(io.WantCaptureKeyboard);
   }
 
-  void ImGuiContext::SetDarkThemeColors()
+  void ImGuiUtils::SetDarkThemeColors()
   {
 		auto& colors = ImGui::GetStyle().Colors;
 		colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };

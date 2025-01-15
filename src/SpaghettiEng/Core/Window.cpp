@@ -1,5 +1,5 @@
 #include <GLFW/glfw3.h>
-#include "ImGuiContext/ImGuiContext.h"
+#include "ImGuiUtils/ImGuiUtils.h"
 #include "Events/EventManager.h"
 #include "OpenGL32/GL32Context.h"
 #include "OpenGL32/GL32Renderer.h"
@@ -15,26 +15,10 @@ namespace Spg
 
   uint32_t Window::s_window_count = 0;
 
-  Window::Window()
-  {
-    Initialise();
-  }
-
-  Window::~Window()
-  {
-    Shutdown();
-  }
-
-  Scope<Window> Window::Create(const std::string& title)
+  Window::Window(const std::string& title)
   {
     SPG_ASSERT(Window::s_window_count == 0);
-    auto window = CreateScope<Window>();
-    s_window_count++;
-    return window;
-  }
 
-  void Window::Initialise(const std::string& title)
-  {
     glfwSetErrorCallback(ErrorCallback);
 
     if(!glfwInit())
@@ -42,7 +26,7 @@ namespace Spg
       SPG_CRITICAL("GLFW initalisation failed");
       glfwTerminate();
     }
-    //Todo. Linux does not work with V4.5
+    //Todo. Linux does not work with V4.5 (V4.2 max?)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -73,12 +57,21 @@ namespace Spg
     SetWindowEventCallbacks();
 
     SPG_INFO("Window Created.  Buffer width, height: {}, {}", m_params.buffer_width, m_params.buffer_height);
+
+    s_window_count++;
   }
 
-  void Window::Shutdown()
+  Window::~Window()
   {
     glfwDestroyWindow(m_window_handle);
     s_window_count--;
+
+    if(m_graphics_context != nullptr)
+      delete m_graphics_context;
+
+    if(m_input != nullptr)
+      delete m_input;
+
     if(s_window_count == 0)
       glfwTerminate();
   }
@@ -210,7 +203,7 @@ namespace Spg
     });
 
     glfwSetKeyCallback(m_window_handle, [](GLFWwindow* handle, int key, int code, int action, int mode){
-      if(ImGuiContext::WantCaptureKeyboard())  
+      if(ImGuiUtils::WantCaptureKeyboard())  
         return;
 
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
@@ -238,7 +231,7 @@ namespace Spg
     
     glfwSetMouseButtonCallback(m_window_handle, [](GLFWwindow* handle, int button, int action, int mods)
     {
-      if(ImGuiContext::WantCaptureMouse())  
+      if(ImGuiUtils::WantCaptureMouse())  
         return;
 
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
@@ -258,7 +251,7 @@ namespace Spg
     });
 
     glfwSetScrollCallback(m_window_handle, [](GLFWwindow* handle, double xoffset, double yoffset){
-      if(ImGuiContext::WantCaptureMouse())  
+      if(ImGuiUtils::WantCaptureMouse())  
         return;
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
       EventMouseScrolled e{(float)xoffset,(float)yoffset};
@@ -266,7 +259,7 @@ namespace Spg
     });
 
     glfwSetCursorPosCallback(m_window_handle, [](GLFWwindow* handle, double xpos, double ypos) {
-      if(ImGuiContext::WantCaptureMouse())  
+      if(ImGuiUtils::WantCaptureMouse())  
         return; 
 
 		  Window* win = static_cast<Window*>(glfwGetWindowUserPointer(handle));

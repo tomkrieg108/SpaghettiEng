@@ -1,6 +1,8 @@
 #include <iostream>
 
-#include "Geometry/Geometry.h"
+#include <SpaghettiEng/Camera/Camera2D.h>
+#include <SpaghettiEng/Camera/CameraController2D.h>
+#include <Geometry/Geometry.h>
 #include "BubbleSoup.h"
 
 //external libs
@@ -17,32 +19,43 @@ namespace Spg
 
   Application* CreateApplication()
   {
+    //BubbleContext* context = new BubbleContext();
     return new BubbleSoup("Bubble Soup"s);
   }
 
-  DefaultLayer::DefaultLayer(const AppContext& app_context, const std::string& name) : 
-    Layer(app_context, name)  
+  BubbleLayer::BubbleLayer(AppContext& app_context, const std::string& name) : 
+    Layer(app_context, name),
+    m_window(app_context.Get<Window>("Window")),
+    m_renderer(app_context.Get<GLRenderer>("GLRenderer")),
+    m_camera_controller(app_context.Get<CameraController2D>("CameraController2D"))
   {
-    m_logger = Utils::Logger::Create("Default Layer");
+    m_logger = Utils::Logger::Create("Bubble Layer");
   }
 
-  void DefaultLayer::OnAttach()
+  void BubbleLayer::OnAttach()
   {
-    EventManager::AddHandler(this, &DefaultLayer::OnMouseMoved);
-    EventManager::AddHandler(this, &DefaultLayer::OnMouseButtonPressed);
-    EventManager::AddHandler(this, &DefaultLayer::OnMouseButtonReleased);
+    EventManager::AddHandler(this, &BubbleLayer::OnMouseMoved);
+    EventManager::AddHandler(this, &BubbleLayer::OnMouseButtonPressed);
+    EventManager::AddHandler(this, &BubbleLayer::OnMouseButtonReleased);
+
+    Camera2D& camera = m_camera_controller.GetCamera();
+
+    glm::vec2 position = camera.GetPosition();
+    glm::mat4 transform = camera.GetTransform();
+    glm::mat4 view = camera.GetViewMatrix();
   }
 
-  void DefaultLayer::OnDetach()
+  void BubbleLayer::OnDetach()
   {
+    //Todo remove handlers
   }
 
-  void DefaultLayer::OnMouseMoved(EventMouseMoved& e)
+  void BubbleLayer::OnMouseMoved(EventMouseMoved& e)
   {
     LOG_WARN(m_logger, "Mouse Moved: {} {}", e.delta_x, e.delta_y);
   }
 
-  void DefaultLayer::OnMouseButtonPressed(EventMouseButtonPressed& e)
+  void BubbleLayer::OnMouseButtonPressed(EventMouseButtonPressed& e)
   {
     LOG_WARN(m_logger, "Mouse Btn Pressed: {}", e.btn);
     if(e.btn == Mouse::ButtonLeft)
@@ -53,7 +66,7 @@ namespace Spg
       LOG_INFO(m_logger,"Middle");  
   }
 
-  void DefaultLayer::OnMouseButtonReleased(EventMouseButtonReleased& e)
+  void BubbleLayer::OnMouseButtonReleased(EventMouseButtonReleased& e)
   {
     LOG_WARN(m_logger, "Mouse Btn Released: {}", e.btn);
     if(e.btn == Mouse::ButtonLeft)
@@ -64,7 +77,7 @@ namespace Spg
       LOG_INFO(m_logger,"Middle");  
   }
 
-  void DefaultLayer::OnImGuiRender()
+  void BubbleLayer::OnImGuiRender()
   {
     ImGui::Begin(m_name.c_str());
     if (ImGui::CollapsingHeader("Gui For this layer"))
@@ -77,14 +90,16 @@ namespace Spg
   //---------------------------------------------------------------------------------
 
   BubbleSoup::BubbleSoup(const std::string& title) : 
-    Application(title) 
+    Application(title)
   {
-    m_default_layer = new Spg::DefaultLayer(this->m_app_context, std::string("Default Layer"));
-    PushLayer(m_default_layer);
+    
+    auto camera = CreateRef<Camera2D>();
+    auto Camera_controller = CreateRef<CameraController2D>(*camera);
 
-    glm::vec2 position = m_camera.GetPosition();
-    glm::mat4 transform = m_camera.GetTransform();
-    glm::mat4 view = m_camera.GetViewMatrix();
+    m_app_context.Set("CameraController2D", Camera_controller);
+
+    BubbleLayer* layer = new BubbleLayer(m_app_context, std::string("Bubble Layer"));
+    PushLayer(layer);
 
     //Todo - compile error
     //SPG_WARN("Camera Pos: {}", position);
@@ -94,7 +109,7 @@ namespace Spg
 
   BubbleSoup::~BubbleSoup()
   {
-    PopLayer(m_default_layer);
+
   }
 
   void AppPrintHello()
@@ -132,6 +147,7 @@ namespace Spg
 
 int main()
 {
+  Spg::Application::SystemInit();
 #ifdef SPG_LIB_LINK_CHECK 
   Utils::LibCheck();
   Geom::GeomLibHello();
@@ -140,6 +156,6 @@ int main()
 
   auto app = Spg::CreateApplication();
   app->Run();
-  delete app; //Doesn't call this in release mode!
+  delete app; //Doesn't get called in release mode!
   return 0;
 }

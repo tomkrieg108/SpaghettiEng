@@ -3,12 +3,14 @@
 
 namespace Spg
 {
+  enum class PtrType {Scope,Ref,Raw};
+
   template<typename T>
   using Ref = std::shared_ptr<T>;
 
   template<typename T>
   using Scope = std::unique_ptr<T>;
-
+  
   template<typename T, typename ... Args>
   constexpr Ref<T> CreateRef(Args&& ... args)
   {
@@ -20,4 +22,15 @@ namespace Spg
   {
     return std::make_unique<T>(std::forward<Args>(args)...);
   }
+
+//Todo - craches!!
+  template<typename T, typename ... Args>
+  constexpr T* CreateRaw(Args&& ... args)
+  {
+    return new T(std::forward<Args>(args)...);
+  }
+
+  
+
+
 }

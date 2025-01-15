@@ -8,6 +8,6 @@
 #include "SpaghettiEng/Core/Input.h"
 #include "SpaghettiEng/Core/Layer.h"
 #include "SpaghettiEng/Events/EventManager.h"
-#include "SpaghettiEng/ImGuiContext/ImGuiContext.h"
+#include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 
 

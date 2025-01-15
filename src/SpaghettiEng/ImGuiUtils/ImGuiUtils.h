@@ -9,7 +9,7 @@ namespace Spg
 {
   class Window;
 
-  class ImGuiContext
+  class ImGuiUtils
   {
     public:
 

@@ -1,14 +1,14 @@
 #pragma once
+#include "AppContext.h"
 
 namespace Spg
 {
   struct Event;
-  struct AppContext;
-
+ 
   class Layer
   {
   public:
-    Layer(const AppContext& app_context, const std::string& name = "Layer");
+    Layer(AppContext& app_context, const std::string& name = "Layer");
     virtual ~Layer() = default;
 
     virtual void OnAttach() {}
@@ -18,7 +18,7 @@ namespace Spg
     virtual void OnImGuiRender() {}
     const std::string& GetName() const { return m_name; }
   protected:
-    const AppContext& m_app_conext;
+    AppContext& m_app_conext;
     std::string m_name;
   };
 
@@ -44,7 +44,7 @@ namespace Spg
     auto rend() const { return m_Layers.crend(); }
 
   private:
-    std::vector<Layer*> m_Layers;
+    std::vector<Layer*> m_Layers; //Todo - use Scope<Layer>
     unsigned int m_LayerInsertIndex = 0;
   };
 

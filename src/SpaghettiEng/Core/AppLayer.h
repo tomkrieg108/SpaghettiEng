@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Window.h"
 #include "Layer.h"
 
 namespace Spg
@@ -7,7 +8,7 @@ namespace Spg
   class AppLayer : public Layer
   {
   public:
-    AppLayer(const AppContext& app_context, const std::string& name);
+    AppLayer(AppContext& app_context, const std::string& name);
     ~AppLayer() = default;
 
     void OnAttach() override {};
@@ -15,6 +16,8 @@ namespace Spg
     void OnUpdate(double time_step) override {};
     void OnEvent(Event& event) override {};
     void OnImGuiRender() override;  
+  private:
+    Window& m_window;  
   };
 
 }
