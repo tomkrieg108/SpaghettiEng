@@ -1,3 +1,6 @@
+//#define GLFW_INCLUDE_NONE
+
+#include <glad/gl.h>  
 #include <GLFW/glfw3.h>
 #include "ImGuiUtils/ImGuiUtils.h"
 #include "Events/EventManager.h"
@@ -126,7 +129,7 @@ namespace Spg
   float Window::GetAspectRatio() const
   {
     SPG_ASSERT(m_params.buffer_height > 0);
-    return (m_params.buffer_width) / (m_params.buffer_height);
+    return (float)(m_params.buffer_width) / (float)(m_params.buffer_height);
   }
 
   void Window::SetVSyncEnabled(bool enable)

@@ -6,26 +6,37 @@ namespace Geom
   {
     std::vector<float> vertices;
     const float col = 0.5f; //colour
-    const float y = -0.01f;
-    float x, z;
-
-    z = -grid_size;
-    while (z < grid_size + 0.1f)
+    const float z = 0.0f;
+    
+    float y = -grid_size;
+    while (y < grid_size + 0.1f)
     {
-      x = -grid_size;
-      vertices.insert(std::cend(vertices), { x,y,z, col,col,col,1.0f });
-      x = +grid_size;
-      vertices.insert(std::cend(vertices), { x,y,z, col,col,col,1.0f });
-      z += unit_size;
+      if(std::abs(y) < 0.01f)
+      {
+        vertices.insert(std::cend(vertices), {-grid_size,y,z, 1,0,0,1.0f });
+        vertices.insert(std::cend(vertices), { grid_size,y,z, 1,0,0,1.0f });     
+      }
+      else
+      {
+        vertices.insert(std::cend(vertices), {-grid_size,y,z, col,col,col,1.0f });
+        vertices.insert(std::cend(vertices), { grid_size,y,z, col,col,col,1.0f });
+      }
+      y += unit_size;
     }
 
-    x = -grid_size;
-    while (x < grid_size + +0.1f)
+    float x = -grid_size;
+    while (x < grid_size + 0.1f)
     {
-      z = -grid_size;
-      vertices.insert(std::cend(vertices), { x,y,z, col,col,col,1.0f });
-      z = +grid_size;
-      vertices.insert(std::cend(vertices), { x,y,z, col,col,col,1.0f });
+      if(std::abs(x) < 0.01f)
+      {
+        vertices.insert(std::cend(vertices), { x,-grid_size,z, 0,1,0,1.0f });
+        vertices.insert(std::cend(vertices), { x, grid_size,z, 0,1,0,1.0f });
+      }
+      else
+      {
+        vertices.insert(std::cend(vertices), { x,-grid_size,z, col,col,col,1.0f });
+        vertices.insert(std::cend(vertices), { x, grid_size,z, col,col,col,1.0f });
+      }
       x += unit_size;
     }
 

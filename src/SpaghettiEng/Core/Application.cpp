@@ -56,7 +56,7 @@ namespace Spg
 
   void Application::SystemInit()
   {
-    //Call this in main() before app is created
+    //Called in main() before app is created
     Utils::Logger::Initialise();
     EventManager::Initialise(); //todo - does nothing!
   }

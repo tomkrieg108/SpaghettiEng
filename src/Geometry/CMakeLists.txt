@@ -1,6 +1,8 @@
 add_library(${LIB_GEOM} STATIC 
-  "Geometry.cpp"
-  "Geometry.h"
+  "./Geometry.cpp"
+  "./Geometry.h"
+  "./MeshPrimitives2D.cpp"
+  "./MeshPrimitives2D.h"
 )
 
 target_include_directories(${LIB_GEOM} PUBLIC 

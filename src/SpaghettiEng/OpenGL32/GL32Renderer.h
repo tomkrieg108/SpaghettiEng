@@ -1,6 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <Common/Common.h> //Scope
+#include "GL32VertexArray.h"
+#include "GL32Shader.h"
 
 namespace Spg
 {
@@ -35,7 +37,7 @@ namespace Spg
 
     void Begin();
     void End();
-    void Draw();
+    void Draw(const GLVertexArray& vertex_array, const GLShader& shader);
 
     static void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
     static void SetClearColor(const glm::vec4& color);

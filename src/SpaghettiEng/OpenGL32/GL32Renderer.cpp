@@ -26,9 +26,14 @@ namespace Spg
 
   }
 
-  void GLRenderer::Draw()
+  void GLRenderer::Draw(const GLVertexArray& vertex_array, const GLShader& shader)
   {
-
+    shader.Bind();
+    vertex_array.Bind();
+    auto& vbo = vertex_array.GetVertexBuffers()[0];
+    glDrawArrays(GL_LINES, 0, vbo.GetVertexCount());
+    vertex_array.Unbind();
+    shader.Unbind();
   }
 
   void GLRenderer::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)

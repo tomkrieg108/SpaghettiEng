@@ -12,20 +12,32 @@ namespace Spg
 
     struct Params
     {
-      float left = -100.0f;
-      float right = 100.0f;
-      float bottom = -100.0f;
-      float top = 100.0f;
+      float left = -20.0f;
+      float right = 20.0f;
+      float bottom = -20.0f;
+      float top = 20.0f;
     };
 
   public:
     Camera2D();
     ~Camera2D() = default;
 
-    glm::vec2 GetPosition();
-    glm::mat4& GetTransform();
+    glm::vec2 GetPosition() const;
     glm::mat4 GetProjMatrix() const;
     glm::mat4 GetViewMatrix() const;
+    glm::mat4& GetTransform();
+
+    Camera2D::Params GetParams() const;
+    void SetParams(const Camera2D::Params& params);
+
+    glm::vec3 Front() const;
+    glm::vec3 Up() const;
+    glm::vec3 Right() const;
+
+    //Todo - these in controller class?
+    void SetPosition(glm::vec3& position);
+    void LookAt(glm::vec3& look_pos);
+    void LookAt(glm::vec3& look_pos, glm::vec3& up);
 
   private:  
     Params m_params;

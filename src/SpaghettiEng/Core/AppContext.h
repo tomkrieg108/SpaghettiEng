@@ -74,6 +74,7 @@ namespace Spg
       template <typename T>
       void Set(const std::string& name, Ref<T> value)
       {
+        //For'Ref<T> value' lvalues passed by value, rvalues passed by move
         static_assert(!std::is_pointer_v<T>, "Do not pass raw pointers to AppComponent. Use std::unique_ptr instead.");
         auto it = m_data.find(name);
         SPG_ASSERT(it == m_data.end());
