@@ -1,8 +1,14 @@
 add_library(${LIB_GEOM} STATIC 
   "./Geometry.cpp"
   "./Geometry.h"
+  "./GeomBase.h"
+  "./GeomUtils.h"
+  "./GeomUtils.cpp"
+  "./Line.h"
   "./MeshPrimitives2D.cpp"
   "./MeshPrimitives2D.h"
+  "./ConvexHull.h"
+  "./ConvexHull.cpp"
 )
 
 target_include_directories(${LIB_GEOM} PUBLIC 

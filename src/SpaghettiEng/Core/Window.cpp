@@ -140,6 +140,9 @@ namespace Spg
 
   void Window::SetCursorEnabled(bool enabled) 
   {
+    #ifdef __linux__
+        return;
+    #endif
       if(enabled)
 		    glfwSetInputMode(m_window_handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
       else

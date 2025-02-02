@@ -37,7 +37,11 @@ namespace Spg
 
     void Begin();
     void End();
-    void Draw(const GLVertexArray& vertex_array, const GLShader& shader);
+    void DrawLines(const GLVertexArray& vertex_array, const GLShader& shader);
+    void DrawLineStrip(const GLVertexArray& vertex_array, const GLShader& shader);
+    void DrawLineLoop(const GLVertexArray& vertex_array, const GLShader& shader);
+    void DrawPoints(const GLVertexArray& vertex_array, const GLShader& shader);
+
 
     static void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
     static void SetClearColor(const glm::vec4& color);

@@ -1,8 +1,8 @@
-#include <iostream>
-
+#include "BubbleSoup.h"
 #include <SpaghettiEng/SpaghettiEng.h>
 #include <Geometry/Geometry.h>
-#include "BubbleSoup.h"
+#include <iostream>
+
 
 //external libs
 //should be available because they were linked as public in Geom lib and propagated here
@@ -64,6 +64,79 @@ namespace Spg
     m_vao_grid.AddVertexBuffer(vertex_buffer);
   }
 
+  void BubbleLayer::CreatePolygon(uint32_t vertex_count)
+  {
+    //auto data = Geom::CreateRandPolygon_XY(vertex_count);
+    auto points = Geom::GenerateRandomPolygon_XY(vertex_count, 0.2f);
+    auto data = Geom::GetMeshFromPoints(points);
+
+
+    uint32_t size_in_bytes = static_cast<uint32_t>(data.size() * sizeof(float));
+
+    BufferLayout layout =
+    {
+      {"a_position", ShaderDataType::Float3},
+      {"a_color", ShaderDataType::Float4}
+    };  
+    auto vertex_buffer = GLVertexBuffer{ data.data(), size_in_bytes, layout };  
+    m_vao_polygon.AddVertexBuffer(vertex_buffer);
+    m_vao_points.AddVertexBuffer(vertex_buffer);
+  }
+
+  void BubbleLayer::CreateCircle(uint32_t vertex_count)
+  {
+    auto data = Geom::CreateCircle_XY(300, vertex_count);
+    uint32_t size_in_bytes = static_cast<uint32_t>(data.size() * sizeof(float));
+
+    BufferLayout layout =
+    {
+      {"a_position", ShaderDataType::Float3},
+      {"a_color", ShaderDataType::Float4}
+    };  
+    auto vertex_buffer = GLVertexBuffer{ data.data(), size_in_bytes, layout };  
+    m_vao_circle.AddVertexBuffer(vertex_buffer);
+  }
+
+  void BubbleLayer::CreatePoints(uint32_t point_count)
+  {
+    auto data = Geom::CreateRandomPointMesh_XY(400, point_count);
+    uint32_t size_in_bytes = static_cast<uint32_t>(data.size() * sizeof(float));
+
+    BufferLayout layout =
+    {
+      {"a_position", ShaderDataType::Float3},
+      {"a_color", ShaderDataType::Float4}
+    };  
+    auto vertex_buffer = GLVertexBuffer{ data.data(), size_in_bytes, layout };  
+    m_vao_points.AddVertexBuffer(vertex_buffer);
+  }
+
+  void BubbleLayer::CreateConvexHull(uint32_t point_count)
+  {
+    std::vector<Geom::Point2d> points = Geom::CreateRandomPoints_XY(400,point_count);
+    //std::vector<Geom::Point2d> hull = Geom::ConvexHull2D_GiftWrap(points);
+    //std::vector<Geom::Point2d> hull = Geom::ConvexHull2D_GiftWrap_V2(points);
+    std::vector<Geom::Point2d> hull = Geom::Convexhull2D_ModifiedGrahams(points);
+
+    std::vector<float> points_data = Geom::GetMeshFromPoints(points);
+    std::vector<float> hull_data = Geom::GetMeshFromPoints(hull);
+
+    uint32_t points_size_in_bytes = static_cast<uint32_t>(points_data.size() * sizeof(float));
+    uint32_t hull_size_in_bytes = static_cast<uint32_t>(hull_data.size() * sizeof(float));
+
+    BufferLayout layout =
+    {
+      {"a_position", ShaderDataType::Float3},
+      {"a_color", ShaderDataType::Float4}
+    };  
+
+    auto vb_points = GLVertexBuffer{ points_data.data(), points_size_in_bytes, layout };  
+    m_vao_points.AddVertexBuffer(vb_points);
+
+    auto vb_hull = GLVertexBuffer{ hull_data.data(), hull_size_in_bytes, layout };  
+    m_vao_convex_hull.AddVertexBuffer(vb_hull);
+  }
+
   BubbleLayer::BubbleLayer(AppContext& app_context, const std::string& name) : 
     Layer(app_context, name),
     m_window(app_context.Get<Window>("Window")),
@@ -76,7 +149,15 @@ namespace Spg
     GLShaderBuilder shader_builder;
     m_coords_shader = shader_builder.Add(ShaderType::Vertex, "coords.vs").Add(ShaderType::Fragment, "coords.fs").Build("Coords Shader");
 
+
     Create2DGrid();
+    CreatePolygon(24);
+    //CreateCircle(32);
+    //CreatePoints(12);
+    //CreateConvexHull(30);
+
+    GeomTest();
+   
     SetCanvasSize(500.0f);
     auto model = glm::mat4(1.0f);
     m_coords_shader->Bind();
@@ -107,7 +188,13 @@ namespace Spg
 
   void BubbleLayer::OnUpdate(double delta_time) 
   {
-    m_renderer.Draw(m_vao_grid, *m_coords_shader);
+    m_renderer.DrawLines(m_vao_grid, *m_coords_shader);
+    m_renderer.DrawLineLoop(m_vao_polygon, *m_coords_shader);
+    //m_renderer.DrawLineLoop(m_vao_circle, *m_coords_shader);
+    //m_renderer.DrawLineLoop(m_vao_points, *m_coords_shader);
+    m_renderer.DrawPoints(m_vao_points, *m_coords_shader);
+    //m_renderer.DrawLineLoop(m_vao_convex_hull, *m_coords_shader);
+    //m_renderer.DrawLineStrip(m_vao_convex_hull, *m_coords_shader);
   }
 
   void BubbleLayer::OnEvent(Event& event)
@@ -137,6 +224,8 @@ namespace Spg
       m_coords_shader->Bind();
       m_coords_shader->SetUniformMat4f("u_view", m_camera.GetViewMatrix());
       m_coords_shader->Unbind();
+
+       //LOG_INFO(m_logger,"Panning by ({},{}).  New Pos ({},{})  ",e.delta_x*factor, e.delta_y*factor, m_camera.GetPosition().x, m_camera.GetPosition().y);
     }
     e.handled = true;
   }
@@ -148,6 +237,7 @@ namespace Spg
     {
       m_canvas_size = new_canvas_size;
       UpdateCanvas();
+      //LOG_INFO(m_logger,"Zooming by {}. New size: {} ",e.y_offset*10.0f, m_canvas_size);
     }
     e.handled = true;
   }
@@ -194,6 +284,86 @@ namespace Spg
       ImGui::Text("Data and controls for this layer goes here");
     }
     ImGui::End();
+  }
+
+  void BubbleLayer::GeomTest()
+  {
+    //Test out some geom stuff
+    Geom::LineSeg2D seg1(Geom::Point2d{0,0}, Geom::Point2d{10,0});
+    Geom::LineSeg2D seg2(Geom::Point2d{0,0}, Geom::Point2d{10,10});
+    Geom::LineSeg2D seg3(Geom::Point2d{0,0}, Geom::Point2d{0,10});
+    Geom::LineSeg2D seg4(Geom::Point2d{0,0}, Geom::Point2d{-10,10});
+    Geom::LineSeg2D seg5(Geom::Point2d{0,0}, Geom::Point2d{-10,0});
+    Geom::LineSeg2D seg6(Geom::Point2d{0,0}, Geom::Point2d{-10,-10});
+    Geom::LineSeg2D seg7(Geom::Point2d{0,0}, Geom::Point2d{0,-10});
+    Geom::LineSeg2D seg8(Geom::Point2d{0,0}, Geom::Point2d{10,-10});
+    LOG_WARN(m_logger, "{} {} {} {} {} {} {} {}", seg1.Angle(),seg2.Angle(),seg3.Angle(),seg4.Angle(),seg5.Angle(),seg6.Angle(),seg7.Angle(),seg8.Angle());
+
+    //angle difference
+    seg1.Set({-10,-10},{-40,10});
+    seg2.Set({-10,-10},{15,5});
+    auto angle = Geom::Angle_LineSeg2D_LineSeg2d(seg1,seg2);
+    LOG_WARN(m_logger, "Angle between seg 1 and seg 2: {} ", angle);
+
+    //area
+    Geom::Point2d p1{13.16,-47.2};
+    Geom::Point2d p2{42.98,-26.07};
+    Geom::Point2d p3{-13.52,-38.96};
+    auto area1 =Geom::SignedAreaTriangle2d(p1,p2,p3);
+    auto area2 =Geom::SignedAreaTriangle2d(p3,p1,p2);
+    auto area3 =Geom::SignedAreaTriangle2d(p2,p3,p1);
+    LOG_WARN(m_logger, "Signed Area of Triangle p1,p2,p3: {} {} {} ", area1, area2, area3);
+
+    auto area4 =Geom::SignedAreaTriangle2d(p1,p3,p2);
+    auto area5 =Geom::SignedAreaTriangle2d(p2,p1,p3);
+    auto area6 =Geom::SignedAreaTriangle2d(p3,p2,p1);
+    LOG_WARN(m_logger, "Signed Area of Triangle p1,p2,p3: {} {} {} ", area4, area5, area6);
+  
+    //orientation test
+    p1 = {-4,-2};
+    p2 = {2,1};
+    p3 = {-3,3};
+    auto orient = Geom::Orientation2d(p1,p2,p3);  //Left
+    orient = Geom::Orientation2d(p1,p3,p2);  //Right
+
+    p1 = {-4,-4};
+    p2 = {4,4};
+    p3 = {-2,-2};
+    orient = Geom::Orientation2d(p1,p2,p3);  //Between
+    orient = Geom::Orientation2d(p3,p2,p1);  //Behind
+    orient = Geom::Orientation2d(p1,p3,p2);  //beyond
+    orient = Geom::Orientation2d(p1,p2,p1);  //origin
+    orient = Geom::Orientation2d(p1,p2,p2);  //destination
+    //-----------------------------------------
+
+    //equality test
+    float f1 = 1.123004;
+    float f2 = 1.123005;
+    bool eq = Geom::Equal(f1,f2);
+    eq = Geom::Equal(f2,f1);
+
+    p1 = {1.0001f, 2.0002f};
+    p2 = {1.0002f, 2.0001f};
+    eq = Geom::Equal(p1,p2);
+    eq = Geom::Equal(p2,p1);
+
+    //------------------------------------------------------------------------------
+    //Intersection test
+    p1 = {-8.8, 2.88}; //intersect
+    //p1 = {-2.94, 1.39}; //no intersect
+    p2 = {8.2, -3.1};
+    p3 = {-9.27, -6.49};
+    Geom::Point2d p4 = {-1.69,6.4};
+    Geom::Point2d intersection(0,0);
+
+    seg1 = {p1,p2};
+    seg2 = {p3,p4};
+
+    bool intersect = Geom::LineSegs2dIntersect(seg1,seg2);
+    if(intersect)
+    {
+      Geom::GetLines2dIntersectPoint(seg1,seg2, intersection);
+    }
   }
 
   void AppPrintHello()
