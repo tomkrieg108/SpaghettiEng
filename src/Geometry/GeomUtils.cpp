@@ -1,28 +1,36 @@
 #include "GeomUtils.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/norm.hpp> //for length2() (length squared)
+#include <numbers> 
 
 namespace Geom
 {
-  float SignedAreaTriangle2d(const Point2d& a, const Point2d& b, const Point2d& c)
+  float ComputeSignedArea(const Point2d& a, const Point2d& b, const Point2d& c)
   {
-    //Det()*0.5.  CCW => +ve, CW => -ve
+    //Det()*0.5
     return 0.5f * ((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y));
+  }
+
+  float ComputeCrossProduct(const Point2d& o, const Point2d& a, const Point2d& b)
+  {
+    //Det() Samas above withut the 0.5 scaling1!!!
+    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
   }
 
   RelativePos Orientation2d(const Point2d& a, const Point2d& b, const Point2d& c)
   {
-    float area = SignedAreaTriangle2d(a, b, c);
+    float area = ComputeSignedArea(a, b, c);
     if(Geom::Equal(area,0.0f))  
       area = 0.0f;
+
+    if (area > 0.0) //CCW orientation
+		  return RelativePos::Left;
+    if (area < 0.0)
+        return RelativePos::Right; //CW orientation
 
     glm::vec2 ab = b - a;
     glm::vec2 ac = c - a;
 
-    if (area > 0.0) //CCW orientationab
-		  return RelativePos::Left;
-    if (area < 0.0)
-        return RelativePos::Right; //CW orientation
     if ((ab.x * ac.x < 0.0f) || (ab.y * ac.y < 0.0f))
         return RelativePos::Behind;
     if ( glm::length2(ab) < glm::length2(ac)) //length squared to avoid sq root
@@ -35,7 +43,7 @@ namespace Geom
     return RelativePos::Between;
   }
 
-  bool LineSegs2dIntersect(const LineSeg2D& line_seg1, const LineSeg2D& line_seg2)
+  bool IntersectionExists(const LineSeg2D& line_seg1, const LineSeg2D& line_seg2)
   {
     // if one of the end points of a segment is in between other segment endpoints we consider it as intersection.
     Point2d a = line_seg1.start;
@@ -55,7 +63,7 @@ namespace Geom
           Xor(Left(line_seg2, a), Left(line_seg2, b));
   }
 
-  bool GetLines2dIntersectPoint(const Point2d& a, const Point2d& b, const Point2d& c, const Point2d& d, Point2d& out_intersect_point)
+  bool ComputeIntersection(const Point2d& a, const Point2d& b, const Point2d& c, const Point2d& d, Point2d& out_intersect_point)
   {
     glm::vec2 AB = b - a;
     glm::vec2 CD = d - c;
@@ -84,20 +92,37 @@ namespace Geom
     return false;
   }
 
-  bool GetLines2dIntersectPoint(const LineSeg2D& line1, const LineSeg2D& line2, Point2d& out_intersect_point)
+  bool ComputeIntersection(const LineSeg2D& line1, const LineSeg2D& line2, Point2d& out_intersect_point)
   {
-    return GetLines2dIntersectPoint(line1.start, line1.end, line2.start, line2.end, out_intersect_point);
+    return ComputeIntersection(line1.start, line1.end, line2.start, line2.end, out_intersect_point);
   }
 
-  float Angle_LineSeg2D_LineSeg2d(const LineSeg2D& line_seg1, const LineSeg2D& line_seg2)
+  float ComputeAngleInDegrees(const LineSeg2D& line_seg1, const LineSeg2D& line_seg2)
   {
     const float dot =  glm::dot(line_seg1.dir_vec, line_seg2.dir_vec);
-    //const auto theta = glm::acos(std::fabs(dot));
-    const auto theta = glm::acos(dot);
+    const auto theta = glm::acos(dot); //[0,PI)
     return glm::degrees(theta);
   }
 
-  Point2d ComputeCentroid2d(const std::vector<Point2d>& points)
+  float ComputeAngleInDegrees(const Point2d& a, const Point2d& b, const Point2d& c)
+  {
+    auto ab = glm::normalize(b-a);
+    auto bc = glm::normalize(c-b);
+    const auto dot = glm::dot(ab, bc);
+    const auto angle = glm::acos(dot);
+    return glm::degrees(angle);
+  }
+
+  float ComputeAngleInDegreesChatGPT(const Point2d& a, const Point2d& b, const Point2d& c)
+  {
+    float abx = b.x - a.x, aby = b.y - a.y;
+    float bcx = c.x - b.x, bcy = c.y - b.y;
+    float dot = abx * bcx + aby * bcy;
+    float det = abx * bcy - aby * bcx;
+    return std::atan2(det, dot) * 180.0f / std::numbers::pi;
+  }
+
+  Point2d ComputeCentroid(const std::vector<Point2d>& points)
   {
     Point2d centroid = {0, 0};
     for (const auto& p : points) {

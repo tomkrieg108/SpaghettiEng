@@ -22,15 +22,4 @@ namespace Spg
   {
     return std::make_unique<T>(std::forward<Args>(args)...);
   }
-
-//Todo - craches!!
-  template<typename T, typename ... Args>
-  constexpr T* CreateRaw(Args&& ... args)
-  {
-    return new T(std::forward<Args>(args)...);
-  }
-
-  
-
-
 }

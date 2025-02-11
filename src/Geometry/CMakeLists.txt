@@ -5,10 +5,14 @@ add_library(${LIB_GEOM} STATIC
   "./GeomUtils.h"
   "./GeomUtils.cpp"
   "./Line.h"
+  "./Polygon.h"
+  "./Polygon.cpp"
   "./MeshPrimitives2D.cpp"
   "./MeshPrimitives2D.h"
   "./ConvexHull.h"
   "./ConvexHull.cpp"
+  "./Triangulate.cpp"
+  "./Triangulate.h"
 )
 
 target_include_directories(${LIB_GEOM} PUBLIC 

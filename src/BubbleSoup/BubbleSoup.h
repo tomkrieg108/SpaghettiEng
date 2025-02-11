@@ -26,15 +26,17 @@ namespace Spg
     void OnMouseScrolled(EventMouseScrolled& e);
     void OnMouseButtonPressed(EventMouseButtonPressed& e);
     void OnMouseButtonReleased(EventMouseButtonReleased& e);
+
     void Create2DGrid();  
     void CreatePolygon(uint32_t vertex_count);
+    void CreateTriangulatedPolygon(uint32_t vertex_count);
     void CreateCircle(uint32_t vertex_count);
     void CreatePoints(uint32_t point_count);
     void CreateConvexHull(uint32_t point_count);
+     void GeomTest();
+
     void UpdateCanvas();
 
-    void GeomTest();
-    
   private:
     Window& m_window;
     GLRenderer& m_renderer;
@@ -48,6 +50,7 @@ namespace Spg
 
     GLVertexArray m_vao_grid;
     GLVertexArray m_vao_polygon;
+    GLVertexArray m_vao_polygon_diagonals;
     GLVertexArray m_vao_circle;
     GLVertexArray m_vao_points;
     GLVertexArray m_vao_convex_hull;
