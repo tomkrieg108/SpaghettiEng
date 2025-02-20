@@ -85,6 +85,7 @@ namespace Geom
 
   //vid 27
   // The Levelbuilder program uses a different algo - try that also!
+  //edge_list is an output param and is actually the list of diagonals used to triangulate the poly
   void Triangulate_EarClipping(PolygonSimple* polygon, std::vector<SP::Edge>& edge_list)
   {
     InitialiseEarStatus(polygon);

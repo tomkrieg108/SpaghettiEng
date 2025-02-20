@@ -1,7 +1,7 @@
 #pragma once
 #include "GeomBase.h"
 #include <Common/Common.h>
-
+#include <iostream>
 
 namespace Geom
 {
@@ -61,6 +61,7 @@ namespace Geom
       }
     };
     
+    //Todo - call this thing a HalfEdge rather than Edge
     struct Edge
     {
       Vertex* origin = nullptr;  
@@ -78,6 +79,11 @@ namespace Geom
       }
 
       void Print() {
+        std::cout << "This point pointer" << this << "\n";
+        std::cout << "Origin : "; this->origin->Print();
+        std::cout << "Twin pointer" << this->twin << "\n";
+        std::cout << "Next pointer" << this->next << "\n";
+        std::cout << "Prev pointer" << this->prev << "\n";
         SPG_TRACE("E([]): ([],[])->([],[])", id, origin->point.x, origin->point.y, Destination()->point.x, Destination()->point.y);
       }
 
@@ -85,15 +91,55 @@ namespace Geom
 
     struct Face
     {
-      //one or the outer boundary edges (only need 1 - can use it to iterate through the others)
+      //one or the outer boundary edges (only need 1 - can use it to hydrate through the others)
       Edge* outer = nullptr;  
       std::vector<Edge*> inner;  //stores 1 edge to each hole in the polygon  
 
-      std::vector<Edge*> GetEdges();
+      std::vector<Edge*> GetEdges()
+      {
+        std::vector<Edge*> edge_list;
+        if (outer){
+          auto edge_ptr = outer;
+          auto next_ptr = outer->next;
+          edge_list.push_back(edge_ptr);
+          edge_ptr->origin->Print();
+          while (next_ptr != edge_ptr) {
+            edge_list.push_back(next_ptr);
+            next_ptr = next_ptr->next;
+          }
+			  }
+			  return edge_list;
+      }
 
-      std::vector<Point2d> GetPoints();
+      std::vector<Point2d> GetPoints()
+      {
+        std::vector<Point2d> point_list;
+        if (outer) {
+          auto edge_ptr = outer;
+          auto next_ptr = outer->next;
+          point_list.push_back(edge_ptr->origin->point);
+          while (next_ptr != edge_ptr) {
+            point_list.push_back(next_ptr->origin->point);
+            next_ptr = next_ptr->next;
+          }
+        }
+        return point_list;
+      }
 
-      void Print();
+      void Print()
+      {
+       if (outer)
+        {
+          auto edge_ptr = outer;
+          auto next_ptr = outer->next;
+
+          edge_ptr->origin->Print();
+          while (next_ptr!=edge_ptr) {
+            next_ptr->origin->Print();
+            next_ptr = next_ptr->next;
+          }
+        }
+      }
     };
 
   
@@ -102,6 +148,7 @@ namespace Geom
     public:
       //Assume given points are in CCW order
       explicit Polygon(std::vector<Point2d>& points);
+      ~Polygon();
 
       //Insert Edge between vertices v1 and v2
       bool Split(Vertex* v1, Vertex* v2);
@@ -123,6 +170,8 @@ namespace Geom
 
       Vertex* GetVertex(Point2d point);
 
+      std::vector<Point2d> GetPoints();
+
       void GetEdgesWithSamefaceAndGivenOrigins(Vertex* v1, Vertex* v2, Edge** edge_leaving_v1, Edge** edge_leaving_v2);
 
     private:
@@ -133,9 +182,6 @@ namespace Geom
       Edge* empty_edge = new Edge();
 
     };
-
-
-
   }
 
   using PolygonSimple = SP::Polygon;

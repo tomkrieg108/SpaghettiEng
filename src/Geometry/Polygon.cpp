@@ -47,11 +47,14 @@ namespace Geom
         m_vertices.push_back(new Vertex(p));
       }
 
-      for(auto i=0; i<m_vertices.size()-2; ++i) {
-        auto edge = new Edge(m_vertices[i]);
-        auto edge_twin = new Edge(m_vertices[i+1]);
+      //edges (CCW) at even indices in m_edges
+      //edge_twin (CW) at odd indices in m_edges
+      for(auto i=0; i<=m_vertices.size()-2; ++i) {
+        auto edge = new Edge(m_vertices[i]); //supplied vertex is origin of the edge
+        auto edge_twin = new Edge(m_vertices[i+1]); //origin of twin is the next point in list (CCW oriented)
         m_vertices[i]->incident_edge = edge;
         edge->twin = edge_twin;
+        edge_twin->twin = edge;
         m_edges.push_back(edge);
         m_edges.push_back(edge_twin);
       }
@@ -60,12 +63,12 @@ namespace Geom
       auto edge_twin = new Edge(m_vertices.front());
       edge->twin = edge_twin;
       edge_twin->twin = edge;
+      m_edges.push_back(edge);
       m_edges.push_back(edge_twin);
-
       m_vertices[m_vertices.size() - 1]->incident_edge = edge;
 
-      // Set the prev and next for the element middle of the list (2 : size-2)
-      for(auto i = 2; i< m_edges.size()-3; i++)   {
+      // Set the prev and next for the elements from m_edges indices (2 : size-2)
+      for(auto i = 2; i<= m_edges.size()-3; i++)   {
         if(i%2 == 0) { // even case - CCW edges
           m_edges[i]->next = m_edges[i+2];
           m_edges[i]->prev = m_edges[i-2];
@@ -76,22 +79,27 @@ namespace Geom
         }
       }
 
-      m_edges[0]->next = m_edges[2];
-      m_edges[0]->prev = m_edges[m_edges.size()-2];
-      m_edges[1]->next = m_edges[m_edges.size()-1];
-      m_edges[1]->prev = m_edges[m_edges.size()];
+      //set as above for the ends of m_edges 
+      m_edges[0]->next = m_edges[2]; //CCW edge
+      m_edges[0]->prev = m_edges[m_edges.size()-2]; //CCW edge
+      m_edges[1]->next = m_edges[m_edges.size()-1]; //CW edge
+      m_edges[1]->prev = m_edges[3]; //CW edge
 
-      m_edges[m_edges.size()-2]->next = m_edges[0];
-      m_edges[m_edges.size()-2]->prev = m_edges[m_edges.size()-4];
-      m_edges[m_edges.size()-1]->next = m_edges[m_edges.size()-3];
-      m_edges[m_edges.size()-1]->prev = m_edges[1];
+      m_edges[m_edges.size()-2]->next = m_edges[0]; //CCW edge
+      m_edges[m_edges.size()-2]->prev = m_edges[m_edges.size()-4]; //CCW edge
+      m_edges[m_edges.size()-1]->next = m_edges[m_edges.size()-3]; //CW edge
+      m_edges[m_edges.size()-1]->prev = m_edges[1]; //CW edge
 
       //setup faces
-      Face* f1 = new Face();
-      Face* f2 = new Face();
+      Face* f1 = new Face(); //interior face - outer boundary edge list is CCW
+      Face* f2 = new Face(); //exterior face / outer space - inner boundary edge list is CW
 
-      f1->outer = m_edges[0]; //CCW edge list
-      f2->inner.push_back(m_edges[1]); //f2 is an unbounded face which wraps f1.  So f1 is a hole in f2 - CW edge list
+      //outer boundary of the polygon. CCW edge list. No holes => inner is empty
+      f1->outer = m_edges[0];
+
+      //f2 is an unbounded face which wraps f1.  So f1 is a hole in f2 - CW edge list.  Unbounded => outer is null
+      f2->inner.push_back(m_edges[1]); 
+
       m_faces.push_back(f1);
       m_faces.push_back(f2);
 
@@ -111,6 +119,20 @@ namespace Geom
       }
     }
 
+    Polygon::~Polygon()
+    {
+      for(auto f : m_faces)
+        delete f;
+      for(auto e : m_edges)
+        delete e;
+      for(auto v : m_vertices)
+        delete v;
+      
+      m_faces.clear();
+      m_edges.clear();
+      m_vertices.clear();
+    }
+
     Vertex* Polygon::GetVertex(Point2d point)
     {
       for (size_t i = 0; i < m_vertices.size(); i++) {
@@ -120,7 +142,17 @@ namespace Geom
       return nullptr;
     }
 
-    //Vid 30
+    std::vector<Point2d> Polygon::GetPoints()
+    {
+      std::vector<Point2d> points;
+      for(auto v : m_vertices) {
+        points.push_back(v->point);
+      }
+      return points;
+    }
+
+    //Vid 30 - If valid edges not found, returns Invalid edges (id = -1)
+    //Find 2 edges edge_leaving_v1, edge_leaving_v2 with v1, v2 as respective origins.  v1,v2 cannot be consecutive.  edge_leaving_v1, edge_leaving_v2 have same incident face.  See diagram in notes on how this is done here.
      void Polygon::GetEdgesWithSamefaceAndGivenOrigins(Vertex* v1, Vertex* v2, Edge** edge_leaving_v1, Edge** edge_leaving_v2)
      {
         std::vector<Edge*> edges_with_v1_ori, edges_with_v2_ori;
@@ -145,7 +177,8 @@ namespace Geom
           next_edge = next_edge->twin->next;
         }
 
-        // Get two edges, one with origin v1 and other with origin v2 and incident to same face
+        //Get two edges, one with origin v1 and other with origin v2 and incident to same face
+        //bit of hydrating going on here
         for ( auto ev1 : edges_with_v1_ori){
           for ( auto ev2 : edges_with_v2_ori){
             if (ev1->incident_face->outer != nullptr) {
@@ -164,22 +197,25 @@ namespace Geom
     bool Polygon::Split(Vertex* v1, Vertex* v2)
     {
       // Find two edges with given points as origins and are in same face.
-      Edge* edge_oriV1;
-      Edge* edge_oriV2;
+      Edge* edge_oriV1; //e1 (refer to diagram in notes)
+      Edge* edge_oriV2; //e2
+      //Todo = this generated an exception once
 		  GetEdgesWithSamefaceAndGivenOrigins(v1, v2, &edge_oriV1, &edge_oriV2);    
 
+      //Todo - this line sometimes causes an exception - read access violation - edge_origV1 : 0xFFFFFFFFFFFD7
       if (edge_oriV1->id == -1 || edge_oriV2->id == -1)
 			  return false;						// Cannot find a edges with same face with ori _v1, _v2
 
-      // If the vertices are adjucent we can return.
+      // If the vertices are adjacent then return.
       if (edge_oriV1->next->origin == v2 || edge_oriV1->prev->origin == v2)
         return false;
 
       // Later we can delete this entry
 		  Face* previous_face = edge_oriV1->incident_face;  
 
-      auto half_edge1 = new Edge(v1);
-		  auto half_edge2 = new Edge(v2);
+      //Origins of new half edges 1,2 set to v1, v2 respectively
+      auto half_edge1 = new Edge(v1); //h1 (refer to diagram in notes)
+		  auto half_edge2 = new Edge(v2); //h2
 
       half_edge1->twin = half_edge2;
       half_edge2->twin = half_edge1;

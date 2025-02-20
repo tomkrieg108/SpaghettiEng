@@ -102,28 +102,53 @@ namespace Spg
     auto polygon_points = Geom::GenerateRandomPolygon_XY(vertex_count,min_edges, perturbFactor, minEdge, maxEdge, minAngle);
 
     Geom::PolygonSimple polygon = Geom::PolygonSimple(polygon_points);
-    auto diagonal_points = Geom::GeneratePolygonDiagonals(&polygon);
-    //auto ears = polygon.GetEars();
-
-    auto poly_mesh =  Geom::GetMeshFromPoints(polygon_points, glm::vec4(0,1,0,1));
-    //auto points_mesh = Geom::GetMeshFromPoints(ears, glm::vec4(1,0,0,1));
+    auto diagonal_points = Geom::GenerateEarClipplingDiagonals(&polygon);
+    
+    auto poly_mesh =  Geom::GetMeshFromPoints(polygon_points, glm::vec4(1,1,0,1));
     auto diagonals_mesh = Geom::GetMeshFromPoints(diagonal_points, glm::vec4(0,0,1,1));
     uint32_t poly_size_in_bytes = static_cast<uint32_t>(poly_mesh.size() * sizeof(float));
-    //uint32_t point_size_in_bytes = static_cast<uint32_t>(points_mesh.size() * sizeof(float));
     uint32_t diagonal_size_in_bytes = static_cast<uint32_t>(diagonals_mesh.size() * sizeof(float));
-
 
     BufferLayout layout =
     {
       {"a_position", ShaderDataType::Float3},
       {"a_color", ShaderDataType::Float4}
     };  
-    auto poly_buffer = GLVertexBuffer{ poly_mesh.data(), poly_size_in_bytes, layout };  
-    //auto points_buffer = GLVertexBuffer{ points_mesh.data(), point_size_in_bytes, layout };  
+    auto poly_buffer = GLVertexBuffer{ poly_mesh.data(), poly_size_in_bytes, layout };   
     auto diagonals_buffer = GLVertexBuffer{ diagonals_mesh.data(), diagonal_size_in_bytes, layout };  
 
     m_vao_polygon.AddVertexBuffer(poly_buffer);
-    //m_vao_points.AddVertexBuffer(points_buffer);
+    m_vao_polygon_diagonals.AddVertexBuffer(diagonals_buffer);
+  }
+
+  void BubbleLayer::CreateMonotonePartitionedPolygon(uint32_t vertex_count)
+  {
+    float perturbFactor = 0.4; // Adjusts inward/outward movement
+    float minEdge = 50.0; // Minimum edge length
+    float maxEdge = 250.0; // Maximum edge length
+    float minAngle = 30.0; // Minimum allowed angle (in degrees)
+
+    uint32_t min_edges = (uint32_t)(vertex_count*0.7f);
+    auto polygon_points = Geom::GenerateRandomPolygon_XY(vertex_count,min_edges, perturbFactor, minEdge, maxEdge, minAngle);
+
+    //Identical to the above function apart from the next 2 lines!
+    Geom::DCEL::Polygon polygon = Geom::DCEL::Polygon(polygon_points);
+    auto diagonal_points = Geom::GenerateMonotoneDiagonals(&polygon);
+
+    auto poly_mesh =  Geom::GetMeshFromPoints(polygon_points, glm::vec4(1,1,0,1));
+    auto diagonals_mesh = Geom::GetMeshFromPoints(diagonal_points, glm::vec4(0,0,1,1));
+    uint32_t poly_size_in_bytes = static_cast<uint32_t>(poly_mesh.size() * sizeof(float));
+    uint32_t diagonal_size_in_bytes = static_cast<uint32_t>(diagonals_mesh.size() * sizeof(float));
+
+    BufferLayout layout =
+    {
+      {"a_position", ShaderDataType::Float3},
+      {"a_color", ShaderDataType::Float4}
+    };  
+    auto poly_buffer = GLVertexBuffer{ poly_mesh.data(), poly_size_in_bytes, layout };   
+    auto diagonals_buffer = GLVertexBuffer{ diagonals_mesh.data(), diagonal_size_in_bytes, layout };  
+
+    m_vao_polygon.AddVertexBuffer(poly_buffer);
     m_vao_polygon_diagonals.AddVertexBuffer(diagonals_buffer);
   }
 
@@ -201,7 +226,8 @@ namespace Spg
     //CreatePoints(40);
     //CreateCircle(32);
     //CreatePolygon(18);
-    CreateTriangulatedPolygon(18);
+    //CreateTriangulatedPolygon(30);
+    CreateMonotonePartitionedPolygon(24);
     //CreateConvexHull(30);
 
     GeomTest();
@@ -442,6 +468,54 @@ namespace Spg
     LOG_WARN(m_logger, "Subtended angle (interior) a->b->c {} ", 180 - std::abs(angle));
     LOG_WARN(m_logger, "Subtended angle (exterior) a->b->c {} ", 180 + std::abs(angle));
 
+    //-----------------------------------------------------------------------
+    //BST
+    std::vector<float> values{2,11,4,125,15,3,9,32,71,43,27};
+    std::list<float> list;
+    Geom::BST bst(values);
+    bst.InOrderTraverse(bst.GetRootNode(), list);
+    for(auto val : list) {
+      LOG_TRACE(m_logger, "{},", val);
+    }
+    float predecessor,sucessor;
+    auto success = bst.Predecessor(15,predecessor);
+    LOG_TRACE(m_logger, "Predecessor of 15 is {} ", predecessor);
+    success = bst.Successor(32,sucessor);
+    LOG_TRACE(m_logger, "Sucessor of 32 is {} ", sucessor);
+
+    success = bst.Predecessor(2,predecessor);
+    if(success) {
+      LOG_TRACE(m_logger, "predecessor of 2 is {} ", predecessor);
+    }
+    else {
+      LOG_TRACE(m_logger, "2 does not have a predecessor");   
+    }
+
+    success = bst.Successor(125,sucessor);
+    if(success) {
+      LOG_TRACE(m_logger, "Sucessor of 125 is {} ", sucessor);
+    }
+    else {
+      LOG_TRACE(m_logger, "125 does not have a successor");   
+    }
+
+
+    bst.Delete(32.0);
+    list.clear();
+    bst.InOrderTraverse(bst.GetRootNode(), list);
+    LOG_TRACE(m_logger, "Delete 32");   
+    for(auto val : list) {
+      LOG_TRACE(m_logger, "{},", val);
+    }
+
+    bst.Delete(99.0);
+    list.clear();
+    bst.InOrderTraverse(bst.GetRootNode(), list);
+    LOG_TRACE(m_logger, "Delete 99");   
+    for(auto val : list) {
+      LOG_TRACE(m_logger, "{},", val);
+    }
+    
   }
 
   void AppPrintHello()

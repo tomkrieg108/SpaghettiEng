@@ -4,13 +4,16 @@
 #include "Line.h"
 #include "Polygon.h"
 #include "Triangulate.h"
+#include "MonotonePartition.h"
 #include <vector>
 
 namespace Geom
 {
   std::vector<float> GenerateGridMesh_XY(float grid_size, float unit_size);
 
-  std::vector<Point2d> GeneratePolygonDiagonals(PolygonSimple* polygon);
+  std::vector<Point2d> GenerateEarClipplingDiagonals(PolygonSimple* polygon);
+
+  std::vector<Point2d> GenerateMonotoneDiagonals(DCEL::Polygon* polygon);
 
   std::vector<Point2d> GenerateRandomPoints_XY(float radius, uint32_t num_points);
 

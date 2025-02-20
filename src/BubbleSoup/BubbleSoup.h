@@ -30,6 +30,7 @@ namespace Spg
     void Create2DGrid();  
     void CreatePolygon(uint32_t vertex_count);
     void CreateTriangulatedPolygon(uint32_t vertex_count);
+    void CreateMonotonePartitionedPolygon(uint32_t vertex_count);
     void CreateCircle(uint32_t vertex_count);
     void CreatePoints(uint32_t point_count);
     void CreateConvexHull(uint32_t point_count);

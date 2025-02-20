@@ -6,6 +6,7 @@
 #include "ConvexHull.h"
 #include "Polygon.h"
 #include "Triangulate.h"
+#include "BST.h"
 
 namespace Geom
 {

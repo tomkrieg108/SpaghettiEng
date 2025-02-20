@@ -48,7 +48,7 @@ namespace Geom
     return vertices;
   }
 
-  std::vector<Point2d> GeneratePolygonDiagonals(PolygonSimple* polygon)
+  std::vector<Point2d> GenerateEarClipplingDiagonals(PolygonSimple* polygon)
   {
     std::vector<Point2d> points;
     std::vector<SP::Edge> diagonals; //output arg to Triangulate_EarClipping() 
@@ -56,6 +56,19 @@ namespace Geom
     for(auto d : diagonals) {
       points.push_back(d.v1.point);
       points.push_back(d.v2.point);
+    }
+    return points;
+  }
+
+  std::vector<Point2d> GenerateMonotoneDiagonals(DCEL::Polygon* polygon)
+  {
+    std::vector<Point2d> points;
+    std::vector<LineSeg2D> diagonals;
+
+    auto monoton_polys = GetMonotonPolygons(polygon, diagonals);
+    for(auto seg : diagonals) {
+      points.push_back(seg.start);
+      points.push_back(seg.end);
     }
     return points;
   }

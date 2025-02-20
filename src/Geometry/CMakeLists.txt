@@ -13,6 +13,17 @@ add_library(${LIB_GEOM} STATIC
   "./ConvexHull.cpp"
   "./Triangulate.cpp"
   "./Triangulate.h"
+  "./MonotonePartition.cpp"
+  "./MonotonePartition.h"
+  "./BST.cpp"
+  "./BST.h"
+  "./KDTree.cpp"
+  "./KDTree.h"
+  "./RangeTree.cpp"
+  "./RangeTree.h"
+  "./BoundingVolume.h"
+  "./QuadTree.cpp"
+  "./QuadTree.h"
 )
 
 target_include_directories(${LIB_GEOM} PUBLIC 
