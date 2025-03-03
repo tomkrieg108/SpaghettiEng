@@ -15,10 +15,11 @@ cmake/CPM.cmake
 build/
 assets/
 html/
+.vscode/
 external/glad
-external/stb_img
-
-
+external/stb_image
+external/Readme.txt
+#external/
 
 ################################
 ############ C/C++ #############
@@ -70,7 +71,7 @@ external/stb_img
 ################################
 *.code-workspace
 .history
-.vscode
+
 
 ################################
 ###########   VS    ############
