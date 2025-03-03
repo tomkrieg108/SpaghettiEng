@@ -1,16 +1,14 @@
-#include <iostream>
-
+#include "Geometry.h"
+#include <Common/Common.h>
 //external libs check only
 #include <cxxopts.hpp>
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 //------------------------
-
 #include <glm/glm.hpp>
+#include <iostream>
 
-#include "Common/Common.h"
-#include "Geometry.h"
 
 namespace Geom
 {

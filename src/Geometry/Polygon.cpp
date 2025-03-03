@@ -37,6 +37,10 @@ namespace Geom
 
   namespace DCEL
   {
+    /*
+      Todo - this Polygon class is more like the representation of a polygonal / planar topology that might contain many individual polygons.  Individual polygons are the faces and associated outer edge.  Might want to rename it to reflect this.  There are also algorithms to do boolean operations on DCEL - union, intersection, difference.  
+    */
+    
     //Vid 29
     Polygon::Polygon(std::vector<Point2d>& points)
     {
@@ -225,6 +229,7 @@ namespace Geom
       half_edge1->prev = edge_oriV1->prev;
       half_edge2->prev = edge_oriV2->prev;
 
+      //setting next and prev of edge_oriV1 and edge_oriV2
       half_edge1->next->prev = half_edge1;
       half_edge2->next->prev = half_edge2;
       half_edge1->prev->next = half_edge1;

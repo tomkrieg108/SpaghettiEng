@@ -91,7 +91,7 @@ namespace Geom
 
     struct Face
     {
-      //one or the outer boundary edges (only need 1 - can use it to hydrate through the others)
+      //one of the outer boundary edges (only need 1 - can use it to hydrate through the others)
       Edge* outer = nullptr;  
       std::vector<Edge*> inner;  //stores 1 edge to each hole in the polygon  
 

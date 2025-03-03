@@ -6,6 +6,7 @@
 namespace Geom
 {
   using Point2d = glm::vec2;
+  using Point3d = glm::vec3;
 
   enum class RelativePos 
   {

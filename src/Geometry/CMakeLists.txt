@@ -5,6 +5,7 @@ add_library(${LIB_GEOM} STATIC
   "./GeomUtils.h"
   "./GeomUtils.cpp"
   "./Line.h"
+  "./Plane.h"
   "./Polygon.h"
   "./Polygon.cpp"
   "./MeshPrimitives2D.cpp"
@@ -24,6 +25,10 @@ add_library(${LIB_GEOM} STATIC
   "./BoundingVolume.h"
   "./QuadTree.cpp"
   "./QuadTree.h"
+  "./IntersectionSet.cpp"
+  "./IntersectionSet.h"
+  "./DCEL.cpp"
+  "./DCEL.h"
 )
 
 target_include_directories(${LIB_GEOM} PUBLIC 

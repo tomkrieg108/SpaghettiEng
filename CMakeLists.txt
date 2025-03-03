@@ -47,8 +47,8 @@ set(LIB_GEOM "lib_geom")
 set(APP "bubble_soup")
 
 #processed depth-first
+add_subdirectory(external)  
 add_subdirectory(src) 
-add_subdirectory(external)   
 
 # Build type - preprocessor macro is compiler dependent, so set here 
 # Need to use generator expression for multi-config generators (MSVC)

@@ -7,6 +7,7 @@
 #include "Polygon.h"
 #include "Triangulate.h"
 #include "BST.h"
+#include "IntersectionSet.h"
 
 namespace Geom
 {

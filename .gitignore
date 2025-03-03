@@ -7,14 +7,17 @@
 CMakeUserPresets.json
 .mypy_cache 
 
+cmake/CPM.cmake
+
 ################################
 ########### FOLDERS ############
 ################################
 build/
 assets/
 html/
-#external/glad
-#external/stb_img
+external/glad
+external/stb_img
+
 
 
 ################################
@@ -67,6 +70,7 @@ html/
 ################################
 *.code-workspace
 .history
+.vscode/
 
 ################################
 ###########   VS    ############

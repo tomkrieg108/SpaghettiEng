@@ -515,7 +515,36 @@ namespace Spg
     for(auto val : list) {
       LOG_TRACE(m_logger, "{},", val);
     }
-    
+
+    //-------------------------------------------------------------------------------
+    //Intersection Set
+    LOG_WARN(m_logger, "-----------------------------------");  
+    LOG_TRACE(m_logger, "iNTERSECTION TESTING");  
+    std::vector<Geom::LineSeg2D> segs 
+    {
+      {{-1,4},{-2,1}}, //f
+      {{-2,12},{2,-2}}, //g
+      {{0,2},{-4,6}}, //h
+      {{-2,6},{2,10}}, //i
+      {{6,4},{2,10}}, //j
+      {{4,4},{2,10}}, //k
+      {{2,10},{4,14}}, //l
+      {{8,10},{-4,10}}, //m horizontal line - ok
+
+      //Still some errors with these
+      // {{-4,6},{-4,10}}, //n vertical line
+      // {{4,4},{6,4}}, //p horizontal line
+       {{6,14},{6,10}}, //q vertical line, meets at horiz line - error - reports intersection (-2,12)
+      // {{-8,8},{-4,8}}, //r horizontal line
+      // {{-6,12},{-6,4}}, //q vertical line
+
+    };
+    // Geom::ItersectSet::Queue queue;
+    // queue.Insert(segs);
+    // queue.Print();
+
+    Geom::ItersectSet::IntersectionSet intersection_set{segs};
+    intersection_set.Process();
   }
 
   void AppPrintHello()
@@ -548,6 +577,9 @@ namespace Spg
     std::cout << "\n";
 
     std::cout << "####################################################\n\n";
+
+    
+    
   }
 }
 
@@ -563,5 +595,4 @@ int main()
   auto app = Spg::CreateApplication();
   app->Run();
   delete app; //Doesn't get called in release mode!
-  return 0;
 }
