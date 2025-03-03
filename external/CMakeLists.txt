@@ -17,8 +17,8 @@ target_link_libraries(${EXT_GLAD} )
 # stb_image
 #--------------------------------------------------------------
 add_library(${EXT_STB_IMG} STATIC 
-  "./stb_imgage/stb_image.cpp"
-  "./stb_imgage/stb_image.h"
+  "./stb_image/stb_image.cpp"
+  "./stb_image/stb_image.h"
 )
 target_include_directories(${EXT_STB_IMG} PUBLIC
   "./stb_imgage"
