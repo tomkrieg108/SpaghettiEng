@@ -1,5 +1,6 @@
 # From udemy cmake ch3
 # I added assets/
+# Note:  To untrack a tracked file/folder, first need to do command: git rm --cache [filename] or git rm -r --cache [folder] Then commit changes, then add thise files/folders to git ignore
 ################################
 ###########  FILES  ############
 ################################
@@ -8,6 +9,7 @@ CMakeUserPresets.json
 .mypy_cache 
 
 cmake/CPM.cmake
+external/Readme.txt
 
 ################################
 ########### FOLDERS ############
@@ -18,7 +20,7 @@ html/
 .vscode/
 external/glad
 external/stb_image
-external/Readme.txt
+
 #external/
 
 ################################

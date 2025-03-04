@@ -3,6 +3,8 @@ add_subdirectory(Geometry)
 add_subdirectory(SpaghettiEng)
 add_subdirectory(BubbleSoup)
 
+
+
 target_include_directories(${LIB_COMMON}  PUBLIC 
   "${CMAKE_CURRENT_SOURCE_DIR}"
 ) 
@@ -18,3 +20,12 @@ target_include_directories(${LIB_ENG}  PUBLIC
 target_include_directories(${APP}  PUBLIC 
   "${CMAKE_CURRENT_SOURCE_DIR}"
 ) 
+
+if(ENABLE_TESTING)
+  add_subdirectory(Tests)
+
+  #this caises an error?
+  # target_include_directories(${TEST_GEOM}  PUBLIC 
+  # "${CMAKE_CURRENT_SOURCE_DIR}"
+endif()
+

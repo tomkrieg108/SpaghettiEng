@@ -10,10 +10,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(ENABLE_TESTING "Enable a Unit Testing Build" ON)
+
 #include() looks in cmake dir 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 
 #CPM - lib needs to be github / gitlab cmake projects to use
+#todo CPM can be brought in automatically via 
+# include(FetchContent)
+# FetchContent_Declare(
+#   CPM
+#   GIT_REPOSITORY https://github.com/cpm-cmake/CPM.cmake.git
+#   GIT_TAG v0.38.2 # Use the latest version
+# )
+# FetchContent_MakeAvailable(CPM)
+
 message(STATUS "Using CPM package manager")
 include(CPM) 
 cpmaddpackage("gh:nlohmann/json#v3.11.3") # gh: look in github
@@ -36,8 +47,20 @@ cpmaddpackage(
   GIT_TAG 1.0.1
 )
 
+if(ENABLE_TESTING)
+  cpmaddpackage(
+    NAME catch2
+    GITHUB_REPOSITORY catchorg/catch2
+    GIT_TAG v3.8.0
+  )
+  #causes cmake error?
+  #list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+endif()
+
+
 find_package(OpenGL REQUIRED) # Add OpenGL (usually available system-wide)
 
+#Define variables for all targets
 set(EXT_GLAD "lib_glad")
 set(EXT_STB_IMG "lib_stb_image")
 set(EXT_IMGUI "lib_imgui_docking")
@@ -46,7 +69,13 @@ set(LIB_ENG "lib_eng")
 set(LIB_GEOM "lib_geom")
 set(APP "bubble_soup")
 
-#processed depth-first
+if(ENABLE_TESTING)
+  set(TEST_GEOM "test_geom")
+  # include(CTest)
+  # enable_testing()
+endif()
+
+#processe depth-first
 add_subdirectory(external)  
 add_subdirectory(src) 
 

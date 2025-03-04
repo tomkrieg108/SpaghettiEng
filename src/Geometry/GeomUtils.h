@@ -2,16 +2,20 @@
 #include "GeomBase.h"
 #include "Line.h"
 #include "Plane.h"
+#include <vector> //todo compile errors without this - should be included in pch???
 
 namespace Geom
 {
-  //Signed area of triangled formed by points a,b,a.  CCW => +ve, CW=> -ve
+  uint32_t Factorial( uint32_t number );
+
+  /*
+    Returns signed area of triangle formed by points a,b,c. CCW otiented=> +ve, CW=> negative. Returns zero if colinear.  Check for equality with zero using Geom::Equal()
+  */
   float ComputeSignedArea(const Point2d& a, const Point2d& b, const Point2d& c); 
 
-  // oa x ob
-  float ComputeCrossProduct(const Point2d& o, const Point2d& a, const Point2d& b);
-
-  // Orientation of point c relative to a->b
+  /*
+    Orientation of point c relative to a->b
+  */
   RelativePos Orientation2d(const Point2d& a, const Point2d& b, const Point2d& c);
 
    // Orientation of point p relative to line_seg

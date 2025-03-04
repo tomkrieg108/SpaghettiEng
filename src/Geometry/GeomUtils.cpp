@@ -1,20 +1,19 @@
 #include "GeomUtils.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/norm.hpp> //for length2() (length squared)
-#include <numbers> 
+#include <numbers> //for PI
 
 namespace Geom
 {
-  float ComputeSignedArea(const Point2d& a, const Point2d& b, const Point2d& c)
-  {
-    //Det()*0.5
-    return 0.5f * ((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y));
+
+  uint32_t Factorial( uint32_t number ) {
+    return number <= 1 ? 1 : Factorial(number-1) * number;
   }
 
-  float ComputeCrossProduct(const Point2d& o, const Point2d& a, const Point2d& b)
+  float ComputeSignedArea(const Point2d& a, const Point2d& b, const Point2d& c)
   {
-    //Det() Samas above withut the 0.5 scaling1!!!
-    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    //Det()*0.5.  
+    return 0.5f * ((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y));
   }
 
   RelativePos Orientation2d(const Point2d& a, const Point2d& b, const Point2d& c)
