@@ -6,36 +6,25 @@ namespace Geom
 {
   struct LineSeg2D
   {
-    LineSeg2D() : start{0}, end{0}, dir_vec{0,0} {}
+    LineSeg2D() = default;
 
-    LineSeg2D(const Point2d& p_start, const Point2d& p_end) : start{p_start}, end{p_end}
-    {
-      dir_vec = end - start;
-      dir_vec = glm::normalize(dir_vec);
-    }
+    LineSeg2D(const Point2d& p_start, const Point2d& p_end) : start{p_start}, end{p_end}{}
     void Set(const Point2d& p_start, const Point2d& p_end)
     {
       start=p_start;
-      end=p_end;
-      dir_vec = end - start;
-      dir_vec = glm::normalize(dir_vec);   
+      end=p_end; 
     }
 
-    float Length() 
-    {
-      return glm::length(dir_vec);
+    float Length()  {
+      return glm::length(end-start);
     }
 
-    // [-pi,pi] in radians
-    float Angle() 
-    {
-      const float theta = std::atan2f(dir_vec.y, dir_vec.x);
-      return glm::degrees(theta);
+    glm::vec2 DirectionVector() {
+      return(end - start);
     }
     
-    Point2d start, end;
-    glm::vec2 dir_vec;
-    
+    Point2d start{0,0};
+    Point2d end{1,0};
   };
 
   //-------------------------------------

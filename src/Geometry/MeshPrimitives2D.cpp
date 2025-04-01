@@ -59,7 +59,7 @@ namespace Geom
     }
     return points;
   }
-
+ 
   std::vector<Point2d> GenerateMonotoneDiagonals(DCEL::Polygon* polygon)
   {
     std::vector<Point2d> points;
@@ -154,8 +154,7 @@ namespace Geom
     return points;
   }
 
- 
- std::vector<Point2d> GenerateRandomPolygon_XY(uint32_t max_points, uint32_t min_points, float perturb_factor, float min_edge, float max_edge, float min_angle)
+  std::vector<Point2d> GenerateRandomPolygon_XY(const PolygonParameters& params)
 {
     std::random_device rand_device;
     std::mt19937 gen(rand_device());
@@ -163,21 +162,21 @@ namespace Geom
 
     std::vector<Point2d> finalPolygon;
 
-    while(finalPolygon.size() < min_points) {
+    while(finalPolygon.size() < params.min_points) {
       finalPolygon.clear();
-      std::vector<Point2d> points = GenerateRandomPoints_XY(500, max_points);
+      std::vector<Point2d> points = GenerateRandomPoints_XY(500, params.max_points);
       std::vector<Point2d> hull = Convexhull2D_ModifiedGrahams(points);
       Point2d centroid = ComputeCentroid(points);
 
       // Perturb points dynamically
       for (auto& p : hull) {
           float scaleFactor = 0.5f + dist(gen); // Dynamic scaling
-          p = perturbPoint(p, centroid, -perturb_factor, scaleFactor);
+          p = perturbPoint(p, centroid, -params.perturb_factor, scaleFactor);
       }
       for (auto& p : points) {
           if (std::find(hull.begin(), hull.end(), p) == hull.end()) {
               float scaleFactor = 0.5f + dist(gen); // Dynamic scaling
-              p = perturbPoint(p, centroid, perturb_factor, scaleFactor);
+              p = perturbPoint(p, centroid, params.perturb_factor, scaleFactor);
           }
       }
       // Sort by polar angle from centroid
@@ -190,18 +189,18 @@ namespace Geom
       finalPolygon.push_back(points[0]);
       for (size_t i = 1; i < points.size(); i++) {
           auto dist = glm::distance(finalPolygon.back(), points[i]);
-          if (dist < min_edge || dist > max_edge) {
+          if (dist < params.min_edge || dist > params.max_edge) {
               continue;
           }
           if (finalPolygon.size() > 1) {
-              float angle = ComputeAngleInDegreesChatGPT(finalPolygon[finalPolygon.size() - 2], finalPolygon.back(), points
+              float angle = ComputeAngleInDegrees(finalPolygon[finalPolygon.size() - 2], finalPolygon.back(), points
               [i]);
               angle = 180 - std::abs(angle); // = interior (acute) angle subtended by the 3 consecutive points
               //SPG_TRACE("Angle: {} ", angle);
-              if (angle < min_angle) { 
+              if (angle < params.min_angle) { 
                   continue; //reject if angle too acute
               }
-              if( 180 - angle < min_angle)
+              if( 180 - angle < params.min_angle)
                 continue; //reject if angle too close to 180  
 
           }

@@ -14,7 +14,7 @@ namespace Geom
     Diagonal check:
       -The connecting line should not intersect with any other edges
       - If start vertex of the line has convex interior angle, then its 2 neighbours should lie on different sides of the connecting line
-      -If the start vertex of the line has a reflex interior angle, then it should not be an exterior line, which means its next neighbour should not be on the left of the connecting line, and previous neighbout should not be on the right of the connecting line.
+      -If the start vertex of the line has a reflex interior angle, then it should not be an exterior line, which means its next neighbour should not be on the left of the connecting line, and previous neighbour should not be on the right of the connecting line.
 
       -Do the same 2 checks on the end vertex
     

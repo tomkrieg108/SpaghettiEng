@@ -18,6 +18,10 @@ namespace Spg
     void SetIndexBuffer(const GLIndexBuffer& index_buffer);
 
     const std::vector<GLVertexBuffer>& GetVertexBuffers() const { return m_vertex_buffers; }
+    const GLVertexBuffer& GetVertexBuffer(uint32_t index = 0) const { 
+      SPG_ASSERT(index < m_vertex_buffers.size());
+      return m_vertex_buffers[index]; 
+    }
     const GLIndexBuffer& GetIndexBuffer() const { return m_index_buffer; }
     const uint32_t GetId() const { return m_id; }
 

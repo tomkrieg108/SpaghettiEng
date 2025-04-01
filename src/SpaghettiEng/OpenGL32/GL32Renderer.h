@@ -6,15 +6,16 @@
 
 namespace Spg
 {
-  enum class DrawMode
-  {
-    Triangles, Lines
-  };
-
   //Todo - future - derive this from a base Renderer class
   class GLRenderer
   {
   public:
+
+  enum class DrawMode
+  {
+    Triangle, Line, LineStrip, LineLoop, Point
+  };
+
     //Shader Uniform block definitions
     //TODO - maybe put in shader class or shader utils?
   struct CameraBlock
@@ -37,6 +38,7 @@ namespace Spg
 
     void Begin();
     void End();
+    void Draw(const GLVertexArray& vertex_array, const GLShader& shader, DrawMode draw_mode);
     void DrawLines(const GLVertexArray& vertex_array, const GLShader& shader);
     void DrawLineStrip(const GLVertexArray& vertex_array, const GLShader& shader);
     void DrawLineLoop(const GLVertexArray& vertex_array, const GLShader& shader);

@@ -6,33 +6,61 @@
 
 namespace Geom
 {
-  uint32_t Factorial( uint32_t number );
-
   /*
+    TESTED (Catch2)
     Returns signed area of triangle formed by points a,b,c. CCW otiented=> +ve, CW=> negative. Returns zero if colinear.  Check for equality with zero using Geom::Equal()
   */
   float ComputeSignedArea(const Point2d& a, const Point2d& b, const Point2d& c); 
 
   /*
-    Orientation of point c relative to a->b
+    TESTED (Catch2)
+    Orientation of point c relative to a->b.  Returns Origin when c==a, Destination when c==b, Between when c is colinear with a->b and strictly bwteen them, Beyond when c is colinear when a->b and strictly ahead, Behind when  c is colinear when a->b and strictly behind, Left with c is ledt of a->b, Right when c is right of a->b
   */
   RelativePos Orientation2d(const Point2d& a, const Point2d& b, const Point2d& c);
 
-   // Orientation of point p relative to line_seg
+   /*
+    TESTED (Catch2) - contains a single call:  Collinear(seg.start, seg.end, p)
+    Orientation of point p relative to line_seg (a->b).  Returns Origin when c==a, Destination when c==b, Between when c is colinear with a->b and strictly bwteen them, Beyond when c is colinear when a->b and strictly ahead, Behind when  c is colinear when a->b and strictly behind, Left with c is ledt of a->b, Right when c is right of a->b
+   */
   inline RelativePos Orientation2d(const LineSeg2D& line_seg, const Point2d& p)
   {
     return Orientation2d(line_seg.start, line_seg.end, p);
   }
 
+  bool Collinear(const glm::vec3& a, const glm::vec3& b);
+
+  bool Collinear(const Point3d& a, const Point3d& b, const Point3d& c);
+
   /*
-    Return true if point is strictly colinear with segs endpoints (does not coincide with either endpoint)
-    Same as calling Orientation2d(seg,p) == RelativePos::Between, but faster
+    TESTED (Catch2)
+    Returns true when a, b, c are collinear, or any points coincide
+  */
+  bool Collinear(const Point2d& a, const Point2d& b, const Point2d& c);
+
+  /*
+    TESTED (Catch2)
+    Returns true if point p is collinear with start or end point of seg
+  */
+  bool Collinear(const LineSeg2D& seg, const Point2d& p);
+
+  /*
+    Return true if point is collinear with segs endpoints, lies between the endpoints, does not coincide with either endpoint.
   */
   bool SegContainsPoint(const LineSeg2D& seg, Point2d p);
 
+  bool IsHorizontal(const LineSeg2D& seg);
+
+  bool IsVertical(const LineSeg2D& seg);
+
+
   /*
-    Return true if segs cross in their interior, or an endpoint of one seg is colinear with the other
-    Returns false if any endpoints coincident.
+    Return true if point is collinear with segs endpoints, lies between the endpoints, may coincide with either endpoint.
+  */
+  bool SegIncludesPoint(const LineSeg2D& seg, Point2d p);
+
+  /*
+    Return true if segs cross in their interior, or an endpoint of one seg is colinear with the other,
+    or any endpoints coincident.
   */
   bool IntersectionExists(const LineSeg2D& line_seg1, const LineSeg2D& line_seg2);
 
@@ -53,12 +81,7 @@ namespace Geom
 
   bool ComputeIntersection(const Plane& plane1, const Plane& plane2, Line3d& out_intersect_line);
 
-  /*
-    Note:
-    These angle functions give the angles between the vectors defined by the LineSegs, or defined by vectors AB, BC
-    This is different from the angle subtended by points A,B,C.  This subtended angle is: AngleSubtend = (180 - abs(Angle)) for the interior (accute) angle, or 360 - (AngleSubtend) = 180 + abs(Angle)
-  */
-
+ 
   template <uint32_t Dim, typename T>
   float AngleLines(const glm::vec<Dim, T>& v1, const  glm::vec < Dim, T>& v2)
   { //Assumes v1, v2 are normalised
@@ -67,14 +90,23 @@ namespace Geom
     return glm::degrees(theta);
   }
 
-  //Angle between seg1 -> seg2 always [0,180) 
-  float ComputeAngleInDegrees(const LineSeg2D& line_seg1, const LineSeg2D& line_seg2);
+  /*
+    TESTED (Catch2)
+    Angle in degrees between seg1 and seg2. Output range [-180,180].  Oriented CCW => positive.  Otherwise negative
+  */
+  float ComputeAngleInDegrees(const LineSeg2D& seg1, const LineSeg2D& seg2);
 
-  //Angle between a->b->c - same result as above - always [0,180)
+  /*
+    TESTED (Catch2)
+    Angle in degrees between vectors a->b, b->c. Output range [-180,180].  Oriented CCW => positive.  Otherwise negative.
+  */
   float ComputeAngleInDegrees(const Point2d& a, const Point2d& b, const Point2d& c);
 
-  //Angle between a->b->c, same as above except signed. i.e.  CCW=> [0,180), CW =>(-180,0]
-  float ComputeAngleInDegreesChatGPT(const Point2d& a, const Point2d& b, const Point2d& c);
+  /*
+    TESTED (Catch2)
+    Angle subtended by sides b->a (initial side) and b->c (terminal side).  i.e. the central angle at point b subtended by side a->c. Output range [0,180].
+  */
+  float ComputeSubtendedAngleInDegrees(const Point2d& a, const Point2d& b, const Point2d& c);
 
   float AngleLinePlaneInDegrees(const Line3d& line, const Plane& plane);
 
@@ -87,14 +119,6 @@ namespace Geom
   float AngleLines3D(const Line3d& l1, const Line3d& l2);
 
   Point2d ComputeCentroid(const std::vector<Point2d>& points);
-
-  bool Collinear(const glm::vec3& a, const glm::vec3& b);
-
-  bool Collinear(const Point3d& a, const Point3d& b, const Point3d& c);
-
-  bool Collinear(const glm::vec2& a, const glm::vec2& b);
-
-  bool Collinear(const Point2d& a, const Point2d& b, const Point2d& c);
 
   bool Coplanar(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c);
 
@@ -138,11 +162,6 @@ namespace Geom
   inline bool IsConvex(const Point2d& a, const Point2d& b, const Point2d& c)
   {
     return Left({a,b},c);
-  }
-
-  inline float CrossProduct2D(glm::vec2 v1, glm::vec3 v2)
-  {
-    return v1.x * v2.y - v1.y * v2.x;
   }
 
   inline float ScalarTripleProduct(glm::vec3 a, glm::vec3 b, glm::vec3 c)

@@ -5,21 +5,18 @@
 
 namespace Geom
 {
-
-  uint32_t Factorial( uint32_t number ) {
-    return number <= 1 ? 1 : Factorial(number-1) * number;
-  }
+  constexpr float pi_reciprical = 1/std::numbers::pi;
 
   float ComputeSignedArea(const Point2d& a, const Point2d& b, const Point2d& c)
   {
-    //Det()*0.5.  
+    //returns Det(a->b, a->c)*0.5.  
     return 0.5f * ((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y));
   }
 
   RelativePos Orientation2d(const Point2d& a, const Point2d& b, const Point2d& c)
   { //Vid 10
     float area = ComputeSignedArea(a, b, c);
-    if(Geom::Equal(area,0.0f))  
+    if(Geom::Equal(area,0.0f,1000.0f))  
       area = 0.0f;
 
     if (area > 0.0f) //CCW orientation
@@ -41,13 +38,44 @@ namespace Geom
     return RelativePos::Between;
   }
 
+  bool Collinear(const Point2d& a, const Point2d& b, const Point2d& c)
+  {
+    float det = ((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)); //det(a->b, a->c)
+    return Geom::Equal(det*0.5f,0);
+  }
+
+  bool Collinear(const LineSeg2D& seg, const Point2d& p)
+  {
+    return Collinear(seg.start, seg.end, p);
+  }
+
+   bool Collinear(const glm::vec3& a, const glm::vec3& b)
+  { //Vid 17
+    //checking that a.x/b.x = a.y/b.y = a.x=z/b.z
+    auto v1 = a.x * b.y - a.y * b.x;
+    auto v2 = a.y * b.z - a.z * b.y;
+    auto v3 = a.x * b.z - a.z * b.x;
+    return Equal(v1, 0) && Equal(v2, 0) && Equal(v3, 0);
+  }
+
+  bool Collinear(const Point3d& a, const Point3d& b, const Point3d& c)
+  { //Vid 17
+    auto AB = b - a;
+    auto AC = c - a;
+    return Collinear(AB, AC);
+  }
+
   bool SegContainsPoint(const LineSeg2D& seg, Point2d p)
   {
-    if(Geom::Equal(seg.start.x, seg.end.x)) //Vertical seg
-      return ((p.y > std::min(seg.start.y, seg.end.y)) && (p.y < std::max(seg.start.y, seg.end.y)));
+    if(Geom::Equal(seg.start.x, seg.end.x)) {//Vertical seg
+      if ((p.y > std::min(seg.start.y, seg.end.y)) && (p.y < std::max(seg.start.y, seg.end.y)));
+        return Geom::Collinear(seg.start, seg.end, p);
+    }
     
-    if(Geom::Equal(seg.start.y, seg.end.y))  //Horizontal seg
-      return ( (p.x > std::min(seg.start.x, seg.end.x)) && (p.x < std::max(seg.start.x, seg.end.x)));
+    if(Geom::Equal(seg.start.y, seg.end.y)) { //Horizontal seg
+      if ( (p.x > std::min(seg.start.x, seg.end.x)) && (p.x < std::max(seg.start.x, seg.end.x)));
+        return Geom::Collinear(seg.start, seg.end, p);
+    }
     
     if( (p.x > std::min(seg.start.x, seg.end.x)) && (p.x < std::max(seg.start.x, seg.end.x)) &&
         (p.y > std::min(seg.start.y, seg.end.y)) && (p.y < std::max(seg.start.y, seg.end.y)) )
@@ -57,12 +85,39 @@ namespace Geom
     return false;  
   }
 
+  bool SegIncludesPoint(const LineSeg2D& seg, Point2d p)
+  {
+    if(Geom::Equal(seg.start, p))
+      return true;
+    if(Geom::Equal(seg.end, p))
+      return true;  
+    return SegContainsPoint(seg,p);
+  }
+
+  bool IsHorizontal(const LineSeg2D& seg) {
+    return Geom::Equal(seg.start.y, seg.end.y);
+  }
+
+  bool IsVertical(const LineSeg2D& seg) {
+    return Geom::Equal(seg.start.x, seg.end.x);
+  }
+
+  //Todo - more testing needed!
   bool IntersectionExists(const LineSeg2D& line_seg1, const LineSeg2D& line_seg2)
   { //Vid 14
     Point2d a = line_seg1.start;
     Point2d b = line_seg1.end;
     Point2d c = line_seg2.start;
     Point2d d = line_seg2.end;
+
+    // if(SegIncludesPoint(line_seg1, line_seg2.start))
+    //   return true;  
+    // if(SegIncludesPoint(line_seg1, line_seg2.end))
+    //   return true;   
+    // if(SegIncludesPoint(line_seg2, line_seg1.start))
+    //   return true;   
+    // if(SegIncludesPoint(line_seg2, line_seg2.end))
+    //   return true;   
 
     if (   Orientation2d(line_seg1, c) == RelativePos::Between
         || Orientation2d(line_seg1, d) == RelativePos::Between
@@ -71,6 +126,7 @@ namespace Geom
     {
       return true;
     }
+
     return  Xor(Left(line_seg1, c), Left(line_seg1, d)) &&
             Xor(Left(line_seg2, a), Left(line_seg2, b));
   }
@@ -154,29 +210,49 @@ namespace Geom
     return true;
   }
 
-  float ComputeAngleInDegrees(const LineSeg2D& line_seg1, const LineSeg2D& line_seg2)
+  float ComputeAngleInDegrees(const LineSeg2D& seg1, const LineSeg2D& seg2)
   {
-    const float dot =  glm::dot(line_seg1.dir_vec, line_seg2.dir_vec);
-    const auto theta = glm::acos(dot); //[0,PI)
-    return glm::degrees(theta);
+    /*
+      NOTE:
+      area of parallelogram = |det(u,v)|
+      area of parallelogram = base * height = |u|*|h| => |h| = |det(u,v)| /|u|
+      tan(angle) = |h| / proj(v onto u) = det(u,v) / dot(u,v)
+
+      u->v oriented CCW => det(u,v) > 0
+      u->v oriented CW =>  det(u,v) < 0
+      angle(u,v) acute => dot(u,v) > 0
+      angle(u,v) obtuse => dot(u,v) < 0
+      std::atan2() uses the above to return quadrant
+      return value [-pi,pi] radians
+
+      This method is much faster than (which needs sq roots)
+        auto ab = glm::normalize(b-a);
+        auto bc = glm::normalize(c-b);
+        const auto dot = glm::dot(ab, bc);
+        const auto angle = glm::acos(dot);
+        return glm::degrees(angle);
+    */
+
+    glm::vec2 u = seg1.end - seg1.start;
+    glm::vec2 v = seg2.end - seg2.start;
+    float dot = u.x * v.x + u.y * v.y;
+    float det = u.x * v.y - u.y * v.x;
+    if(det == -0)
+      det = 0;
+    return std::atan2(det, dot) * 180.0f * pi_reciprical;
   }
 
   float ComputeAngleInDegrees(const Point2d& a, const Point2d& b, const Point2d& c)
   {
-    auto ab = glm::normalize(b-a);
-    auto bc = glm::normalize(c-b);
-    const auto dot = glm::dot(ab, bc);
-    const auto angle = glm::acos(dot);
-    return glm::degrees(angle);
+    LineSeg2D seg1{a,b}, seg2{b,c};
+    return ComputeAngleInDegrees(seg1,seg2);
   }
 
-  float ComputeAngleInDegreesChatGPT(const Point2d& a, const Point2d& b, const Point2d& c)
+  float ComputeSubtendedAngleInDegrees(const Point2d& a, const Point2d& b, const Point2d& c)
   {
-    float abx = b.x - a.x, aby = b.y - a.y;
-    float bcx = c.x - b.x, bcy = c.y - b.y;
-    float dot = abx * bcx + aby * bcy;
-    float det = abx * bcy - aby * bcx;
-    return std::atan2(det, dot) * 180.0f / std::numbers::pi;
+    float angle = ComputeAngleInDegrees(a,b,c); 
+    angle = (angle < 0 ? -angle : angle); //output range [0,180]
+    return 180 - angle; //subtended angle is complementary angle.
   }
 
   float AngleLinePlaneInDegrees(const Line3d& line, const Plane& plane)
@@ -213,31 +289,7 @@ namespace Geom
     return centroid;
   }
 
-  bool Collinear(const glm::vec3& a, const glm::vec3& b)
-  { //Vid 17
-    //checking that a.x/b.x = a.y/b.y = a.x=z/b.z
-    auto v1 = a.x * b.y - a.y * b.x;
-    auto v2 = a.y * b.z - a.z * b.y;
-    auto v3 = a.x * b.z - a.z * b.x;
-    return Equal(v1, 0) && Equal(v2, 0) && Equal(v3, 0);
-  }
-
-  bool Collinear(const Point3d& a, const Point3d& b, const Point3d& c)
-  { //Vid 17
-    auto AB = b - a;
-    auto AC = c - a;
-    return Collinear(AB, AC);
-  }
-
-  bool Collinear(const glm::vec2& a, const glm::vec2& b)
-  {
-    return Equal(a.x * b.y, a.y*b.x);
-  }
-
-  bool Collinear(const Point2d& a, const Point2d& b, const Point2d& c)
-  {
-    return Collinear(b-a, c-a);
-  }
+ 
 
   bool Coplanar(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
   { //Vid 17

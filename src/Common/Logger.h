@@ -48,6 +48,7 @@ inline OStream& operator<<(OStream& os, glm::qua<T, Q> quaternion)
 	#define SPG_WARN(...)  {Utils::Logger::Initialise();   Utils::Logger::GetDefault()->warn(__VA_ARGS__);}
 	#define SPG_ERROR(...)  {Utils::Logger::Initialise();  Utils::Logger::GetDefault()->error(__VA_ARGS__);}
 	#define SPG_CRITICAL(...) {Utils::Logger::Initialise(); Utils::Logger::GetDefault()->critical(__VA_ARGS__);}
+	#define SPG_LOG_FLUSH {Utils::Logger::GetDefault()->flush();}
 
 	#define LOG_TRACE(logger, ...) \
 		{static_assert(std::is_same_v<decltype(logger), Utils::SpdLogger>); logger->trace(__VA_ARGS__);}

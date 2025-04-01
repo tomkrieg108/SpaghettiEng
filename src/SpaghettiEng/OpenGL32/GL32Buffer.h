@@ -13,6 +13,9 @@ namespace Spg
       GLVertexBuffer(void* const data, uint32_t size, const BufferLayout& layout);
       ~GLVertexBuffer();
 
+      void UpdateData(int32_t offset_bytes, uint32_t data_size_bytes, const void* data) const;
+      void UpdateVertexData(uint32_t vertex_index, uint32_t vertex_size_bytes, const void* data) const;
+
       void Bind() const;
       void Unbind() const;
       void Release();

@@ -8,6 +8,7 @@
 #include "Triangulate.h"
 #include "BST.h"
 #include "IntersectionSet.h"
+#include "DCEL.h"
 
 namespace Geom
 {

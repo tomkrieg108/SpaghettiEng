@@ -47,14 +47,35 @@ cpmaddpackage(
   GIT_TAG 1.0.1
 )
 
+#Add zlib - need for FreeType
+# CPMAddPackage(
+#     NAME zlib
+#     GITHUB_REPOSITORY madler/zlib
+#     GIT_TAG v1.2.11  # Replace with the latest stable tag
+# )
+
+#Add libpng - need for FreeType
+# CPMAddPackage(
+#     NAME libpng
+#     GITHUB_REPOSITORY glennrp/libpng
+#     GIT_TAG v1.6.37  # Replace with the latest stable tag
+# )
+
+#Add FreeType
+CPMAddPackage(
+    NAME freetype
+    GITHUB_REPOSITORY freetype/freetype
+    GIT_TAG VER-2-13-3  # Replace with the latest stable tag
+    # GIT_REPOSITORY "https://github.com/aseprite/freetype-cmake.git"
+    # GIT_TAG VER-2-13-3
+)
+
 if(ENABLE_TESTING)
   cpmaddpackage(
     NAME catch2
     GITHUB_REPOSITORY catchorg/catch2
     GIT_TAG v3.8.0
   )
-  #causes cmake error?
-  #list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 endif()
 
 
@@ -149,6 +170,34 @@ else()
   message(STATUS CMAKE_SYSTEM_PROCESSOR) 
 endif()
 
+
+
+target_precompile_headers(${LIB_COMMON} PRIVATE 
+  <cstdint>
+  <cmath>
+  <string>
+  <string_view>
+  <vector>
+  <random>
+  <algorithm>
+  <numbers>
+  <random>
+)
+
+target_precompile_headers(${LIB_GEOM} PRIVATE 
+  <cstdint>
+  <cmath>
+  <string>
+  <string_view>
+  <vector>
+  <random>
+  <algorithm>
+  <numbers>
+)
+
+
+
+
 target_precompile_headers(${LIB_ENG} PRIVATE 
   <cstdint>
   <cmath>
@@ -169,16 +218,7 @@ target_precompile_headers(${LIB_ENG} PRIVATE
   <numbers>
 )
 
-target_precompile_headers(${LIB_GEOM} PRIVATE 
-  <cstdint>
-  <cmath>
-  <string>
-  <string_view>
-  <vector>
-  <random>
-  <algorithm>
-  <numbers>
-)
+
 
 target_precompile_headers(${APP} PRIVATE 
   <cstdint>

@@ -148,6 +148,9 @@ namespace Geom
       poly->Split(vertex.vert, ej->helper.vert);
       ej->helper = vertex;
     }
+    else {
+      int wtf = 1;
+    }
     sweep_line.insert(edge);
     edge_mapper.insert(std::pair<DCEL::Edge*, DCELEdgeWrapper*>(vertex.vert->incident_edge, edge));
   }

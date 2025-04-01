@@ -1,20 +1,41 @@
 #pragma once
-#include "GeomBase.h"
+#include "GeomUtils.h"
 #include "Line.h"
 #include <vector>
+#include <Common/Common.h>
 #include <set>
 #include <map>
+#include <variant>
+#include <iostream>
 
-//https://copilot.microsoft.com/chats/4vj5Cni1Tz4j2oQt6sqLh
+ /*
+  Comparators must have 'Strict week ordering'
+  1. Irreflexivity: comp(a,a) == false  
+  2. Asymmetry: if comp(a,b) == true then comp(b,a) == false
+  3. Transivity: if comp(a, b) && comp(b, c) then comp(a, c) == true
+  4. Transivity of equivalence: if !comp(a, b) && !comp(b, a)  and  !comp(b, c) && !comp(c, b)
+    then !comp(a, c) && !comp(c, a)
 
-//https://copilot.microsoft.com/shares/qWy8WdJVqsSxLmmQek3uC
+   ChatGPT:
+        For std::set:
+        Since std::set requires unique elements based on the comparator, if comp(existing, val) == false and comp(val, existing) == false, then val is considered a duplicate and will not be inserted.
+
+        Comp(v1,v2) == true, v1 goes before v2.  Comp(v1,v1) == true implies an invalid comparator
+        Comp(v1,v2) == false v1 does not go before v2. 
+        
+        For a std::set<T, Compare>, the comparator is called as:
+        comp(existing_element, val);
+        If comp(existing, val) == true, then val is considered to go after existing, so it continues checking other elements.
+        If no existing element is considered equivalent to val, it will be inserted.
+        If comp(existing, val) == false and comp(val, existing) == false, then val is considered equivalent to existing, and std::set does not insert it.  
+*/
 
 namespace Geom
 {
   namespace ItersectSet
   {
     /*
-      Bentley-Ottmann - Line intersection 
+      Bentley-Ottmann - Line intersection algorithm. Comp Geom book, sec 2.1
     */
     
     using SegList = std::vector<LineSeg2D>;
@@ -31,7 +52,6 @@ namespace Geom
       void Insert(LineSeg2D seg) {
         seg_list.push_back(seg);
       }
-
       void Print();
 
       Point2d point;
@@ -40,7 +60,6 @@ namespace Geom
 
     struct EventComparator
     {
-      //Todo.  This can be a lambda
       bool operator ()(const Event& e1,  const Event& e2) const noexcept
       {
         if( !Geom::Equal(e1.point.y,e2.point.y))
@@ -68,75 +87,113 @@ namespace Geom
         std::set<Event, EventComparator> m_data;
     };
 
-    struct LineSeg2dComparator
+    struct ComparatorLogger
     {
-      //Need this, but the specific ordering shouldn't matter
-      //Todo.  This can be a lambda
-      //Todo - use std::tie() for this
+      struct ComparisonRecord
+      {
+        LineSeg2D seg1;
+        LineSeg2D seg2;
+        Point2d event_point;
+        bool result;
+        int tag;
+      };
+      struct PreInsertionRecord
+      {
+        LineSeg2D seg;
+      };
+       struct PostInsertionRecord
+      {
+        LineSeg2D seg;
+        bool success;
+        int32_t size_change=0;
+      };
+      struct PreDeletionRecord
+      {
+        LineSeg2D seg;
+      };
+      struct PostDeletionRecord
+      {
+        LineSeg2D seg;
+        bool success;
+        int32_t size_change=0;
+      };
+
+      using Record = std::variant<ComparisonRecord,PreInsertionRecord,PostInsertionRecord,PreDeletionRecord,PostDeletionRecord>;
+
+      void Log(const LineSeg2D& seg1, const LineSeg2D& seg2, const Point2d& event_point, bool result, int tag) {
+        ComparisonRecord record{seg1,seg2,event_point,result,tag};
+        m_data.push_back(record);
+      }
+
+      void Log(Record record) {
+        m_data.push_back(record);
+      }
+      void Print();
+
+      std::vector<Record> m_data;
+    };  
+
+    struct SegComparator
+    {
       bool operator ()(const LineSeg2D& seg1,  const LineSeg2D& seg2) const noexcept
-      { 
-        if(!Geom::Equal(seg1.start.y, seg2.start.y))
-          return seg1.start.y > seg2.start.y;
-        else if (!Geom::Equal(seg1.start.x, seg2.start.x))  
+      {
+        if(!Equal(seg1.start.x,seg2.start.x))
           return seg1.start.x < seg2.start.x;
-        if(!Geom::Equal(seg1.end.y, seg2.end.y))
-          return seg1.end.y > seg2.end.y;  
-        else
+        else if(!Equal(seg1.start.y,seg2.start.y))  
+          return seg1.start.y > seg2.start.y;
+        else if(!Equal(seg1.end.x,seg2.end.x))
           return seg1.end.x < seg2.end.x;  
+        else
+          return seg1.end.y > seg2.end.y;     
+      }
+    };
+
+    struct SegEqualityChecker
+    {
+      LineSeg2D target;
+      explicit SegEqualityChecker(LineSeg2D& target) : target{target} {}
+      bool operator ()(const LineSeg2D& seg) const
+      {
+        if(!Equal(seg.start.x,target.start.x))
+          return false;
+        else if(!Equal(seg.start.y,target.start.y))  
+          return false;
+        else if(!Equal(seg.end.x,target.end.x))
+          return false;
+        else if(!Equal(seg.end.y,target.end.y))
+          return false;
+        return true;  
       }
     };
 
     struct SweepLineComparator
     {
-      float& y_sweep;
-      float x_limit = FLT_MAX;
+      Point2d& event_point;
+      SweepLineComparator(Point2d& event_point_) : event_point{event_point_} {}
+      SweepLineComparator(Point2d& event_point_, ComparatorLogger* logger) : 
+        event_point{event_point_}, m_logger{logger} {}
 
-      SweepLineComparator(float& y_sweep_) : y_sweep{y_sweep_} {}
-      SweepLineComparator(float& y_sweep_, float x_limit_) : y_sweep{y_sweep_}, x_limit{x_limit_} {}
+      float ComputeSweepLineXIntercept(const LineSeg2D& seg) const noexcept;
+      bool operator ()(const LineSeg2D& seg1,  const LineSeg2D& seg2) const noexcept;
 
-      float ComputeSweepLineXIntercept(const LineSeg2D& seg) const noexcept
-      {
-        float y = y_sweep;
-        if(Geom::Equal(seg.start.y, y))
-          return seg.start.x;
-      
-        if(Geom::Equal(seg.end.y, y))
-          return seg.end.x;
-
-        if(Geom::Equal(seg.start.x, seg.end.x))  
-          return seg.start.x;
-
-        if(Geom::Equal(seg.start.y, seg.end.y))  
-          return seg.start.x;
-
-        float x = (seg.start.x - seg.end.x) / (seg.start.y - seg.end.y) *(y - seg.end.y) + seg.end.x;
-        return x;
-      }
-
-      bool operator ()(const LineSeg2D& seg1,  const LineSeg2D& seg2) const noexcept
-      { 
-        float x1 = ComputeSweepLineXIntercept(seg1);
-        float x2 = ComputeSweepLineXIntercept(seg2);
-        //Todo - what to do if the 2 segs yield the same x-intercept.
-        //todo - revisit this second constraint w.r.t. 'strict weak ordering'
-        return (x1 < x2) && (x2 < x_limit);
-      }
+      ComparatorLogger* m_logger = nullptr;
+      void SetComparatorLogger(ComparatorLogger* logger) {m_logger = logger;}
     };
 
     class StatusStructure
     {
       public:
 
-        StatusStructure() : m_T(SweepLineComparator(m_y_sweep)) {}
+        StatusStructure() : m_T(SweepLineComparator(m_cur_event_point, &m_comparator_log)) {}
 
-        void Update(const Event& e);
+        void FindNewActiveSegCandidates(const Event& e);
+        auto FindSegsInTContainingPoint(const Point2d& p);
       
-        auto LeftAndRightNeighbour(Point2d p);
-        auto LeftMost_UC_In_T(Point2d p);
-        auto RightMost_UC_In_T(Point2d p);
+        auto LeftAndRightNeighbour(const Event& e);
+        auto LeftMost_UC_In_T(const Event& e);
+        auto RightMost_UC_In_T(const Event& e);
 
-        void Delete_LC();
-        void Insert_UC();
+        void UpdateActiveSegs(const Event& e);
 
         SegList& Get_LUC() {return m_union_LUC;}
         SegList& Get_LC() {return m_union_LC;}
@@ -148,20 +205,31 @@ namespace Geom
         auto rend() {return m_T.rend();}
 
         float SweepLineY() const {
-          return m_sweep_delta_applied ? m_y_sweep + s_sweep_delta : m_y_sweep;
+          return m_cur_event_point.y;
+        }
+        ComparatorLogger& GetComparatorLogger() {
+          return m_comparator_log;
+        }
+        void PrintComparatorLog() {
+          m_comparator_log.Print();
         }
 
-        void Print();
+        void PrintStatusStructure();
+        void PrintUnionUC(const Point2d& p);
+        void PrintStatusStructureSubset(std::set<LineSeg2D, SweepLineComparator>::iterator first,
+         std::set<LineSeg2D, SweepLineComparator>::iterator last, const Point2d& p);
 
-        static const float s_sweep_delta; //Amount to lower sweep line to enforce order swap for intersecting segs
+        void PrintActiveSegList(); 
+
+       static const float s_sweep_delta; //Amount to lower sweep line to force order swap for intersecting segs  
 
       private:
-        float m_y_sweep = FLT_MAX;
-        bool m_sweep_delta_applied = false;
-        std::set<LineSeg2D, SweepLineComparator> m_T; //set for sweep line status structure
+        Point2d m_cur_event_point{FLT_MAX,FLT_MAX};
+        std::set<LineSeg2D, SweepLineComparator> m_T; //ordered set of active segs. i.e. 'Status Structure'
         SegList m_union_LUC, m_union_LC, m_union_UC;
+        ComparatorLogger m_comparator_log;
+        SegList m_active_segs;
     };
-    
     
     struct Intersection
     {
@@ -175,17 +243,15 @@ namespace Geom
         IntersectionSet() = default;
         IntersectionSet(const SegList& seg_list);
         void Process();  
-        void Print();
+        void PrintIntersections();
       private:
         void HandleEvent(const Event& e);
         void FindNewEvent(const LineSeg2D& seg1, const LineSeg2D& seg2, Point2d p);
-        
       private:
         Queue m_queue;
         StatusStructure m_status;
         std::vector<Intersection> m_intersections;
     };
-
 
   }
 }

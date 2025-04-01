@@ -3,13 +3,15 @@
 
 namespace Spg
 {
+  using DrawMode = GLRenderer::DrawMode;
+
   GLRenderer::GLRenderer()
   {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS); 
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glPointSize(8.0f); //can be at least 64.0
+    glPointSize(12.0f); //can be at least 64.0
 
     //glEnable(GL_BLEND); 
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -27,6 +29,29 @@ namespace Spg
   void GLRenderer::End()
   {
 
+  }
+
+  static GLenum GetGLDrawPrimitive(DrawMode draw_mode)
+  {
+    switch (draw_mode) {
+      case DrawMode::Triangle : return GL_TRIANGLES;
+      case DrawMode::Line : return GL_LINES;
+      case DrawMode::LineLoop : return GL_LINE_LOOP;
+      case DrawMode::LineStrip : return GL_LINE_STRIP;
+      case DrawMode::Point : return GL_POINTS;
+      default: return GL_LINES;
+    }
+  }
+
+  void GLRenderer::Draw(const GLVertexArray& vertex_array, const GLShader& shader, DrawMode draw_mode)
+  {
+    shader.Bind();
+    vertex_array.Bind();
+    auto& vbo = vertex_array.GetVertexBuffer();
+    auto primitive = GetGLDrawPrimitive(draw_mode);
+    glDrawArrays(primitive, 0, vbo.GetVertexCount());
+    vertex_array.Unbind();
+    shader.Unbind();
   }
 
   void GLRenderer::DrawLines(const GLVertexArray& vertex_array, const GLShader& shader)

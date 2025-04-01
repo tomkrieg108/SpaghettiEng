@@ -36,6 +36,22 @@ namespace Spg
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
+  void GLVertexBuffer::UpdateData(int32_t offset_bytes, uint32_t data_size_bytes, const void* data) const
+  {
+    SPG_ASSERT(offset_bytes + data_size_bytes <= m_vertex_count*m_layout.GetStride());
+    glBindBuffer(GL_ARRAY_BUFFER, m_id);
+    glBufferSubData(GL_ARRAY_BUFFER,offset_bytes,data_size_bytes,data);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
+  void GLVertexBuffer::UpdateVertexData(uint32_t vertex_index, uint32_t vertex_size_bytes, const void* data) const
+  {
+    SPG_ASSERT(vertex_index < m_vertex_count);
+    auto stride = m_layout.GetStride();
+    SPG_ASSERT(vertex_size_bytes % stride == 0);
+    UpdateData(vertex_index*stride, vertex_size_bytes, data);
+  }
+
 //---------------------------------------------------
 
   GLIndexBuffer::GLIndexBuffer(uint32_t* indices, uint32_t count)
