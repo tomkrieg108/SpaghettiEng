@@ -535,7 +535,6 @@ namespace Geom
     {
       DCEL_HalfEdge*  half_edge = GetDepartingEdge(e.vertex);
       SPG_ASSERT(half_edge != nullptr);
-      //const auto [it, success] = m_T.insert(std::make_pair(*half_edge, e));
       const auto [it, success] = m_T.insert({*half_edge, e});
       SPG_ASSERT(success);
     }
@@ -560,26 +559,24 @@ namespace Geom
     {
       //Search m_T to find edge directly left of e.vertex
       SPG_ASSERT(m_T.size() > 0);
-      //returns first element not less than (i.e. >=) dummy_edge
       DCEL_HalfEdge*  cur_edge = GetDepartingEdge(e.vertex);
-      auto itr = m_T.lower_bound(*cur_edge); 
-
-      SPG_ASSERT(itr != m_T.begin()); //todo - this triggers occasionally
-      //if(itr != m_T.begin()) 
-      { //it this is omitted when itr == m_T.begin(), then in HandleEndVertex() above, SPG_ASSERT(itr != m_T.end()); triggers!
-        itr = std::prev(itr); //theoretically points to element directly left of e.vertex in m_T
-        HelperPoint helper = itr->second;
-        //Insert diagonal connecting e.vertex to event_point.helper_vertex
-        SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
-        m_diagonals.push_back({e.vertex, helper.vertex});
-        //helper(ej -> vi)
-        auto [it, inserted] = m_T.insert_or_assign(itr->first,e);
-        SPG_ASSERT(!inserted); //Should have been assigned, not inserted
+      //Get first element not less than (i.e. >=) key. If no such element found, return end()
+      auto itr = m_T.lower_bound(*cur_edge);   
+      //Should never return begin(), even if there is only 1 element in m_T.  It may return end(), in which case prev(itr) should be valid (i.e. the last element in m_T).  We've already checked that m_T has at least 1 element
+      SPG_ASSERT(itr != m_T.begin()); 
+      itr = std::prev(itr); //theoretically points to edge directly left of e.vertex in m_T
+      HelperPoint helper = itr->second;
+      //Insert diagonal connecting e.vertex to event_point.helper_vertex
+      SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+      m_diagonals.push_back({e.vertex, helper.vertex});
+      //helper(ej -> vi)
+      auto [it, inserted] = m_T.insert_or_assign(itr->first,e);
+      SPG_ASSERT(!inserted); //Should have been assigned, not inserted
+      { //insert e_i into T, helper e_i -> v_i
+        DCEL_HalfEdge*  half_edge = GetDepartingEdge(e.vertex);
+        auto [it, success] = m_T.insert({*half_edge, e});
+        SPG_ASSERT(success);
       }
-      //insert e_i into T, helper e_i -> v_i
-      DCEL_HalfEdge*  half_edge = GetDepartingEdge(e.vertex);
-      auto [it, success] = m_T.insert({*half_edge, e});
-      SPG_ASSERT(success);
     }
 
     void MonotoneSpawner5000::HandleMergeVertex(const Event& e)
@@ -589,19 +586,19 @@ namespace Geom
       SPG_ASSERT(half_edge != nullptr);
       SPG_ASSERT(half_edge->prev != nullptr);
       auto itr = m_T.find(*(half_edge->prev));
-      SPG_ASSERT(itr != m_T.end()); //todo - has triggered
+      SPG_ASSERT(itr != m_T.end()); 
+      
       HelperPoint helper = itr->second; 
       if(helper.vertex_category == VertexCategory::Merge) {
         SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
         m_diagonals.push_back({e.vertex, helper.vertex});
       }
       //delete e-1 from T
-      m_T.erase(itr); //return itr to element following removed element
+      m_T.erase(itr); 
 
       //Search m_T to find edge directly left of e.vertex
       DCEL_HalfEdge*  cur_edge = GetDepartingEdge(e.vertex);
       itr = m_T.lower_bound(*cur_edge); 
-
       SPG_ASSERT(itr != m_T.begin());
       itr = std::prev(itr); //theoretically points to element left of e.vertex in m_T
       helper = itr->second;
@@ -609,11 +606,9 @@ namespace Geom
         SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
         m_diagonals.push_back({e.vertex, helper.vertex});
       }
-
       //helper(ej <-vi)
-      m_T[itr->first] = e;
       const auto [it, inserted] = m_T.insert_or_assign(itr->first,e);
-      SPG_ASSERT(!inserted); //Should have been assigned, not insertet
+      SPG_ASSERT(!inserted); //Should have been assigned, not inserted. 
     }
 
     void MonotoneSpawner5000::HandleRegularVertex(const Event& e)
@@ -624,7 +619,8 @@ namespace Geom
         SPG_ASSERT(half_edge != nullptr);
         SPG_ASSERT(half_edge->prev != nullptr);
         auto itr_e_prev = m_T.find(*(half_edge->prev));
-        SPG_ASSERT(itr_e_prev != m_T.end());
+        SPG_ASSERT(itr_e_prev != m_T.end()); 
+        
         HelperPoint helper_e_prev = itr_e_prev->second; 
         if(helper_e_prev.vertex_category == VertexCategory::Merge) {
           SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper_e_prev.vertex).is_valid);
@@ -638,19 +634,19 @@ namespace Geom
         //search in T to find e_j directly left of v_i
         DCEL_HalfEdge*  cur_edge = GetDepartingEdge(e.vertex);
         auto itr = m_T.lower_bound(*cur_edge); 
-
         SPG_ASSERT(itr != m_T.begin());
         itr = std::prev(itr); //theoretically points to element left of e.vertex in m_T
         auto helper = itr->second;
         if(helper.vertex_category == VertexCategory::Merge) {
-          //todo - occasionally get debug assertion fail here
           SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
           m_diagonals.push_back({e.vertex, helper.vertex});
         }
+        //helper(ej <- vi)
+        const auto [it, inserted] = m_T.insert_or_assign(itr->first,e);
+        SPG_ASSERT(!inserted); //Should have been assigned, not inserted
       }
     }
 
-    
     DCEL_HalfEdge* MonotoneSpawner5000::GetDepartingEdge(DCEL_vertex* v)
     {
       auto half_edges = m_polygon.GetDepartingEdges(v);
@@ -673,9 +669,22 @@ namespace Geom
     }
 
     //Debug logging
+    std::string GetCategoryString(VertexCategory category) 
+    {
+      switch(category) {
+        case VertexCategory::Start  : return "Start";
+        case VertexCategory::End    : return "End";
+        case VertexCategory::Merge  : return "Merge";
+        case VertexCategory::Split  : return "Split";
+        case VertexCategory::Regular: return "Regular";
+        default: return "Invalid";
+      }
+    }
+
     void MonotoneSpawner5000::PrintEvent(Event e)
     {
-      SPG_WARN("Next Event: {}: ({},{}) ----------------", e.tag, e.vertex->point.x,  e.vertex->point.y);
+      auto cat_str = GetCategoryString(e.vertex_category);
+      SPG_WARN("Next Event: {}: ({},{}) - {} ----------------", e.tag, e.vertex->point.x,  e.vertex->point.y, cat_str);
     }
 
     void MonotoneSpawner5000::PrintStatusStucture()

@@ -1,8 +1,8 @@
 #pragma once
 
-
 #include <Common/Common.h>
 #include <glad/gl.h>    //need to include before <GLFW/glfw3.h>
+
 #include "SpaghettiEng/Core/Application.h"
 #include "SpaghettiEng/Core/Window.h"
 #include "SpaghettiEng/Core/KeyCodes.h"
@@ -18,6 +18,5 @@
 #include "SpaghettiEng/OpenGL32/GL32Buffer.h"
 #include "SpaghettiEng/OpenGL32/GL32VertexArray.h"
 #include "SpaghettiEng/OpenGL32/GL32Shader.h"
-
-
-
+#include <SpaghettiEng/OpenGL32/GL32Renderer.h>
+#include <SpaghettiEng/OpenGL32/GL32TextRenderer.h>

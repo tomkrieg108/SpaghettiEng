@@ -13,9 +13,10 @@ namespace Spg
     glEnable(GL_PROGRAM_POINT_SIZE);
     glPointSize(12.0f); //can be at least 64.0
 
-    //glEnable(GL_BLEND); 
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND); 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //glEnable(GL_CULL_FACE);
+
     //glCullFace(GL_BACK);
     //glFrontFace(GL_CW);	//or GL_CCW     
   }

@@ -10,6 +10,8 @@
 #include "Logger.h"
 #include "LibCheck.h"
 
+
+
 namespace Utils
 {
   namespace fs = std::filesystem;
@@ -46,6 +48,7 @@ namespace Utils
     std::cout << "SPDLOG:" << SPDLOG_VER_MAJOR << "." << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << "\n";
 
     LOG_WARN(logger, "SPDLOG: {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
+
     LOG_WARN(logger, "That's all the external libs!");
 
     fs::path current_path = fs::current_path();

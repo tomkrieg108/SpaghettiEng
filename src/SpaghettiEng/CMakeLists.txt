@@ -15,6 +15,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./OpenGL32/GL32Buffer.cpp"
   "./OpenGL32/GL32VertexArray.cpp"
   "./OpenGL32/GL32Renderer.cpp"
+  "./OpenGL32/GL32TextRenderer.cpp"
   "./Camera/Camera2D.cpp"
   "./Camera/CameraController2D.cpp"
   )
@@ -38,6 +39,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./OpenGL32/GL32VertexArray.h"
   "./OpenGL32/GL32BufferLayout.h"
   "./OpenGL32/GL32Renderer.h"
+   "./OpenGL32/GL32TextRenderer.h"
   "./Camera/Camera2D.h"
   "./Camera/CameraController2D.h"
 )
@@ -59,8 +61,7 @@ target_link_libraries(${LIB_ENG} PUBLIC OpenGL::GL)
 target_link_libraries(${LIB_ENG} PUBLIC ${EXT_GLAD} )
 target_link_libraries(${LIB_ENG} PUBLIC glfw)
 target_link_libraries(${LIB_ENG} PUBLIC glm::glm-header-only)
-# target_link_libraries(${LIB_ENG} PUBLIC zlib libpng)
-# target_link_libraries(${LIB_ENG} PUBLIC freetype)
+target_link_libraries(${LIB_ENG} PUBLIC freetype)
 target_link_libraries(${LIB_ENG} PUBLIC ${LIB_COMMON} )
 target_link_libraries(${LIB_ENG} PUBLIC ${LIB_GEOM} ) #This also links to GLM
 target_link_libraries(${LIB_ENG} PUBLIC ${EXT_STB_IMG} )

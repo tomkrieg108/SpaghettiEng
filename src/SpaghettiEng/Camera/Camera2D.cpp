@@ -7,14 +7,15 @@ namespace Spg
 {
   Camera2D::Camera2D()
   {
-    glm::vec4 v4_pos = glm::vec4(0, 0, -0.5f, 1.0f);
+    glm::vec4 v4_pos = glm::vec4(0, 0, 0.5f, 1.0f);
     m_transform[3] = v4_pos;
   }
 
   glm::mat4 Camera2D::GetProjMatrix() const
   {
     //near and far are -1,1 if not specified
-    return glm::ortho(m_params.left, m_params.right, m_params.bottom, m_params.top);
+    //return glm::ortho(m_params.left, m_params.right, m_params.bottom, m_params.top);
+    return glm::ortho(m_params.left, m_params.right, m_params.bottom, m_params.top, m_params.z_near, m_params.z_far);
   }
 
   glm::mat4 Camera2D::GetViewMatrix() const

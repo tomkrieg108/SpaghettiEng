@@ -314,9 +314,10 @@ namespace Geom
       
       float x = (seg.start.x - seg.end.x) / (seg.start.y - seg.end.y) *(y_sweep - seg.end.y) + seg.end.x;
 
-      if( (x < seg.start.x) || (x > seg.end.x)) {
-        //Todo - if it is near horizontal, but !IsHorizontal() x-intercept may lie outside the seg.  Need to accound for this - treat as horizontal as per above
-      }
+      auto seg_min_x = std::min(seg.start.x,seg.end.x);
+      auto seg_max_x = std::max(seg.start.x,seg.end.x);  
+      SPG_ASSERT((x >= seg_min_x) && (x <= seg_max_x));
+
       return x;
     }
 

@@ -27,6 +27,7 @@ namespace Geom
     Point2d end{1,0};
   };
 
+  
   //-------------------------------------
 
   template <class coord_type, uint32_t dim = 3>

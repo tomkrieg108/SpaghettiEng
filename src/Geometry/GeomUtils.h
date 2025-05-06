@@ -52,6 +52,7 @@ namespace Geom
 
   bool IsVertical(const LineSeg2D& seg);
 
+  bool Equal(const LineSeg2D& seg1, const LineSeg2D& seg2);
 
   /*
     Return true if point is collinear with segs endpoints, lies between the endpoints, may coincide with either endpoint.

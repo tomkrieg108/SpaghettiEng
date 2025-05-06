@@ -153,13 +153,15 @@ namespace Geom
       Start, End, Regular, Split, Merge, Invalid
     }; 
 
-   inline bool operator < (const Point2d& p1, const Point2d& p2)
+    //todo - Utils?
+    inline bool operator < (const Point2d& p1, const Point2d& p2)
     {
       if(!Geom::Equal(p1.y, p2.y))
           return p1.y < p2.y;
         return p1.x > p2.x;  
     }
 
+    //todo - Utils?
     inline bool operator > (const Point2d& p1, const Point2d& p2)
     {
       if(!Geom::Equal(p1.y, p2.y))
@@ -183,7 +185,7 @@ namespace Geom
       {
         Point2d p1 = e1.vertex->point;
         Point2d p2 = e2.vertex->point;
-        return p1 > p2;
+        return p1 > p2; //If true, p1 goes before p2.  If false p1 does not go before p2.
       }
     };
 
@@ -193,20 +195,21 @@ namespace Geom
       float ComputeSweepLineXIntercept(const LineSeg2D& seg) const noexcept
       {
         float y_sweep = event_point.y;
+        if(Geom::IsVertical(seg))
+          return seg.start.x;  
+        if(Geom::IsHorizontal(seg))
+          return std::min(seg.start.x,seg.end.x);  
         if(Geom::Equal(seg.start.y, y_sweep))
           return seg.start.x;
         if(Geom::Equal(seg.end.y, y_sweep))
           return seg.end.x;
-        if(Geom::IsVertical(seg))
-          return seg.start.x;  
-        if(Geom::IsHorizontal(seg)) { 
-            return std::max(seg.start.x,seg.end.x);  
-        }
-      
+        
         float x = (seg.start.x - seg.end.x) / (seg.start.y - seg.end.y) *(y_sweep - seg.end.y) + seg.end.x;
-        if( (x < seg.start.x) || (x > seg.end.x)) { //Near horizontal
-          return std::max(seg.start.x,seg.end.x);  
-        }
+
+        auto seg_min_x = std::min(seg.start.x,seg.end.x);
+        auto seg_max_x = std::max(seg.start.x,seg.end.x);  
+        SPG_ASSERT((x >= seg_min_x) && (x <= seg_max_x));
+        
         return x;
       }
     
@@ -216,11 +219,29 @@ namespace Geom
         LineSeg2D seg2 {e2.origin->point, e2.next->origin->point };
         float x1 = ComputeSweepLineXIntercept(seg1);
         float x2 = ComputeSweepLineXIntercept(seg2);
-        return x1 < x2;
+        if(!Geom::Equal(x1,x2))
+          return x1<x2; //If true, e1 goes before e2.  If false e1 does not go before e2.
+        else {
+          //todo - Utils?
+          auto seg1_min_x = std::min(seg1.start.x,seg1.end.x);
+          auto seg2_min_x = std::min(seg2.start.x,seg2.end.x); 
+          if(!Geom::Equal(seg1_min_x,seg2_min_x))
+            return seg1_min_x < seg2_min_x;
+          auto seg1_max_x = std::max(seg1.start.x,seg1.end.x);
+          auto seg2_max_x = std::max(seg2.start.x,seg2.end.x);  
+          if(!Geom::Equal(seg1_max_x,seg2_max_x))
+            return seg1_max_x < seg2_max_x;  
 
-        // Point2d p1 = e1.origin->point;
-        // Point2d p2 = e2.origin->point;
-        // return p1.x < p2.x; //If true, e1 goes before e2.  If false e1 does not go before e2.
+          auto seg1_min_y = std::min(seg1.start.y,seg1.end.y);
+          auto seg2_min_y = std::min(seg2.start.y,seg2.end.y); 
+          if(!Geom::Equal(seg1_min_y,seg2_min_y))
+            return seg1_min_y < seg2_min_y;
+          auto seg1_max_y = std::max(seg1.start.y,seg1.end.y);
+          auto seg2_max_y = std::max(seg2.start.y,seg2.end.y);  
+          if(!Geom::Equal(seg1_max_y,seg2_max_y))
+            return seg1_max_y < seg2_max_y;  
+          return false;   
+        }
       }
 
       Point2d& event_point;
@@ -301,7 +322,13 @@ namespace Geom
 
       //List of diagonals found
       std::vector<std::pair<DCEL_vertex*, DCEL_vertex*>> m_diagonals;
+    };
 
+    class MonotoneTriangulator9000 //Thats totally a word
+    {
+    public:
+      
+    private:
     };
 
   }

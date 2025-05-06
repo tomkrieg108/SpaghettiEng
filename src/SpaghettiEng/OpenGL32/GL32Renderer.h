@@ -50,8 +50,7 @@ namespace Spg
     static void ClearBuffers();
     static void SetLineWidth(float width);
 
-    int val = 42;
-  
+   
   private:   
       // Todo - render stats - number of draw calls, uniform uploads, total vertices
     

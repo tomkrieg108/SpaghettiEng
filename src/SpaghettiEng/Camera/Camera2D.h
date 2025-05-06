@@ -16,6 +16,8 @@ namespace Spg
       float right = 20.0f;
       float bottom = -20.0f;
       float top = 20.0f;
+      float z_near = -20.0f;
+      float z_far = 20.0f;
     };
 
   public:

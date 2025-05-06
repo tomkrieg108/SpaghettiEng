@@ -1,16 +1,13 @@
 #include "BubbleSoup.h"
-#include <SpaghettiEng/SpaghettiEng.h>
 
-
-//external libs
-//should be available because they were linked as public in Geom lib and propagated here
+//external libs - for testing out only
+//should be available because they were linked as public in Geom/Spg lib and propagated here
 #include <cxxopts.hpp>
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-
-#include <array>
-//--------------------------------------------
+#include "ft2build.h"
+#include <freetype/freetype.h>
 
 namespace Spg
 {
@@ -36,15 +33,17 @@ namespace Spg
     Application(title)
   {
     Window& window = m_app_context.Get<Window>("Window");
-    glm::vec3 cam_pos = glm::vec3(0.0f,0.0f,-0.5f);
+    glm::vec3 cam_pos = glm::vec3(0.0f,0.0f,1.0f);
     glm::vec3 look_pos = glm::vec3(0.0f,0.0f,0.0f);
     auto camera = CreateRef<Camera2D>();
     camera->SetPosition(cam_pos);
     camera->LookAt(look_pos);
     auto controller = CreateRef<CameraController2D>(*camera);
+    auto text_renderer = CreateRef<GLTextRenderer>(*camera);
 
     m_app_context.Set("Camera2D", camera);
     m_app_context.Set("CameraController2D", controller);
+    m_app_context.Set("GLTextRenderer", text_renderer);
 
     BubbleLayer* layer = new BubbleLayer(m_app_context, std::string("Bubble Layer"));
     PushLayer(layer);
@@ -59,6 +58,7 @@ namespace Spg
     Layer(app_context, name),
     m_window(app_context.Get<Window>("Window")),
     m_renderer(app_context.Get<GLRenderer>("GLRenderer")),
+    m_text_renderer(app_context.Get<GLTextRenderer>("GLTextRenderer")),
     m_camera(app_context.Get<Camera2D>("Camera2D")),
     m_camera_controller(app_context.Get<CameraController2D>("CameraController2D"))
   {
@@ -67,18 +67,17 @@ namespace Spg
     GLShaderBuilder shader_builder;
     m_shader = shader_builder.Add(ShaderType::Vertex, "basic.vs").Add(ShaderType::Fragment, "basic.fs").Build("Basic Shader");
 
-
-
-
     Create2DGrid();
     //CreatePoints(40);
     //CreateCircle(32);
     //CreatePolygon(18);
     //CreateTriangulatedPolygon(30);
-    CreateMonotonePartitionedPolygon(24);
+
+    //CreateMonotonePartitionedPolygon(24);
+
     //CreateConvexHull(30);
 
-    GeomTest();
+    //GeomTest();
    
     SetCanvasSize(500.0f);
     auto model = glm::mat4(1.0f);
@@ -106,6 +105,8 @@ namespace Spg
     m_shader->SetUniformMat4f("u_proj", m_camera.GetProjMatrix());
     m_shader->SetUniformMat4f("u_view", m_camera.GetViewMatrix());
     m_shader->Unbind();
+
+    m_text_renderer.UpdateView();
   }
 
   void BubbleLayer::OnUpdate(double delta_time) 
@@ -128,6 +129,13 @@ namespace Spg
         m_renderer.Draw(drawable.VAO, *(drawable.shader), drawable.draw_mode);
       }
     }
+
+    for(auto& label : m_polygon_render_data.m_labels) {
+      m_text_renderer.Render(label.text, label.pos.x + 15.0f, label.pos.y, 0.5f, glm::vec3(1, 1, 1));
+    }
+
+    //m_text_renderer.Render("This is sample text", 50.0f, 50.0f, 0.5f, glm::vec3(1, 1, 1));
+   
     //m_renderer.DrawPoints(m_vao_points, *m_shader);
     //m_renderer.DrawLineLoop(m_vao_circle, *m_coords_shader);
 
@@ -167,6 +175,8 @@ namespace Spg
       m_shader->Unbind();
     }
     e.handled = true;
+
+     m_text_renderer.UpdateView();
   }
 
   void BubbleLayer::OnMouseScrolled(EventMouseScrolled& e)
@@ -178,6 +188,8 @@ namespace Spg
       UpdateCanvas();
     }
     e.handled = true;
+
+     m_text_renderer.UpdateView();
   }
 
   void BubbleLayer::OnMouseButtonPressed(EventMouseButtonPressed& e)
@@ -345,8 +357,8 @@ namespace Spg
             }
             ImGui::SameLine();
             if(ImGui::Button("Run")) {
-            m_polygon_render_data.monotone_spawner.MakeMonotone();
-            s_montotone_algo_state = 3; //algo complete
+              m_polygon_render_data.monotone_spawner.MakeMonotone();
+              s_montotone_algo_state = 3; //algo complete
             }
           }
 
@@ -428,6 +440,13 @@ namespace Spg
     m_vao_polygon_diagonals.AddVertexBuffer(diagonals_buffer);
   }
 
+  static void PrintDiagPoints(const std::vector<Geom::Point2d> points)
+  {
+    for(auto& p : points) {
+      SPG_TRACE("({},{})", p.x,p.y);
+    }
+  }
+
   void BubbleLayer::CreateMonotonePartitionedPolygon(uint32_t vertex_count)
   {
     float perturbFactor = 0.4; // Adjusts inward/outward movement
@@ -442,14 +461,18 @@ namespace Spg
     DCEL_Polygon polygon = DCEL_Polygon(polygon_points);
     
     auto diagonal_points1 = Geom::GenerateMonotoneDiagonals(&polygon);
-    MonotoneSpawner monotone_spawner(polygon_points);
 
+    MonotoneSpawner monotone_spawner(polygon_points);
     monotone_spawner.MakeMonotone();
     auto diagonal_points = monotone_spawner.GetDiagonalEndPoints();
     //SPG_ASSERT(diagonal_points1.size() == diagonal_points.size());
+    SPG_INFO("Mine: ------------------")
+    PrintDiagPoints(diagonal_points);
+    SPG_INFO("Others: ------------------")
+    PrintDiagPoints(diagonal_points1);
 
     auto poly_mesh =  Geom::GetMeshFromPoints(polygon_points, glm::vec4(1,1,0,1));
-    auto diagonals_mesh = Geom::GetMeshFromPoints(diagonal_points1, glm::vec4(0,0,1,1));
+    auto diagonals_mesh = Geom::GetMeshFromPoints(diagonal_points, glm::vec4(0,0,1,1));
     uint32_t poly_size_in_bytes = static_cast<uint32_t>(poly_mesh.size() * sizeof(float));
     uint32_t diagonal_size_in_bytes = static_cast<uint32_t>(diagonals_mesh.size() * sizeof(float));
 
@@ -484,6 +507,12 @@ namespace Spg
   void BubbleLayer::CreatePoints(uint32_t point_count)
   {
     auto points = Geom::GenerateRandomPoints_XY(400, point_count);
+
+    // std::vector<Geom::Point2d> points = 
+    // {
+    //   {50.0f, 50.0f}
+    // };
+
     auto data = Geom::GetMeshFromPoints(points,glm::vec4(1,1,0,1));
 
     uint32_t size_in_bytes = static_cast<uint32_t>(data.size() * sizeof(float));
@@ -724,9 +753,9 @@ namespace Spg
   void PolygonRenderData::AddPolygon(const std::string& name, const std::vector<Geom::Point2d>& points, GLShader* shader)
    {
       auto default_point_color = glm::vec4(1,1,0,1);  
-      std::vector<PolygonRenderData::Layout> mesh;
+      std::vector<PolygonRenderData::Layout> mesh_points;
       for(auto p : points) {
-        mesh.push_back({{p.x, p.y,-0.1f},default_point_color});
+        mesh_points.push_back({{p.x, p.y,-0.1f},default_point_color});
       }
       
       auto default_seg_color = glm::vec4(0.5f,0.5f,0,1);  
@@ -739,8 +768,8 @@ namespace Spg
         mesh_segs.push_back({p_next, default_seg_color});
       }
 
-      uint32_t size_in_bytes = static_cast<uint32_t>(mesh.size() * sizeof(Layout));
-      auto vbo_points = GLVertexBuffer{ mesh.data(), size_in_bytes, PolygonRenderData::s_buffer_layout}; 
+      uint32_t size_in_bytes = static_cast<uint32_t>(mesh_points.size() * sizeof(Layout));
+      auto vbo_points = GLVertexBuffer{ mesh_points.data(), size_in_bytes, PolygonRenderData::s_buffer_layout}; 
       uint32_t size_in_bytes_segs = static_cast<uint32_t>(mesh_segs.size() * sizeof(Layout));
       auto vbo_segs = GLVertexBuffer{ mesh_segs.data(), size_in_bytes_segs, PolygonRenderData::s_buffer_layout}; 
       
@@ -750,7 +779,7 @@ namespace Spg
       point_drawables[name] = drawable_points;
       seg_drawables[name] = drawable_segs;
 
-      point_meshes[name] = mesh;
+      point_meshes[name] = mesh_points;
       seg_meshes[name] = mesh_segs;
 
       polygon_points[name] = points; 
@@ -815,13 +844,26 @@ namespace Spg
       vbo.UpdateVertexData(0,size_in_bytes, sweep_line_mesh.data());
     }
 
+    UpdateMonotoneAlgoLabels(name);
+
     //todo - setup drawable etc for active edges in status structure
-    std::vector<PolygonRenderData::Layout> mesh_active_edges;
+    //std::vector<PolygonRenderData::Layout> mesh_active_edges;
+  }
 
-   
+  void PolygonRenderData::UpdateMonotoneAlgoLabels(const std::string& name)
+  {
+    m_labels.clear();
+    auto& monotone_event_points = this->monotone_spawner.GetEventPoints();
+    auto itr = point_meshes.find(name);
+    SPG_ASSERT(itr != point_meshes.end());
 
-   
-  } 
+    for(auto& event_point : monotone_event_points) {
+      Label label;
+      label.pos = event_point.vertex->point;
+      label.text = std::to_string(event_point.tag);
+      m_labels.push_back(label);
+    }
+  }
 
   void PolygonRenderData::UpdateMonotoneAlgoSweepLineDisplay()
   {
@@ -836,20 +878,6 @@ namespace Spg
     SPG_ASSERT(seg_drawables.find("sweep_line") != seg_drawables.end())
     auto& vbo = seg_drawables["sweep_line"].VAO.GetVertexBuffer();
     vbo.UpdateVertexData(0,size_in_bytes, sweep_line_mesh.data());
-  }
-
-  void PolygonRenderData::UpdateMonotoneAlgoActiveEdgeDisplay()
-  {
-    std::vector<Layout> active_edges;
-    auto& status_structure = this->monotone_spawner.GetStatusStructure();
-    for(auto& item : status_structure) {
-      auto& edge = item.first;
-      auto& helper = item.second;
-      Layout point1, point2;
-      point1.pos = glm::vec3(edge.origin->point, -0.2f);
-      point2.pos = glm::vec3(edge.twin->origin->point, -0.2f);
-      point1.col = point2.col = glm::vec4(1,1,0,1);
-    }
   }
 
   void PolygonRenderData::SetPointColor(const std::string& name, uint32_t index, const glm::vec4& color)
@@ -954,6 +982,8 @@ namespace Spg
               << "\n";
     std::cout << "SPDLOG....:" << SPDLOG_VER_MAJOR << "." << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << "\n";
     std::cout << "\n";
+
+    SPG_WARN( "FREETYPE: {}.{}.{}", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
 
     std::cout << "####################################################\n\n";
 

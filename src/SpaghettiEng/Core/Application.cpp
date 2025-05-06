@@ -56,7 +56,7 @@ namespace Spg
 
   void Application::SystemInit()
   {
-    //Called in main() before app is created
+    //Static method - called in main() before app is created
     Utils::Logger::Initialise();
     EventManager::Initialise(); //todo - does nothing!
   }
@@ -78,12 +78,7 @@ namespace Spg
     AppLayer* app_layer = new AppLayer(m_app_context, "App Layer");
     m_layer_stack.PushOverlay(app_layer);
 
-    //Test shader
-    GLShaderBuilder shader_builder;
-    auto pbr_shader = shader_builder.Add(ShaderType::Vertex, "2.1.2.pbr.vs").Add(ShaderType::Fragment, "2.1.2.pbr.fs").Build("PBR Shader");
-   
   #ifdef SPG_DEBUG
-    pbr_shader->PrintInfo();
     GLContext::PrintVideoModes();
     GLContext::PrintGLParams();
     GLContext::PrintImplInfo();
@@ -130,6 +125,7 @@ namespace Spg
     EventManager::AddHandler(this, &Application::OnKeyPressed);
   }
 
+  //Todo - this should be setup in SystemInit()
   void Application::SetAssetsPath()
   {
     //Todo - this will need to be changed.  Currently depends on the location of this source file, which won't work when app is 'deployed'

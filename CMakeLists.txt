@@ -47,27 +47,49 @@ cpmaddpackage(
   GIT_TAG 1.0.1
 )
 
-#Add zlib - need for FreeType
+
+# Add dependencies before FreeType
 # CPMAddPackage(
 #     NAME zlib
 #     GITHUB_REPOSITORY madler/zlib
-#     GIT_TAG v1.2.11  # Replace with the latest stable tag
+#     GIT_TAG v1.3.1  # Replace with the latest version
 # )
 
-#Add libpng - need for FreeType
-# CPMAddPackage(
+#  CPMAddPackage(
 #     NAME libpng
 #     GITHUB_REPOSITORY glennrp/libpng
-#     GIT_TAG v1.6.37  # Replace with the latest stable tag
+#     GIT_TAG v1.6.37  # Replace with the latest version
 # )
+
+#  CPMAddPackage(
+#     NAME bzip2
+#     GITHUB_REPOSITORY philr/bzip2
+#     GIT_TAG v1.0.8
+# )
+
+#  CPMAddPackage(
+#     NAME brotli
+#     GITHUB_REPOSITORY google/brotli
+#     GIT_TAG v1.1.0
+# )
+
+set(FT_WITH_ZLIB OFF CACHE BOOL "Disable FreeType Zlib support")
+set(FT_WITH_PNG OFF CACHE BOOL "Disable FreeType PNG support")
+set(FT_WITH_BZIP2 OFF CACHE BOOL "Disable FreeType BZip2 support")
+set(FT_WITH_BROTLI OFF CACHE BOOL "Disable FreeType Brotli support")
+set(FT_WITH_HARFBUZZ OFF CACHE BOOL "Disable FreeType HarfBuzz support")
 
 #Add FreeType
 CPMAddPackage(
     NAME freetype
     GITHUB_REPOSITORY freetype/freetype
-    GIT_TAG VER-2-13-3  # Replace with the latest stable tag
-    # GIT_REPOSITORY "https://github.com/aseprite/freetype-cmake.git"
-    # GIT_TAG VER-2-13-3
+    GIT_TAG VER-2-13-3
+    OPTIONS
+        "CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=ON"  # Disable advanced text shaping
+        "CMAKE_DISABLE_FIND_PACKAGE_BZip2=ON"     # Disable BZip2 support
+        "CMAKE_DISABLE_FIND_PACKAGE_BrotliDec=ON" # Disable Brotli support
+        "CMAKE_DISABLE_FIND_PACKAGE_PNG=ON"       # Disable PNG support
+        "CMAKE_DISABLE_FIND_PACKAGE_ZLIB=ON"      # Disable Zlib support
 )
 
 if(ENABLE_TESTING)
@@ -182,6 +204,7 @@ target_precompile_headers(${LIB_COMMON} PRIVATE
   <algorithm>
   <numbers>
   <random>
+  <memory>
 )
 
 target_precompile_headers(${LIB_GEOM} PRIVATE 
@@ -195,9 +218,6 @@ target_precompile_headers(${LIB_GEOM} PRIVATE
   <numbers>
 )
 
-
-
-
 target_precompile_headers(${LIB_ENG} PRIVATE 
   <cstdint>
   <cmath>
@@ -209,6 +229,7 @@ target_precompile_headers(${LIB_ENG} PRIVATE
   <vector>
   <array>
   <unordered_map>
+  <map>
   <memory>
   <random>
   <algorithm>
@@ -217,8 +238,6 @@ target_precompile_headers(${LIB_ENG} PRIVATE
   <type_traits>
   <numbers>
 )
-
-
 
 target_precompile_headers(${APP} PRIVATE 
   <cstdint>

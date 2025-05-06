@@ -1,7 +1,5 @@
 #pragma once
 #include <SpaghettiEng/SpaghettiEng.h>
-#include <SpaghettiEng/Camera/Camera2D.h>
-#include <SpaghettiEng/OpenGL32/GL32Renderer.h>
 #include <Geometry/Geometry.h>
 
 using namespace std::string_literals;
@@ -41,6 +39,12 @@ namespace Spg
         glm::vec4 col;
       };
 
+      struct Label
+      {
+        Geom::Point2d pos;
+        std::string text;
+      };
+
       std::size_t NumPolygons() {
         return point_meshes.size();
       }
@@ -52,9 +56,11 @@ namespace Spg
       }
 
       void AddPolygon(const std::string& name, const std::vector<Geom::Point2d>& points, GLShader* shader);
-      void InitialiseMonotoneAlgoVisuals(const std::string& name,GLShader* shader);
+      void InitialiseMonotoneAlgoVisuals(const std::string& name, GLShader* shader);
+      void UpdateMonotoneAlgoLabels(const std::string& name);
       void UpdateMonotoneAlgoSweepLineDisplay();
-      void UpdateMonotoneAlgoActiveEdgeDisplay();
+      
+      //void UpdateMonotoneAlgoActiveEdgeDisplay();
 
       void SetPointColor(const std::string& name, uint32_t index, const glm::vec4& color);
       void SetPointColor(const std::string& name, const glm::vec4& color);
@@ -71,6 +77,8 @@ namespace Spg
       std::unordered_map<std::string, std::vector<Layout>> seg_meshes;
 
       std::unordered_map<std::string, std::vector<Geom::Point2d>> polygon_points;
+
+      std::vector<Label> m_labels;
 
       Geom::Monotone_V2::MonotoneSpawner5000 monotone_spawner;
 
@@ -111,6 +119,7 @@ namespace Spg
   private:
     Window& m_window;
     GLRenderer& m_renderer;
+    GLTextRenderer& m_text_renderer;
     Camera2D& m_camera;
     CameraController2D& m_camera_controller;
     Utils::SpdLogger m_logger;
@@ -121,8 +130,6 @@ namespace Spg
     PolygonRenderData m_polygon_render_data;
     std::unordered_map<std::string, Drawable> m_drawables;
     
-    
-
     GLVertexArray m_vao_grid;
     GLVertexArray m_vao_polygon;
     GLVertexArray m_vao_polygon_diagonals;

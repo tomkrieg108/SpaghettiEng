@@ -3,7 +3,7 @@
 #include "SmartPointerUtils.h"
 #include "LibCheck.h"
 
-//#define SPG_LIB_LINK_CHECK
+#define SPG_LIB_LINK_CHECK
 //#define SPG_CALLBACK_CHECK
 
 //Todo - do this in cmake if possible.  Is this even needed?  See ChatGPT "Cross-platform OpenGL CMake setup"

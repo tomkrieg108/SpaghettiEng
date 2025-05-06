@@ -102,6 +102,33 @@ namespace Geom
     return Geom::Equal(seg.start.x, seg.end.x);
   }
 
+  bool Equal(const LineSeg2D& seg1, const LineSeg2D& seg2) 
+  {
+    // bool eq1 = Geom::Equal(seg1.start, seg2.start) && Equal(seg1.end, seg2.end);
+    // bool eq2 = Geom::Equal(seg1.start, seg2.end) && Equal(seg1.end, seg2.start);
+    // return eq1 || eq2;
+
+    auto seg1_min_x = std::min(seg1.start.x,seg1.end.x);
+    auto seg2_min_x = std::min(seg2.start.x,seg2.end.x); 
+    if(!Geom::Equal(seg1_min_x,seg2_min_x))
+      return false;
+    auto seg1_max_x = std::max(seg1.start.x,seg1.end.x);
+    auto seg2_max_x = std::max(seg2.start.x,seg2.end.x);  
+    if(!Geom::Equal(seg1_max_x,seg2_max_x))
+      return false;
+
+    auto seg1_min_y = std::min(seg1.start.y,seg1.end.y);
+    auto seg2_min_y = std::min(seg2.start.y,seg2.end.y); 
+    if(!Geom::Equal(seg1_min_y,seg2_min_y))
+      return false;
+    auto seg1_max_y = std::max(seg1.start.y,seg1.end.y);
+    auto seg2_max_y = std::max(seg2.start.y,seg2.end.y);  
+    if(!Geom::Equal(seg1_max_y,seg2_max_y))
+      return false;
+
+    return true;  
+  }
+
   //Todo - more testing needed!
   bool IntersectionExists(const LineSeg2D& line_seg1, const LineSeg2D& line_seg2)
   { //Vid 14
