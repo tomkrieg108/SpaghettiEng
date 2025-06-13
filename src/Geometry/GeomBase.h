@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/epsilon.hpp> //epsilonEqual()
+#include <algorithm>
 
 namespace Geom
 {

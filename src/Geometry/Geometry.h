@@ -9,6 +9,7 @@
 #include "BST.h"
 #include "IntersectionSet.h"
 #include "DCEL.h"
+#include "MonotonePartition.h"
 
 namespace Geom
 {

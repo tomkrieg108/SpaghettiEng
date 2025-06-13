@@ -320,7 +320,7 @@ namespace GeomTest
       {12.26,7.79},     //N 14
       {17.04,6.99}      //O 15
     };
-    Geom::DCEL_V2::DCEL poly = Geom::DCEL_V2::DCEL(poly_points);
+    Geom::DCEL poly = Geom::DCEL(poly_points);
     REQUIRE(poly.DiagonalCheck(poly.GetVertex(5), poly.GetVertex(5)).is_valid == false); //Same vertex!
     REQUIRE(poly.DiagonalCheck(poly.GetVertex(7), poly.GetVertex(8)).is_valid == false); //Neighbours
     REQUIRE(poly.DiagonalCheck(poly.GetVertex(8), poly.GetVertex(7)).is_valid == false); //Neighbours

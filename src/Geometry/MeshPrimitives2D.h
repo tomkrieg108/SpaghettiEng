@@ -24,9 +24,8 @@ namespace Geom
 
   std::vector<Point2d> GenerateEarClipplingDiagonals(PolygonSimple* polygon);
 
-  std::vector<Point2d> GenerateMonotoneDiagonals(DCEL::Polygon* polygon);
-  //std::vector<Point2d> GenerateMonotoneDiagonals(DCEL_V2::DCEL* polygon);
-
+  //std::vector<Point2d> GenerateMonotoneDiagonals(DCEL::Polygon* polygon);
+ 
   std::vector<Point2d> GenerateRandomPoints_XY(float radius, uint32_t num_points);
 
   std::vector<Point2d> GenerateCircle_XY(float radius, uint32_t num_vertices);

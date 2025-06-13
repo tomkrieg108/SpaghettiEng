@@ -110,7 +110,7 @@ set(EXT_IMGUI "lib_imgui_docking")
 set(LIB_COMMON "lib_common")
 set(LIB_ENG "lib_eng")
 set(LIB_GEOM "lib_geom")
-set(APP "bubble_soup")
+set(APP_GEOM "geom_app")
 
 if(ENABLE_TESTING)
   set(TEST_GEOM "test_geom")
@@ -136,7 +136,7 @@ target_compile_definitions(${LIB_ENG} PRIVATE
   $<$<CONFIG:Debug>:SPG_DEBUG>
   $<$<CONFIG:Release>:SPG_RELEASE>
 )
-target_compile_definitions(${APP} PRIVATE 
+target_compile_definitions(${APP_GEOM} PRIVATE 
   $<$<CONFIG:Debug>:SPG_DEBUG>
   $<$<CONFIG:Release>:SPG_RELEASE>
 )
@@ -148,7 +148,7 @@ if(WIN32)
     target_compile_definitions(${LIB_COMMON} PRIVATE SPG_WIN64)
     target_compile_definitions(${LIB_GEOM} PRIVATE SPG_WIN64)
     target_compile_definitions(${LIB_ENG} PRIVATE SPG_WIN64)
-    target_compile_definitions(${APP} PRIVATE SPG_WIN64)
+    target_compile_definitions(${APP_GEOM} PRIVATE SPG_WIN64)
   else()
     message(FATAL_ERROR "Cmake Msg: Unsupported platform detected: Windows 32-bit")
   endif()
@@ -157,7 +157,7 @@ elseif((UNIX AND NOT APPLE))
   target_compile_definitions(${LIB_COMMON} PRIVATE SPG_LINUX)
   target_compile_definitions(${LIB_GEOM} PRIVATE SPG_LINUX)
   target_compile_definitions(${LIB_ENG} PRIVATE SPG_LINUX)
-  target_compile_definitions(${APP} PRIVATE SPG_LINUX)
+  target_compile_definitions(${APP_GEOM} PRIVATE SPG_LINUX)
 elseif(APPLE)  
   message(FATAL_ERROR "Cmake Msg: Unsupported platform detected: Apple")
 else()
@@ -239,7 +239,7 @@ target_precompile_headers(${LIB_ENG} PRIVATE
   <numbers>
 )
 
-target_precompile_headers(${APP} PRIVATE 
+target_precompile_headers(${APP_GEOM} PRIVATE 
   <cstdint>
   <cmath>
   <iostream>

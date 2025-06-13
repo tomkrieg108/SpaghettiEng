@@ -32,7 +32,7 @@ namespace Spg
   void GLVertexArray::Release()
   {
     glDeleteVertexArrays(1, &m_id);
-    m_id = m_buffer_index = 0;
+    m_id = m_attribute_idx = 0;
 
     for (auto& vertex_buffer : m_vertex_buffers)
       vertex_buffer.Release();
@@ -49,10 +49,10 @@ namespace Spg
     const auto& layout = vertex_buffer.GetLayout();
     for (const auto& element : layout.GetElements())
     {
-      glEnableVertexAttribArray(m_buffer_index);
+      glEnableVertexAttribArray(m_attribute_idx);
       if (ShaderUtils::GLBaseTypeIsFloat(element.data_type) )
       {
-        glVertexAttribPointer(m_buffer_index, 
+        glVertexAttribPointer(m_attribute_idx, 
           ShaderUtils::GetComponentCount(element.data_type),
           ShaderUtils::ShaderDataTypeToGLBaseType(element.data_type),
           element.normalized ? GL_TRUE : GL_FALSE, 
@@ -61,13 +61,13 @@ namespace Spg
       }
       else
       {
-        glVertexAttribIPointer(m_buffer_index,
+        glVertexAttribIPointer(m_attribute_idx,
           ShaderUtils::GetComponentCount(element.data_type),
           ShaderUtils::ShaderDataTypeToGLBaseType(element.data_type),
           layout.GetStride(),
           (const void*)(element.offset));
       }
-      ++m_buffer_index;
+      ++m_attribute_idx;
     }
     m_vertex_buffers.push_back(vertex_buffer);
     glBindVertexArray(0);

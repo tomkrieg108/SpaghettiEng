@@ -8,7 +8,7 @@ namespace Spg
   {
     glGenBuffers(1,&m_id); //v2.0+
     glBindBuffer(GL_ARRAY_BUFFER, m_id);
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);  //v2.0
+    glBufferData(GL_ARRAY_BUFFER, size, (void *)data, GL_STATIC_DRAW);  //v2.0
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     m_vertex_count = size / layout.GetStride();
   }
@@ -36,7 +36,7 @@ namespace Spg
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  void GLVertexBuffer::UpdateData(int32_t offset_bytes, uint32_t data_size_bytes, const void* data) const
+  void GLVertexBuffer::UpdateRawData(int32_t offset_bytes, uint32_t data_size_bytes, const void* data) const
   {
     SPG_ASSERT(offset_bytes + data_size_bytes <= m_vertex_count*m_layout.GetStride());
     glBindBuffer(GL_ARRAY_BUFFER, m_id);
@@ -49,7 +49,7 @@ namespace Spg
     SPG_ASSERT(vertex_index < m_vertex_count);
     auto stride = m_layout.GetStride();
     SPG_ASSERT(vertex_size_bytes % stride == 0);
-    UpdateData(vertex_index*stride, vertex_size_bytes, data);
+    UpdateRawData(vertex_index*stride, vertex_size_bytes, data);
   }
 
 //---------------------------------------------------

@@ -41,7 +41,16 @@ namespace Spg
       return *this;
     }
 
+    //Stride is the length in bytes between successive vertices
     uint32_t GetStride() const { return m_stride; }
+    
+    // Return offset in bytes to 'attribute_name' from start of a vertex
+    uint32_t GetOffset(const std::string& attribute_name) const {
+      auto itr = std::find_if(std::cbegin(m_element_list), std::cend(m_element_list), 
+      [&attribute_name](BufferElement element) { return (element.attribute_name == attribute_name); });
+      SPG_ASSERT(itr != std::cend(m_element_list));
+      return itr->offset;
+    }
 
     const std::vector<BufferElement>& GetElements() const { return m_element_list; }
 

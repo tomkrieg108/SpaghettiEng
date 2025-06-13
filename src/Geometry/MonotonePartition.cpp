@@ -1,36 +1,67 @@
 
 #include "MonotonePartition.h"
-#include "GeomBase.h"
 #include "GeomUtils.h"
-#include <set>
-#include <map>
 
 namespace Geom
 {
-  
-  //Vid 33
-  VertexCategory CategorizeVertex(DCEL::Vertex* vertex)
-  {
-    DCEL::Vertex* v_prev= vertex->incident_edge->prev->origin;
-    DCEL::Vertex* v_next= vertex->incident_edge->next->origin;
+  using VertexCategory = MonotonePartitionAlgo::VertexCategory;
 
-    if( (v_prev == nullptr) || (v_next == nullptr))
-      return VertexCategory::Invalid;
-
-    Point2d p_prev = v_prev->point;
-    Point2d p = vertex->point;
-    Point2d p_next = v_next->point;  
-
-    bool is_left = Left({p_prev,p},p_next);
-
-    if((p.y > p_prev.y) && (p.y > p_next.y)) {
-      if(is_left)
-        return VertexCategory::Start;
-      else
-        return VertexCategory::Split;  
+  MonotonePartitionAlgo::MonotonePartitionAlgo() :
+      m_T(EdgeComparator(m_cur_event_point))
+    {
     }
-    else if ((p.y < p_prev.y) && (p.y < p_next.y)) {
-      if(is_left)
+
+  MonotonePartitionAlgo::MonotonePartitionAlgo(const std::vector<Point2d>& points) : 
+    m_polygon(points),
+    m_T(EdgeComparator(m_cur_event_point))
+  {
+    m_polygon.Validate();
+    InitialiseEventQueue();
+  }
+
+  void MonotonePartitionAlgo::Clear()
+    {
+        m_polygon.Clear();
+        m_event_queue.clear();
+        m_event_queue_unsorted.clear();
+        m_T.clear();
+        m_diagonals.clear();
+        m_cur_event_point = {FLT_MAX,FLT_MAX};
+    }
+
+  void MonotonePartitionAlgo::Set(const std::vector<Point2d>& points)
+  {
+    Clear();
+    m_polygon.Set(points);
+    m_polygon.Validate();
+    InitialiseEventQueue();
+  }
+
+  VertexCategory MonotonePartitionAlgo::GetVertexCategory(DCEL::Vertex* vertex)
+  {
+    auto e_departing_v = GetDepartingEdge(vertex);
+    SPG_ASSERT(e_departing_v != nullptr);
+    SPG_ASSERT(e_departing_v->origin = vertex);
+    SPG_ASSERT(e_departing_v->next != nullptr);
+    SPG_ASSERT(e_departing_v->prev != nullptr); 
+
+    auto v_prev = e_departing_v->prev->origin;  
+    auto v_next = e_departing_v->next->origin;
+    SPG_ASSERT(v_prev != nullptr);
+    SPG_ASSERT(v_next != nullptr);
+
+    if( (v_prev->point < vertex->point) && (v_next->point < vertex->point)) {
+      //both neighbours are below vertex => Start or Split
+      Geom::LineSeg2D seg{v_prev->point, vertex->point};
+      if(Geom::LeftOrBeyond(seg,v_next->point)) 
+        return VertexCategory::Start; //Interior angle < Pi => Start
+      else  
+        return VertexCategory::Split; //Interior angle > Pi => Split
+    }
+    else if((v_prev->point > vertex->point) && (v_next->point > vertex->point)) {
+      //both neighbours are above vertex => End or Merge
+      Geom::LineSeg2D seg{v_prev->point, vertex->point};
+      if(Geom::LeftOrBeyond(seg,v_next->point))
         return VertexCategory::End;
       else
         return VertexCategory::Merge;  
@@ -40,277 +71,233 @@ namespace Geom
     }
   }
 
-  struct DCELVertexWrapper
+  void MonotonePartitionAlgo::InitialiseEventQueue()
   {
-    DCEL::Vertex* vert;
-    VertexCategory category;
-  };
-
-  struct DCELVertexWrapperSort
-  {
-    bool operator () (DCELVertexWrapper& current, DCELVertexWrapper& ref) {
-      auto cur_p = current.vert->point;
-      auto ref_p = ref.vert->point;
-      return( (cur_p.y > ref_p.y) || 
-              (Equal(cur_p.y,ref_p.y) && ((cur_p.x < ref_p.x))) );
+    uint32_t i = 0;
+    for(auto v : m_polygon.GetVertices()) {
+      SPG_ASSERT(v != nullptr);
+      Event e;
+      e.tag = v->tag;        
+      e.vertex = v;
+      e.vertex_category = GetVertexCategory(v);
+      m_event_queue.push_back(e);
     }
-  };
+    m_event_queue_unsorted = m_event_queue;
+    //sort in reverse order so that highest priority event at the end (no pop_front() method on vectors)
+    std::sort(m_event_queue.rbegin(), m_event_queue.rend(), EventComparator());
+  }
 
-  struct DCELEdgeWrapper
+  void MonotonePartitionAlgo::Step()
   {
-    DCELEdgeWrapper(DCEL::Edge* _edge, DCELVertexWrapper& _helper) : edge{_edge}, helper{_helper}
-    {
-      origin = edge->origin->point;
-      dest = edge->twin->origin->point;
+    Event e = m_event_queue.back(); //highest priority at back
+    m_cur_event_point = e.vertex->point;
+    PrintEvent(e);
+    SPG_ASSERT(e.vertex_category != VertexCategory::Invalid);
+    m_event_queue.pop_back();
+    switch(e.vertex_category) {
+      case VertexCategory::Start  : HandleStartVertex(e); break;
+      case VertexCategory::End    : HandleEndVertex(e); break;
+      case VertexCategory::Merge  : HandleMergeVertex(e); break;
+      case VertexCategory::Split  : HandleSplitVertex(e); break;
+      case VertexCategory::Regular: HandleRegularVertex(e); break;
+      default:
+        SPG_ERROR("Event with invalid category"); return;
     }
+    PrintStatusStucture();
+    PrintDiagonals();
+  }
 
-    //return x-coord of intersection point with the edge and supplied point (Vid 33 ~ 9:00)
-    float ConputeX(Point2d point) const 
-    {
-      float denom = dest.y - origin.y;
-      float x = point.x;
-      if(!Equal(denom, 0)) {
-        x = origin.x + (point.y - origin.y)*(dest.x-origin.x) / denom;
+  void MonotonePartitionAlgo::MakeMonotone()
+  {
+    while(!m_event_queue.empty()) {
+      Step();
+    }
+    for(auto& diagonal : m_diagonals) {
+      m_polygon.Split(diagonal.first, diagonal.second);
+    }
+  }
+
+  std::vector<Point2d> MonotonePartitionAlgo::GetDiagonalEndPoints()
+  {
+    std::vector<Point2d> points;
+    for(auto& diagonal : m_diagonals) {
+      points.push_back(diagonal.first->point);
+      points.push_back(diagonal.second->point);
+    }
+    return points;
+  }
+
+  void MonotonePartitionAlgo::HandleStartVertex(const Event& e)
+  {
+    DCEL::HalfEdge*  half_edge = GetDepartingEdge(e.vertex);
+    SPG_ASSERT(half_edge != nullptr);
+    const auto [it, success] = m_T.insert({*half_edge, e});
+    SPG_ASSERT(success);
+  }
+
+  void MonotonePartitionAlgo::HandleEndVertex(const Event& e)
+  {
+    SPG_ASSERT(m_T.size() > 0);
+    DCEL::HalfEdge*  half_edge = GetDepartingEdge(e.vertex);
+    SPG_ASSERT(half_edge != nullptr);
+    SPG_ASSERT(half_edge->prev != nullptr);
+    auto itr = m_T.find(*(half_edge->prev));
+    SPG_ASSERT(itr != m_T.end());
+    HelperPoint helper = itr->second;
+    if(helper.vertex_category == VertexCategory::Merge) {
+      SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+      m_diagonals.push_back({e.vertex, helper.vertex});
+    }
+    m_T.erase(itr); 
+  }
+
+  void MonotonePartitionAlgo::HandleSplitVertex(const Event& e)
+  {
+    //Search m_T to find edge directly left of e.vertex
+    SPG_ASSERT(m_T.size() > 0);
+    DCEL::HalfEdge*  cur_edge = GetDepartingEdge(e.vertex);
+    //Get first element not less than (i.e. >=) key. If no such element found, return end()
+    auto itr = m_T.lower_bound(*cur_edge);   
+    //Should never return begin(), even if there is only 1 element in m_T.  It may return end(), in which case prev(itr) should be valid (i.e. the last element in m_T).  We've already checked that m_T has at least 1 element
+    SPG_ASSERT(itr != m_T.begin()); 
+    itr = std::prev(itr); //theoretically points to edge directly left of e.vertex in m_T
+    HelperPoint helper = itr->second;
+    //Insert diagonal connecting e.vertex to event_point.helper_vertex
+    SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+    m_diagonals.push_back({e.vertex, helper.vertex});
+    //helper(ej -> vi)
+    auto [it, inserted] = m_T.insert_or_assign(itr->first,e);
+    SPG_ASSERT(!inserted); //Should have been assigned, not inserted
+    { //insert e_i into T, helper e_i -> v_i
+      DCEL::HalfEdge*  half_edge = GetDepartingEdge(e.vertex);
+      auto [it, success] = m_T.insert({*half_edge, e});
+      SPG_ASSERT(success);
+    }
+  }
+
+  void MonotonePartitionAlgo::HandleMergeVertex(const Event& e)
+  {
+    //first part is same as for end vertex
+    DCEL::HalfEdge*  half_edge = GetDepartingEdge(e.vertex);
+    SPG_ASSERT(half_edge != nullptr);
+    SPG_ASSERT(half_edge->prev != nullptr);
+    auto itr = m_T.find(*(half_edge->prev));
+    SPG_ASSERT(itr != m_T.end()); 
+    
+    HelperPoint helper = itr->second; 
+    if(helper.vertex_category == VertexCategory::Merge) {
+      SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+      m_diagonals.push_back({e.vertex, helper.vertex});
+    }
+    //delete e-1 from T
+    m_T.erase(itr); 
+
+    //Search m_T to find edge directly left of e.vertex
+    DCEL::HalfEdge*  cur_edge = GetDepartingEdge(e.vertex);
+    itr = m_T.lower_bound(*cur_edge); 
+    SPG_ASSERT(itr != m_T.begin());
+    itr = std::prev(itr); //theoretically points to element left of e.vertex in m_T
+    helper = itr->second;
+    if(helper.vertex_category == VertexCategory::Merge) {
+      SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+      m_diagonals.push_back({e.vertex, helper.vertex});
+    }
+    //helper(ej <-vi)
+    const auto [it, inserted] = m_T.insert_or_assign(itr->first,e);
+    SPG_ASSERT(!inserted); //Should have been assigned, not inserted. 
+  }
+
+  void MonotonePartitionAlgo::HandleRegularVertex(const Event& e)
+  {
+    if(PolygonInteriorOnRight(e.vertex)) {
+      //first part is same as for end vertex
+      DCEL::HalfEdge*  half_edge = GetDepartingEdge(e.vertex);
+      SPG_ASSERT(half_edge != nullptr);
+      SPG_ASSERT(half_edge->prev != nullptr);
+      auto itr_e_prev = m_T.find(*(half_edge->prev));
+      SPG_ASSERT(itr_e_prev != m_T.end()); 
+      
+      HelperPoint helper_e_prev = itr_e_prev->second; 
+      if(helper_e_prev.vertex_category == VertexCategory::Merge) {
+        SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper_e_prev.vertex).is_valid);
+        m_diagonals.push_back({e.vertex, helper_e_prev.vertex});
       }
-      return x;
+      m_T.erase(itr_e_prev); //return itr to element following removed element  
+      const auto [it, inserted] = m_T.insert_or_assign(*half_edge,e);
+      SPG_ASSERT(inserted); //Should have been inserted, not assigned
     }
+    else {
+      //search in T to find e_j directly left of v_i
+      DCEL::HalfEdge*  cur_edge = GetDepartingEdge(e.vertex);
+      auto itr = m_T.lower_bound(*cur_edge); 
+      SPG_ASSERT(itr != m_T.begin());
+      itr = std::prev(itr); //theoretically points to element left of e.vertex in m_T
+      auto helper = itr->second;
+      if(helper.vertex_category == VertexCategory::Merge) {
+        SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+        m_diagonals.push_back({e.vertex, helper.vertex});
+      }
+      //helper(ej <- vi)
+      const auto [it, inserted] = m_T.insert_or_assign(itr->first,e);
+      SPG_ASSERT(!inserted); //Should have been assigned, not inserted
+    }
+  }
 
-    public:
-      DCEL::Edge* edge;
-      DCELVertexWrapper helper;
-
-    private:
-      Point2d origin, dest;
-  };
-
-  struct SweepLineComparator
+  DCEL::HalfEdge* MonotonePartitionAlgo::GetDepartingEdge(DCEL::Vertex* v)
   {
-    Point2d* point;
-    SweepLineComparator(Point2d* _point) : point{_point} {}
-
-    bool operator()(const DCELEdgeWrapper* ref1, const DCELEdgeWrapper* ref2) const 
-    {
-      return ref1->ConputeX(*point) < ref2->ConputeX(*point);
+    auto half_edges = m_polygon.GetDepartingEdges(v);
+    SPG_ASSERT(half_edges.size() == 2);
+    if(half_edges[0]->incident_face->outer != nullptr)
+      return half_edges[0];
+    else {
+      SPG_ASSERT(half_edges[1]->incident_face->outer != nullptr)
+      return half_edges[1];
     }
-  };
+  }
 
-  // TODO : Check the posibility of Refactoring the code to remove duplicate lines
+  bool MonotonePartitionAlgo::PolygonInteriorOnRight(DCEL::Vertex* v)
+  {
+    DCEL::HalfEdge* e = GetDepartingEdge(v);
+    auto point_prev = e->prev->origin->point;
+    auto point_cur = e->origin->point;
+    auto point_next = e->next->origin->point;
+    return (point_prev > point_cur) && (point_cur > point_next);
+  }
 
+  //Debug logging
+  std::string GetCategoryString(VertexCategory category) 
+  {
+    switch(category) {
+      case VertexCategory::Start  : return "Start";
+      case VertexCategory::End    : return "End";
+      case VertexCategory::Merge  : return "Merge";
+      case VertexCategory::Split  : return "Split";
+      case VertexCategory::Regular: return "Regular";
+      default: return "Invalid";
+    }
+  }
+
+  void MonotonePartitionAlgo::PrintEvent(Event e)
+  {
+    auto cat_str = GetCategoryString(e.vertex_category);
+    SPG_WARN("Next Event: {}: ({},{}) - {} ----------------", e.tag, e.vertex->point.x,  e.vertex->point.y, cat_str);
+  }
+
+  void MonotonePartitionAlgo::PrintStatusStucture()
+  {
+    SPG_TRACE("Status structure: ------------------- ");
+    for(const auto& element : m_T) {
+        auto half_edge = element.first;
+        auto helper = element.second;
+        SPG_TRACE("e{} -> v{}", half_edge.origin->tag, helper.tag);
+    }
+  }
   
-  /*
-  For each of these Handle function, added in an extra output parameter diag_list, which gets added to when a diagonal is found and Split is called
-  */
-  static void HandleStartVertex(DCELVertexWrapper& vertex
-    , std::set<DCELEdgeWrapper*, SweepLineComparator>& sweep_line
-    , std::map<DCEL::Edge*, DCELEdgeWrapper*>& edge_mapper, DCEL::Polygon* poly,
-     std::vector<LineSeg2D>& diagonals)
+  void MonotonePartitionAlgo::PrintDiagonals()
   {
-    DCELEdgeWrapper* edge = new DCELEdgeWrapper(vertex.vert->incident_edge, vertex);
-    sweep_line.insert(edge);
-    edge_mapper.insert(std::pair<DCEL::Edge*, DCELEdgeWrapper*>(vertex.vert->incident_edge, edge));
-  }
-
-  static void HandleEndVertex(DCELVertexWrapper& vertex
-    , std::set<DCELEdgeWrapper*, SweepLineComparator>& sweep_line
-    , std::map<DCEL::Edge*, DCELEdgeWrapper*>& edge_mapper, DCEL::Polygon* poly,
-    std::vector<LineSeg2D>& diagonals)
-  {
-    auto edge_wrapper = edge_mapper[vertex.vert->incident_edge->prev];
-    auto found = sweep_line.find(edge_wrapper);
-    auto helper = (*found)->helper;
-    if (helper.category == VertexCategory::Merge) {
-      diagonals.push_back({vertex.vert->point, helper.vert->point});
-      poly->Split(vertex.vert, helper.vert);
-    }
-    sweep_line.erase(found);
-  }
-
-  static void HandleSplitVertex(DCELVertexWrapper& vertex
-    , std::set<DCELEdgeWrapper*, SweepLineComparator>& sweep_line
-    , std::map<DCEL::Edge*, DCELEdgeWrapper*>& edge_mapper, DCEL::Polygon* poly, 
-     std::vector<LineSeg2D>& diagonals)
-  {
-    DCELEdgeWrapper* edge = new DCELEdgeWrapper(vertex.vert->incident_edge, vertex);
-    auto found = sweep_line.lower_bound(edge);
-    DCELEdgeWrapper* ej;
-    if (found == sweep_line.end()) {
-      if (sweep_line.size() > 0) {
-        ej = *(--found);
-        diagonals.push_back({vertex.vert->point, ej->helper.vert->point});
-        poly->Split(vertex.vert, ej->helper.vert);
-        ej->helper = vertex;
-      }
-    }
-    else if (found != sweep_line.begin())
-    {
-      ej = *(--found);
-      diagonals.push_back({vertex.vert->point, ej->helper.vert->point});
-      poly->Split(vertex.vert, ej->helper.vert);
-      ej->helper = vertex;
-    }
-    else {
-      int wtf = 1;
-    }
-    sweep_line.insert(edge);
-    edge_mapper.insert(std::pair<DCEL::Edge*, DCELEdgeWrapper*>(vertex.vert->incident_edge, edge));
-  }
-
-  static void HandleMergeVertex(DCELVertexWrapper& vertex
-    , std::set<DCELEdgeWrapper*, SweepLineComparator>& sweep_line
-    , std::map<DCEL::Edge*, DCELEdgeWrapper*>& edge_mapper, DCEL::Polygon* poly,
-    std::vector<LineSeg2D>& diagonals)
-  {
-    auto edge_wrapper = edge_mapper[vertex.vert->incident_edge->prev];
-    if (edge_wrapper->helper.category == VertexCategory::Merge) {
-      diagonals.push_back({vertex.vert->point, edge_wrapper->helper.vert->point});
-      poly->Split(vertex.vert, edge_wrapper->helper.vert);
-    }
-
-    auto found = sweep_line.find(edge_wrapper);
-    if (found != sweep_line.end())
-      sweep_line.erase(found);
-
-    DCELEdgeWrapper* edge = new DCELEdgeWrapper(vertex.vert->incident_edge, vertex);
-    found = sweep_line.lower_bound(edge);
-    DCELEdgeWrapper* ej;
-    if (found == sweep_line.end()) {
-      if (sweep_line.size() > 0) {
-        ej = *(--found);
-        if (ej->helper.category == VertexCategory::Merge) {
-          diagonals.push_back({vertex.vert->point, ej->helper.vert->point});
-          poly->Split(vertex.vert, ej->helper.vert);
-        }
-        ej->helper = vertex;
-      }
-    }
-    else if (found != sweep_line.begin())
-    {
-      ej = *(--found);
-      if (ej->helper.category == VertexCategory::Merge) {
-        diagonals.push_back({vertex.vert->point, ej->helper.vert->point});
-        poly->Split(vertex.vert, ej->helper.vert);   
-      }
-      ej->helper = vertex;
+    SPG_TRACE("Diagonals: ------------------- ");
+    for(auto& inter : m_diagonals) {
+      SPG_TRACE(" {}->{}", inter.first->tag, inter.second->tag);
     }
   }
-
-  static void HandleRegularVertex(DCELVertexWrapper& vertex
-    , std::set<DCELEdgeWrapper*, SweepLineComparator>& sweep_line
-    , std::map<DCEL::Edge*, DCELEdgeWrapper*>& edge_mapper, DCEL::Polygon* poly,
-     std::vector<LineSeg2D>& diagonals)
-  {
-    // Check whether the interior of the polygon lies right to vertex point
-    auto prev_y = vertex.vert->incident_edge->prev->origin->point.y;
-    auto current_y = vertex.vert->point.y;
-    auto next_y = vertex.vert->incident_edge->next->origin->point.y;
-
-    DCELEdgeWrapper* edge = new DCELEdgeWrapper(vertex.vert->incident_edge, vertex);
-
-    if (prev_y >= current_y && current_y >= next_y) {
-      auto edge_wrapper = edge_mapper[vertex.vert->incident_edge->prev];
-      if (edge_wrapper->helper.category == VertexCategory::Merge) {
-        diagonals.push_back({vertex.vert->point, edge_wrapper->helper.vert->point});
-        poly->Split(vertex.vert, edge_wrapper->helper.vert);
-      }
-
-      auto found = sweep_line.find(edge_wrapper);
-      if (found != sweep_line.end())
-        sweep_line.erase(found);
-
-      sweep_line.insert(edge);
-      edge_mapper.insert(std::pair<DCEL::Edge*, DCELEdgeWrapper*>(vertex.vert->incident_edge,
-        edge));
-    }
-    else {
-      auto found = sweep_line.lower_bound(edge);
-      DCELEdgeWrapper* ej;
-      if (found == sweep_line.end()) {
-        if (sweep_line.size() > 0) {
-          ej = *(--found);
-          if (ej->helper.category == VertexCategory::Merge) {
-            diagonals.push_back({vertex.vert->point, ej->helper.vert->point});
-            poly->Split(vertex.vert, ej->helper.vert);
-          }
-          ej->helper = vertex;
-        }
-      }
-      else if (found != sweep_line.begin())
-      {
-        ej = *(found--);
-        if (ej->helper.category == VertexCategory::Merge) {
-          diagonals.push_back({vertex.vert->point, ej->helper.vert->point});
-          poly->Split(vertex.vert, ej->helper.vert);
-        }
-        ej->helper = vertex;
-      }
-    }
-  }
-
-  std::vector<DCEL::Polygon*> GetMonotonPolygons(DCEL::Polygon* poly, std::vector<LineSeg2D>& diagonals)
-  {
-    std::vector<DCELVertexWrapper> vertices;  //The event queue
-    for(auto vertex : poly->GetVertices()) {
-      vertices.push_back(DCELVertexWrapper{vertex, CategorizeVertex(vertex)});
-    }
-    std::sort(vertices.begin(), vertices.end(), DCELVertexWrapperSort());
-
-    Point2d* sweep_point = new Point2d();
-    sweep_point->x = vertices[0].vert->point.x;
-    sweep_point->y = vertices[0].vert->point.y;
-
-    SweepLineComparator comp(sweep_point);
-    std::set<DCELEdgeWrapper*, SweepLineComparator> sweep_line(comp); //sweep line status structure
-    std::map<DCEL::Edge*, DCELEdgeWrapper*> edge_mapping;
-
-    //process event queue
-    for(auto vertex : vertices) {
-      sweep_point->x = vertex.vert->point.x;
-      sweep_point->y = vertex.vert->point.y;  
-
-      switch(vertex.category) {
-        case VertexCategory::Start:
-			    HandleStartVertex(vertex, sweep_line, edge_mapping, poly,diagonals);
-			    break;
-        case VertexCategory::End:
-          HandleEndVertex(vertex, sweep_line, edge_mapping, poly,diagonals);
-          break;
-        case VertexCategory::Regular:
-          HandleRegularVertex(vertex, sweep_line, edge_mapping, poly, diagonals);
-          break;
-        case VertexCategory::Split:
-          HandleSplitVertex(vertex, sweep_line, edge_mapping, poly,diagonals);
-          break;
-        case VertexCategory::Merge:
-          HandleMergeVertex(vertex, sweep_line, edge_mapping, poly,diagonals);
-          break;
-        case VertexCategory::Invalid:
-          break;
-      }
-    }
-
-    std::vector<std::vector<Point2d>> polygon_pieces_vertices;
-
-    for (auto face_ptr : poly->GetFaces()) {
-      auto first_edge_ptr = face_ptr->outer;
-      if (first_edge_ptr) {
-        std::vector<Point2d> vertices;
-        vertices.push_back(first_edge_ptr->origin->point);
-
-        auto next_edge_ptr = first_edge_ptr->next;
-        while (next_edge_ptr != first_edge_ptr) {
-          vertices.push_back(next_edge_ptr->origin->point);
-          next_edge_ptr = next_edge_ptr->next;
-        }
-        polygon_pieces_vertices.push_back(vertices);
-      }
-    }
-
-    std::vector<DCEL::Polygon*> monotone_polys;
-    for(auto vertices : polygon_pieces_vertices)
-		  monotone_polys.push_back(new DCEL::Polygon(vertices));
-
-    return monotone_polys;
-  }
-
-
 }

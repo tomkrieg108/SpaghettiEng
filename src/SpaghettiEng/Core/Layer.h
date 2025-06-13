@@ -8,7 +8,7 @@ namespace Spg
   class Layer
   {
   public:
-    Layer(AppContext& app_context, const std::string& name = "Layer");
+    Layer(AppContext& app_context, const std::string& name = "Default Layer");
     virtual ~Layer() = default;
 
     virtual void OnAttach() {}
@@ -44,8 +44,8 @@ namespace Spg
     auto rend() const { return m_Layers.crend(); }
 
   private:
-    std::vector<Layer*> m_Layers; //Todo - use Scope<Layer>
-    unsigned int m_LayerInsertIndex = 0;
+    std::vector<Layer*> m_Layers;
+    uint32_t m_LayerInsertIndex = 0;
   };
 
 }

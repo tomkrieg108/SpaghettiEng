@@ -60,6 +60,7 @@ namespace Geom
     return points;
   }
  
+  #if 0
   std::vector<Point2d> GenerateMonotoneDiagonals(DCEL::Polygon* polygon)
   {
     std::vector<Point2d> points;
@@ -72,6 +73,7 @@ namespace Geom
     }
     return points;
   }
+#endif
 
   std::vector<Point2d> GenerateRandomPoints_XY(float radius, uint32_t num_points)
   {
