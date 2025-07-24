@@ -13,9 +13,6 @@
     Report all leaves in the right subtree
   -follow search path of right boundary value
     Report all leaves in the left subtree  
-
-
-
 */
 
 namespace Geom
@@ -51,7 +48,6 @@ namespace Geom
     void Insert(float value);
     bool Delete(float value);
 
-    //Todo - not ideal to return bool indicating success and op param as value
     bool Find(float value) {
       return (Find(m_root, value) != nullptr);
     }

@@ -1,6 +1,7 @@
 #pragma once
 #include "DCEL.h"
 #include "GeomBase.h"
+#include <map>
 
 namespace Geom
 {
@@ -109,9 +110,7 @@ namespace Geom
   public:
 
     MonotonePartitionAlgo();
-
     MonotonePartitionAlgo(const std::vector<Point2d>& points);
-
     void Set(const std::vector<Point2d>& points);
     void Clear();
     void Step();
@@ -119,37 +118,41 @@ namespace Geom
       return m_event_queue.empty();
     }
     void MakeMonotone();
+    void Triangulate();
+    std::vector<Point2d> GetMonotonDiagonals() {
+      return GetDiagonalEndPoints(m_monotone_diagonals);
+    }
+    std::vector<Point2d> GetTriangulationDiagonals() {
+      return GetDiagonalEndPoints(m_triangulation_diagonals); 
+    }
+
     auto& GetDCEL() {
       return m_polygon;
     }
-
     auto& GetEventPoints() {
       return m_event_queue_unsorted;
     }
-
     auto& GetEventQueue() {
       return m_event_queue;
     }
-
     auto& GetStatusStructure() {
       return m_T;
     }
 
-    std::vector<Point2d> GetDiagonalEndPoints();
-    
   private:
+    using DiagonalList =  std::vector<std::pair<DCEL::Vertex*, DCEL::Vertex*>>;
+
     VertexCategory GetVertexCategory(DCEL::Vertex* vertex);
     void InitialiseEventQueue();
-
     void HandleStartVertex(const Event& e);
     void HandleEndVertex(const Event& e);
     void HandleSplitVertex(const Event& e);
     void HandleMergeVertex(const Event& e);
     void HandleRegularVertex(const Event& e);
-
-    //Helpers
     DCEL::HalfEdge* GetDepartingEdge(DCEL::Vertex* v); 
     bool PolygonInteriorOnRight(DCEL::Vertex* v);
+    void TriangulateFace(DCEL::Face* face);
+    std::vector<Point2d> GetDiagonalEndPoints(DiagonalList& diagonal_list);
     
   private:
     void PrintEvent(Event e);
@@ -159,15 +162,15 @@ namespace Geom
   private:  
     DCEL m_polygon;
     //use  std::vector rather than priority_queue make debugging easier.  
-    std::vector<Event> m_event_queue; 
+    std::vector<Event> m_event_queue;  
     //retain the unsorted events (same order as the vertices supplied to DCEL).  Return in GetEventPoints().  Need this for rendering in the Geom App (correct colour of the vertex for given category)
     std::vector<Event> m_event_queue_unsorted; 
     Point2d m_cur_event_point{FLT_MAX,FLT_MAX};
-
     //The set of active edges for the current algo state ("status structure")
     std::map<DCEL::HalfEdge, HelperPoint, EdgeComparator> m_T;
-
     //List of diagonals found
-    std::vector<std::pair<DCEL::Vertex*, DCEL::Vertex*>> m_diagonals;
+    DiagonalList m_monotone_diagonals;
+    DiagonalList m_triangulation_diagonals;
   };
+
 }

@@ -7,6 +7,8 @@
 #include "Polygon.h"
 #include "Triangulate.h"
 #include "BST.h"
+#include "BSTree.h"
+#include "RBTree.h"
 #include "IntersectionSet.h"
 #include "DCEL.h"
 #include "MonotonePartition.h"

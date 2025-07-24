@@ -14,10 +14,17 @@ namespace Spg
     {
       Polygon, Circle, LineSet, PointSet
     };
+
+    struct Label
+    {
+      std::string text;
+      Geom::Point2d pos;
+    };
     
     struct Mesh
     {
       std::vector<Geom::Point2d> vertices;
+      std::vector<Label> labels;
       MeshType type;
       bool active = true;
       uint32_t render_id = std::numeric_limits<uint32_t>::max(); //initially undefined

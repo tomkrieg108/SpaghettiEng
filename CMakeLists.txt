@@ -122,7 +122,7 @@ endif()
 add_subdirectory(external)  
 add_subdirectory(src) 
 
-# Build type - preprocessor macro is compiler dependent, so set here 
+# Build type (Debug, Release etc) - preprocessor macro is compiler dependent, so set here 
 # Need to use generator expression for multi-config generators (MSVC)
 target_compile_definitions(${LIB_COMMON} PRIVATE 
   $<$<CONFIG:Debug>:SPG_DEBUG>
@@ -213,6 +213,9 @@ target_precompile_headers(${LIB_GEOM} PRIVATE
   <string>
   <string_view>
   <vector>
+  <map>
+  <unordered_map>
+  <set>
   <random>
   <algorithm>
   <numbers>

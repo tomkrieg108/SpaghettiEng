@@ -35,7 +35,7 @@ namespace Geom
     return std::abs(v1 - v2) < Epsilon(scale_factor);
   }
 
-  inline bool EqualRel(float v1, float v2, float relTol = 1e-3f) {
+  inline bool EqualRel(float v1, float v2, float relTol = 1e-4f) {
     return std::fabs(v1 - v2) <= relTol * std::max(std::fabs(v1), std::fabs(v2));
   }
 

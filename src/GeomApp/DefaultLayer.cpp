@@ -1,8 +1,8 @@
 #include "DefaultLayer.h"
+#include <random>
 
 namespace Spg
 {
-  //namespace fs = std::filesystem;
   using VertexCategory = Geom::MonotonePartitionAlgo::VertexCategory;
 
   static void PrintDiagPoints(const std::vector<Geom::Point2d> points)
@@ -11,10 +11,6 @@ namespace Spg
       SPG_TRACE("({},{})", p.x,p.y);
     }
   }
-
-  std::string DefaultLayer::s_active_mesh = "";
-
-  static uint32_t s_montotone_algo_state = 0;
 
   DefaultLayer::DefaultLayer(AppContext& app_context, const std::string& name) : 
     Layer(app_context, name),
@@ -27,7 +23,7 @@ namespace Spg
     m_logger = Utils::Logger::Create("Bubble Layer");
     Create2DGrid();
     SetCanvasSize(500.0f);
-    //GeomTest();
+    GeomTest();
   }
 
   void DefaultLayer::SetCanvasSize(float canvas_size)
@@ -50,11 +46,12 @@ namespace Spg
     Mesh& mesh = m_mesh_list[s_active_mesh];
     SPG_ASSERT(mesh.type == MeshType::Polygon);
 
-    //clear any child meshes from previous run
+    //clear any child meshes & labels from previous run
     for(auto& item : mesh.children) {
       m_renderer.Delete(item.second.render_id);
     }
     mesh.children.clear();
+    mesh.labels.clear();
 
     //reset the monotone spawner
     m_monotone_spawner.Clear(); //clear DCEL
@@ -70,7 +67,7 @@ namespace Spg
     mesh.children["Points"] = point_mesh;
     
     //set the colours on the polygon vertices based on their category
-    //Todo - could update the mooton event to store the index of the original passed in vertex, then use the to supply the correct index in UpdateColour.  This save having to record the unsorted events in the monotone algo and passing those back in GetEventPoints(). Might have been less effot just to implement this thing rather than type out this todo.
+    //Todo - could update the mootone event to store the index of the original passed in vertex, then use the to supply the correct index in UpdateColour.  This save having to record the unsorted events in the monotone algo and passing those back in GetEventPoints(). Might have been less effort just to implement this thing rather than type out this todo.
     auto& monotone_event_points = m_monotone_spawner.GetEventPoints();
     for(uint32_t i=0; i< point_mesh.vertices.size(); ++i) {
       if(monotone_event_points[i].vertex_category == VertexCategory::Start) {
@@ -105,390 +102,15 @@ namespace Spg
     sweep_line_mesh.type = MeshType::LineSet;
     sweep_line_mesh.render_id = m_renderer.Submit(sweep_line_mesh.vertices, glm::vec4(0,1,1,1),GLRenderer::PrimitiveType::Line);
     mesh.children["Sweepline"] = sweep_line_mesh;
-  }
 
-  void DefaultLayer::OnImGuiRender()
-  {
-    ImGui::Begin(m_name.c_str());
-
-    if(ImGui::CollapsingHeader("2D Polygon List")) {
-
-      //Parameters for creating a random simple polygon
-      ImGui::SeparatorText("Parameters");
-      static int32_t max_vertices = 20;
-      static float min_edge = 50.0f; 
-      static float max_edge = 250.0f; 
-      static float min_angle = 20.0f; 
-      static float perturb_factor = 0.4f;
-
-      ImGui::SliderInt("Max Vertices", &max_vertices, 8, 50); 
-      ImGui::SetItemTooltip("Max number of vertices this polygon can have");
-
-      ImGui::SliderFloat("Min Edge Length", &min_edge, 40.f, 60.f, "%.1f"); 
-      ImGui::SetItemTooltip("Min edge length");
-
-      ImGui::SliderFloat("Max Edge Length", &max_edge, 200.f, 300.f, "%.1f"); 
-      ImGui::SetItemTooltip("Max edge length");
-
-      ImGui::SliderFloat("Min Angle", &min_angle, 15.0f, 30.0f, "%.1f"); 
-      ImGui::SetItemTooltip("Min allowed angle (in degrees) between adjacent edges");
-
-      ImGui::SliderFloat("Perturbation Factor ", &perturb_factor, 0.3f, 0.5f, "%.2f"); 
-      ImGui::SetItemTooltip("Adjusts inward/outward movement");
-
-      //Button to create a new random polygon, add it to DefaultLayer::m_polygon
-      ImGui::SeparatorText("Create New");
-      bool create_clicked = false;
-      if(ImGui::Button("Create New")) {
-        create_clicked = true;
-      }
-      ImGui::SetItemTooltip("Create random simple polygon based on parameters set");
-      std::vector<Geom::Point2d> poly_points;
-      if(create_clicked) {
-        Geom::PolygonParameters poly_params{uint32_t(max_vertices*0.7),uint32_t(max_vertices*1.0),min_edge,max_edge,min_angle,perturb_factor};
-        Mesh mesh;
-        mesh.vertices = Geom::GenerateRandomPolygon_XY(poly_params);
-        mesh.type= MeshType::Polygon;
-        mesh.active = true;
-        std::string mesh_name = std::string("Polygon ") + std::to_string(m_mesh_list.size() + 1);
-        m_mesh_list[mesh_name] = mesh;
-
-        //If there's already a mesh active then disable it's display
-        if(s_active_mesh != "") {
-          //Todo - this code is repeated ofen - refactor
-          Mesh& mesh = m_mesh_list[s_active_mesh];
-          mesh.active = false;
-          m_renderer.Disable(mesh.render_id);
-          //also clear any child meshes from this mesh
-          for(auto& item : mesh.children) {
-            m_renderer.Delete(item.second.render_id);
-          }
-          mesh.children.clear();
-
-          //reset the monotone algo
-          m_monotone_spawner.Clear(); 
-          s_montotone_algo_state = 0;
-        }
-        
-        //Update the active mesh to the newly created one
-        s_active_mesh = mesh_name;
-      }
-
-      //Control for the change the colour of the active mesh
-      ImGui::Separator();
-      if( s_active_mesh != "") {
-        ImGui::Text("Selected: "); 
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), s_active_mesh.c_str());
-        Mesh& mesh = m_mesh_list[s_active_mesh];
-        if(mesh.render_id == std::numeric_limits<uint32_t>::max())
-        {
-            mesh.render_id = m_renderer.Submit( mesh.vertices, glm::vec4(0,0,1,1), GLRenderer::PrimitiveType::LineLoop);
-        }
-        else {
-          static ImVec4 seg_color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
-          if(ImGui::ColorEdit3("Seg Color##1", (float*)&seg_color, ImGuiColorEditFlags_Float)) {
-            glm::vec4 col{seg_color.x,seg_color.y, seg_color.z, seg_color.w};
-            SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
-            auto render_id = m_mesh_list[s_active_mesh].render_id;
-            for(auto i=0; i<m_mesh_list[s_active_mesh].vertices.size(); ++i) //Todo - not super efficient!!
-              m_renderer.UpdateColour(render_id, col,i);
-          }
-        }
-        if(m_mesh_list.empty()) {
-          ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "None created yet.");
-        }
-        ImGui::Separator();
-
-        //List out all the created polygons, save the selected item in s_active_mesh
-        for(auto& item : m_mesh_list) {
-          if(item.second.type != MeshType::Polygon)
-            continue;
-          bool selected = (s_active_mesh == item.first);
-          char buff[128] = {char(0)};
-          std::strncpy(buff, item.first.c_str(), item.first.size());
-          if (ImGui::Selectable(buff, selected)) {
-            //disable the currently active mesh
-            Mesh& mesh = m_mesh_list[s_active_mesh];
-            mesh.active = false;
-            m_renderer.Disable(mesh.render_id);
-            for(auto& item : mesh.children) {
-              m_renderer.Delete(item.second.render_id);
-            }
-            mesh.children.clear();
-
-            //reset the monotone algo
-            m_monotone_spawner.Clear(); 
-            s_montotone_algo_state = 0;  
-
-            //Update active mesh to the selected item
-            s_active_mesh = item.first;
-          } 
-        }
-    
-        //Submit selected polygon for rendering
-        if(s_active_mesh != "") {
-          if(m_mesh_list.find(s_active_mesh) != m_mesh_list.end()) {
-            //activate the mewly selected mesh
-            Mesh& mesh = m_mesh_list[s_active_mesh];
-            m_renderer.Enable(mesh.render_id);
-            for(auto& item : mesh.children) {
-              m_renderer.Enable(item.second.render_id);
-            }
-          } 
-        }
-
-      }
-
-      ImGui::Separator();
-
+    //Set up the labels for the poygon vertices
+    for(auto& event_point : monotone_event_points) {
+      Label label;
+      label.pos.x = event_point.vertex->point.x - 25;
+      label.pos.y = event_point.vertex->point.y + 15;
+      label.text = std::to_string(event_point.tag);
+      mesh.labels.push_back(label);
     }
-
-    if(ImGui::CollapsingHeader("2D PointField List")) {
-      static int32_t num_points = 20;
-      static float radius = 400.0f;
-      ImGui::SeparatorText("Point field Parameters");
-      ImGui::SliderInt("Num Points", &num_points, 10, 50);
-      ImGui::SliderFloat("Radius", &radius, 300, 500);
-      ImGui::SeparatorText("Create new point field");
-     
-      //std::vector<Geom::Point2d> points;
-      if(ImGui::Button("Generate")) {
-        Mesh mesh;
-        mesh.vertices = Geom::GenerateRandomPoints_XY(radius, num_points);
-        mesh.type= MeshType::PointSet;
-        mesh.active = true;
-        mesh.render_id = m_renderer.Submit(mesh.vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::Point);
-        std::string mesh_name = std::string("PointSet ") + std::to_string(m_mesh_list.size() + 1);
-        m_mesh_list[mesh_name] = mesh;
-
-        //If there's already a mesh active then disable it's display
-        if(s_active_mesh != "") {
-          //Todo - this code is repeated ofen - refactor
-          Mesh& mesh = m_mesh_list[s_active_mesh];
-          mesh.active = false;
-          m_renderer.Disable(mesh.render_id);
-          //also clear any child meshes from this mesh
-          for(auto& item : mesh.children) {
-            m_renderer.Delete(item.second.render_id);
-          }
-          mesh.children.clear();
-
-          //reset the monotone algo
-          m_monotone_spawner.Clear(); 
-          s_montotone_algo_state = 0;
-        }
-        //Update the active mesh to the newly created one
-        s_active_mesh = mesh_name;
-      }
-
-      ImGui::Separator();
-
-      //List out all the created Point Sets, save the selected item in s_active_mesh
-      //Todo - repeated
-      for(auto& item : m_mesh_list) {
-        if(item.second.type != MeshType::PointSet)
-          continue;
-        bool selected = (s_active_mesh == item.first);
-        char buff[128] = {char(0)};
-        std::strncpy(buff, item.first.c_str(), item.first.size());
-        if (ImGui::Selectable(buff, selected)) {
-          //disable the currently active mesh
-          Mesh& mesh = m_mesh_list[s_active_mesh];
-          mesh.active = false;
-          m_renderer.Disable(mesh.render_id);
-          for(auto& item : mesh.children) {
-            m_renderer.Delete(item.second.render_id);
-          }
-          mesh.children.clear();
-
-          //reset the monotone algo
-          m_monotone_spawner.Clear(); 
-          s_montotone_algo_state = 0;  
-
-          //Update active mesh to the selected item
-          s_active_mesh = item.first;
-        } 
-      }
-
-      //Submit selected polygon for rendering
-      //todo - repeated
-      if(s_active_mesh != "") {
-        if(m_mesh_list.find(s_active_mesh) != m_mesh_list.end()) {
-          //activet the mewly selected edge
-          Mesh& mesh = m_mesh_list[s_active_mesh];
-          m_renderer.Enable(mesh.render_id);
-          for(auto& item : mesh.children) {
-            m_renderer.Enable(item.second.render_id);
-          }
-        } 
-      }
-    }
-
-    if(ImGui::CollapsingHeader("Convex Hull 2D")) {
-      ImGui::Separator();
-      if(s_active_mesh == "")  {
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Create a point field.");
-      }
-      //Todo this triggered if this header opened before any point sets created
-      SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
-      if(m_mesh_list[s_active_mesh].type != MeshType::PointSet) {
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Select a point field.");
-      }
-      else if( s_active_mesh != "") {
-        ImGui::Text("Selected: "); 
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), s_active_mesh.c_str());
-
-        SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
-        Mesh& mesh = m_mesh_list[s_active_mesh];
-        m_renderer.Enable(mesh.render_id); //should be already enabled 
-        if(!mesh.children.empty()) {
-          ImGui::Text("Convex hull completed");
-          for(auto& item : mesh.children) {
-            m_renderer.Enable(item.second.render_id);
-          }
-        }
-        else if(ImGui::Button("Run")) {
-          Mesh& mesh = m_mesh_list[s_active_mesh];
-          Mesh hull_mesh;
-          //diagonal_mesh.vertices =  Geom::ConvexHull2D_GiftWrap(mesh.vertices);
-          hull_mesh.vertices =  Geom::Convexhull2D_ModifiedGrahams(mesh.vertices);
-          hull_mesh.type = MeshType::LineSet;
-          hull_mesh.active = true;
-          hull_mesh.render_id = m_renderer.Submit( hull_mesh.vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::LineLoop);
-          mesh.children["Diagonals"] = hull_mesh;
-        }
-      }
-    }
-
-    if(ImGui::CollapsingHeader("Polygon Triangulation")) {
-      //Todo - this is almost the same as the section above!
-      ImGui::Separator();
-      if(s_active_mesh == "")  {
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Create a polygon to triangulate.");
-      }
-      SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
-      if(m_mesh_list[s_active_mesh].type != MeshType::Polygon) {
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Select a polygon to triangulate.");
-      }
-      else if( s_active_mesh != "") {
-        ImGui::Text("Selected: "); 
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), s_active_mesh.c_str());
-
-        SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
-        Mesh& mesh = m_mesh_list[s_active_mesh];
-        m_renderer.Enable(mesh.render_id); //should be already enabled 
-        if(!mesh.children.empty()) {
-          ImGui::Text("Triangulation completed");
-          for(auto& item : mesh.children) {
-            m_renderer.Enable(item.second.render_id);
-          }
-        }
-        else if(ImGui::Button("Run")) {
-          Mesh& mesh = m_mesh_list[s_active_mesh];
-          auto poly_points = mesh.vertices;
-          Geom::PolygonSimple polygon = Geom::PolygonSimple(poly_points);
-
-          Mesh diagonal_mesh;
-          diagonal_mesh.vertices =  Geom::GenerateEarClipplingDiagonals(&polygon);
-          diagonal_mesh.type = MeshType::LineSet;
-          diagonal_mesh.active = true;
-          diagonal_mesh.render_id = m_renderer.Submit( diagonal_mesh.vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::Line);
-          mesh.children["Diagonals"] = diagonal_mesh;
-        }
-      }
-    }
-
-    if(ImGui::CollapsingHeader("Polygom Monotone partition and triangluation")) {
-
-      bool valid_mesh = false;
-      if (s_active_mesh != "") {
-        SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
-      } 
-      Mesh& mesh = m_mesh_list[s_active_mesh];
-
-      if(s_active_mesh == "")  {
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Create a polygon to partition.");
-      }
-      else if((mesh.type != MeshType::Polygon)) {
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Select a polygon to triangulate.");
-      }
-      else {
-        ImGui::Text("Selected: "); 
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), s_active_mesh.c_str());
-        valid_mesh = true;
-      }
-
-      if(!valid_mesh) {
-        ImGui::End();
-        return;
-      }
-      
-      if(s_montotone_algo_state == 0)// pre-init
-      {
-        if(ImGui::Button("Initialise")) 
-        {
-          MonotoneAlgoInit();
-          s_montotone_algo_state = 1; //post init
-        } 
-      }
-
-      else if(s_montotone_algo_state == 1) { //post-init
-        if(ImGui::Button("Step")) {
-          auto render_id = mesh.children["Sweepline"].render_id;
-          MonotoneAlgoSweepLineUpdate(render_id); 
-          m_monotone_spawner.Step();
-          s_montotone_algo_state = 2; //algo running
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("Run")) {
-          m_monotone_spawner.MakeMonotone();
-          s_montotone_algo_state = 3; //algo complete
-        }
-      }
-
-      else if(s_montotone_algo_state == 2) { //algo running
-        if(m_monotone_spawner.FinishedProcessing()) {
-          s_montotone_algo_state = 3; //algo complete
-        }
-        else if(ImGui::Button("Step")) {
-          Mesh& sweep_line_mesh = mesh.children["Sweepline"];
-          MonotoneAlgoSweepLineUpdate(sweep_line_mesh.render_id);
-          m_monotone_spawner.Step();
-          if(m_monotone_spawner.FinishedProcessing()) {
-            s_montotone_algo_state = 3; //algo complete
-          }
-        }
-      }
-
-      else if(s_montotone_algo_state == 3) { //algo complete
-        ImGui::Text("Algorithm completed");
-
-        if(ImGui::Button("Show Diagonals")) {
-          SPG_ASSERT(mesh.children.find("Diagonals") == mesh.children.end());
-          Mesh diagonal_mesh;
-          diagonal_mesh.vertices = m_monotone_spawner.GetDiagonalEndPoints();
-          diagonal_mesh.type = MeshType::LineSet;
-          diagonal_mesh.active = true;
-          diagonal_mesh.render_id = m_renderer.Submit( diagonal_mesh.vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::Line);
-          mesh.children["Diagonals"] = diagonal_mesh;
-          s_montotone_algo_state = 4;
-        }
-      }
-
-      else if(s_montotone_algo_state == 4) { //Diagonals displayed  
-        if(ImGui::Button("Reset")) {
-          //m_renderer.Delete( mesh.children["Diagonals"].render_id);
-          MonotoneAlgoInit();
-          s_montotone_algo_state = 1; //post-init
-        }
-      }
-    }
-
-    ImGui::End();
   }
 
   void DefaultLayer::UpdateCanvas()
@@ -505,7 +127,19 @@ namespace Spg
 
   void DefaultLayer::OnUpdate(double delta_time) 
   { 
+    //Primitive shape rendering
     m_renderer.Draw(m_camera);
+    
+    //Text Rendering
+    if(m_mesh_list.find(s_active_mesh) == m_mesh_list.end()) {
+      m_text_renderer.Render("Hello from TexRenderer!!", -50,-50,0.5f,glm::vec3(0,1,0));
+      return;
+    }
+
+    Mesh& mesh = m_mesh_list[s_active_mesh];
+    for(auto& label : mesh.labels) {
+      m_text_renderer.Render(label.text, label.pos.x, label.pos.y, 0.35f, {1,1,1});
+    }
   }
 
   void DefaultLayer::OnAttach()
@@ -589,8 +223,9 @@ namespace Spg
 
   void DefaultLayer::GeomTest()
   {
-   #if 1
-    //Test out some geom stuff
+  //Test out some geom stuff
+#if 0
+    
     Geom::LineSeg2D seg1(Geom::Point2d{0,0}, Geom::Point2d{10,0});
     Geom::LineSeg2D seg2(Geom::Point2d{0,0}, Geom::Point2d{10,10});
     //angle difference
@@ -658,10 +293,16 @@ namespace Spg
     {
       Geom::ComputeIntersection(seg1,seg2, intersection);
     }
+#endif    
 
     //-----------------------------------------------------------------------
     //BST
-    std::vector<float> values{2,11,4,125,15,3,9,32,71,43,27};
+    //----------------------------------------------------------------------
+#if 0  
+    LOG_WARN(m_logger,"--------------------------");
+    LOG_WARN(m_logger,"BST Tree (original)");
+    LOG_WARN(m_logger,"--------------------------");
+    std::vector<float> values{2,11,4,125,15,3,9,32,71,43,27,1};
     std::list<float> list;
     Geom::BST bst(values);
     bst.InOrderTraverse(bst.GetRootNode(), list);
@@ -699,6 +340,14 @@ namespace Spg
       LOG_TRACE(m_logger, "{},", val);
     }
 
+    bst.Insert(32.0);
+    list.clear();
+    bst.InOrderTraverse(bst.GetRootNode(), list);
+    LOG_TRACE(m_logger, "Insert 32");   
+    for(auto val : list) {
+      LOG_TRACE(m_logger, "{},", val);
+    }
+
     bst.Delete(99.0);
     list.clear();
     bst.InOrderTraverse(bst.GetRootNode(), list);
@@ -706,8 +355,277 @@ namespace Spg
     for(auto val : list) {
       LOG_TRACE(m_logger, "{},", val);
     }
+#endif  
 
-    #endif
+    //-------------------------------------------------------------------------------
+    //BSTree (new)
+    //----------------------------------------------------------------------------------
+#if 0    
+    LOG_WARN(m_logger,"--------------------------");
+    LOG_WARN(m_logger,"BST TREE (NEW)");
+    LOG_WARN(m_logger,"--------------------------");
+    std::vector<float> values{2,11,4,125,15,3,9,32,71,43,27,1};
+    Geom::BSTree bstree(values);
+    std::vector<float> op_vals = bstree.InOrderTraverse();
+    for(auto val : op_vals) {
+      LOG_TRACE(m_logger, "{},", val);
+    } 
+
+    LOG_TRACE(m_logger, "Min is {} ", bstree.Min());
+    LOG_TRACE(m_logger, "Max is {} ", bstree.Max());
+    LOG_TRACE(m_logger, "Size is {} ", bstree.Size());
+
+    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
+    LOG_TRACE(m_logger, "Contains 9 ? {} ", bstree.Contains(9));
+    LOG_TRACE(m_logger, "Contains 32 ? {} ", bstree.Contains(32));
+    LOG_TRACE(m_logger, "Contains 77 ? {} ", bstree.Contains(77));
+    LOG_TRACE(m_logger, "Contains 39 ? {} ", bstree.Contains(39));
+    LOG_TRACE(m_logger, "Contains 127 ? {} ", bstree.Contains(127));
+
+    LOG_TRACE(m_logger, "Sucessor of 1 is {} ", bstree.Next(1));
+    LOG_TRACE(m_logger, "Sucessor of 2 is {} ", bstree.Next(2));
+    LOG_TRACE(m_logger, "Sucessor of 3 is {} ", bstree.Next(3));
+    LOG_TRACE(m_logger, "Sucessor of 4 is {} ", bstree.Next(4));
+    LOG_TRACE(m_logger, "Sucessor of 9 is {} ", bstree.Next(9));
+    LOG_TRACE(m_logger, "Sucessor of 11 is {} ", bstree.Next(11));
+    LOG_TRACE(m_logger, "Sucessor of 15 is {} ", bstree.Next(15));
+    LOG_TRACE(m_logger, "Sucessor of 27 is {} ", bstree.Next(27));
+    LOG_TRACE(m_logger, "Sucessor of 32 is {} ", bstree.Next(32));
+    LOG_TRACE(m_logger, "Sucessor of 43 is {} ", bstree.Next(43));
+    LOG_TRACE(m_logger, "Sucessor of 71 is {} ", bstree.Next(71));
+    LOG_TRACE(m_logger, "Sucessor of 125 is {} ", bstree.Next(125));
+
+    LOG_TRACE(m_logger, "Predecessor of 1 is {} ", bstree.Previous(1));
+    LOG_TRACE(m_logger, "Predecessor of 2 is {} ", bstree.Previous(2));
+    LOG_TRACE(m_logger, "Predecessor of 3 is {} ", bstree.Previous(3));
+    LOG_TRACE(m_logger, "Predecessor of 4 is {} ", bstree.Previous(4));
+    LOG_TRACE(m_logger, "Predecessor of 9 is {} ", bstree.Previous(9));
+    LOG_TRACE(m_logger, "Predecessor of 11 is {} ", bstree.Previous(11));
+    LOG_TRACE(m_logger, "Predecessor of 15 is {} ", bstree.Previous(15));
+    LOG_TRACE(m_logger, "Predecessor of 27 is {} ", bstree.Previous(27));
+    LOG_TRACE(m_logger, "Predecessor of 32 is {} ", bstree.Previous(32));
+    LOG_TRACE(m_logger, "Predecessor of 43 is {} ", bstree.Previous(43));
+    LOG_TRACE(m_logger, "Predecessor of 71 is {} ", bstree.Previous(71));
+    LOG_TRACE(m_logger, "Predecessor of 125 is {} ", bstree.Previous(125));
+
+    LOG_TRACE(m_logger, "Contains 2 ? {} ", bstree.Contains(2));
+    bstree.Erase(2);
+    LOG_TRACE(m_logger, "Contains 2 ? {} ", bstree.Contains(2));
+
+    LOG_TRACE(m_logger, "Contains 32 ? {} ", bstree.Contains(32));
+    bstree.Erase(32);
+    LOG_TRACE(m_logger, "Contains 32 ? {} ", bstree.Contains(32));
+
+    LOG_TRACE(m_logger, "Contains 11 ? {} ", bstree.Contains(11));
+    bstree.Erase(11);
+    LOG_TRACE(m_logger, "Contains 11 ? {} ", bstree.Contains(11));
+
+    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
+    bstree.Erase(15);
+    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
+
+    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
+    bstree.Erase(15);
+    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
+
+    LOG_TRACE(m_logger, "Contains 71 ? {} ", bstree.Contains(71));
+    bstree.Erase(71);
+    LOG_TRACE(m_logger, "Contains 71 ? {} ", bstree.Contains(71));
+
+    op_vals = bstree.InOrderTraverse();
+    for(auto val : op_vals) {
+      LOG_TRACE(m_logger, "{},", val);
+    } 
+#endif
+    //-------------------------------------------------------------------------------
+    //RBTree (new)
+    //----------------------------------------------------------------------------------
+#if 1    
+    LOG_WARN(m_logger,"--------------------------");
+    LOG_WARN(m_logger,"Red-Black TREE (NEW)");
+    LOG_WARN(m_logger,"--------------------------");
+    
+    //std::vector<float> rb_values{2,11,4,125,15,3,9,32,71,43,27,1};
+    std::vector<float> rb_values;
+    std::vector<bool> rb_value_deleted;
+
+    //Add a bunch of random values
+    const uint32_t RB_NUM_VALS = 2000;
+    const float RB_MIN_VAL = 0;
+    const float RB_MAX_VAL = 1000;
+    const int RB_NUM_VALS_TO_DEL = 1000;
+
+    std::random_device rd;                         
+    std::mt19937 mt(rd()); 
+    std::uniform_real_distribution<float> fdist(RB_MIN_VAL, RB_MAX_VAL); 
+    std::uniform_int_distribution<int> idist(0, RB_NUM_VALS-1);  
+
+    for(int i=0; i< RB_NUM_VALS; i++) {
+      rb_values.push_back(fdist(mt));
+      rb_value_deleted.push_back(false);
+    }
+
+    //pick values to delete at random
+    for(int i=0; i<RB_NUM_VALS_TO_DEL; i++ ) {
+      int idx = 0;
+      do {
+        idx = idist(mt);
+      } while (rb_value_deleted[idx] == true);
+      rb_value_deleted[idx] = true;
+    }
+
+  
+    Geom::RBTree rbtree(rb_values);
+    rbtree.Validate();
+
+    // SPG_INFO("Values (Ranged for loop) --------------------------");
+    // for(auto& val : rbtree) {
+    //   SPG_TRACE("{}", val);
+    // }
+    // SPG_INFO("--------------------------");
+
+    //LowerBound() and UpperBund()
+    {
+      // auto lb = rbtree.LowerBound(15.f);
+      // lb = rbtree.LowerBound(4.f);
+      // lb = rbtree.LowerBound(71.f);
+      // lb = rbtree.LowerBound(2.f);
+      // lb = rbtree.LowerBound(11.f);
+      // lb = rbtree.LowerBound(32.f);
+      // lb = rbtree.LowerBound(125.f);
+      // lb = rbtree.LowerBound(1.f);
+      // lb = rbtree.LowerBound(3.f);
+      // lb = rbtree.LowerBound(9.f);
+      // lb = rbtree.LowerBound(27.f);
+      // lb = rbtree.LowerBound(43.f);
+
+      // lb = rbtree.LowerBound(-20.f);
+      // lb = rbtree.LowerBound(0.5f);
+      // lb = rbtree.LowerBound(32.2f); 
+      // lb = rbtree.LowerBound(31.2f); 
+      // lb = rbtree.LowerBound(2.2f);
+      // lb = rbtree.LowerBound(29.1f);
+      // lb = rbtree.LowerBound(26.1f);
+      // lb = rbtree.LowerBound(11.3f);
+      // lb = rbtree.LowerBound(125.1f);
+      // SPG_ASSERT(lb == rbtree.end());
+
+      // lb = rbtree.UpperBound(15.f);
+      // lb = rbtree.UpperBound(4.f);
+      // lb = rbtree.UpperBound(71.f);
+      // lb = rbtree.UpperBound(2.f);
+      // lb = rbtree.UpperBound(11.f);
+      // lb = rbtree.UpperBound(32.f);
+      // lb = rbtree.UpperBound(125.f);
+      // SPG_ASSERT(lb == rbtree.end());
+      // lb = rbtree.UpperBound(1.f);
+      // lb = rbtree.UpperBound(3.f);
+      // lb = rbtree.UpperBound(9.f);
+      // lb = rbtree.UpperBound(27.f);
+      // lb = rbtree.UpperBound(43.f);
+
+      // lb = rbtree.UpperBound(-20.f);
+      // lb = rbtree.UpperBound(0.5f);
+      // lb = rbtree.UpperBound(32.2f); 
+      // lb = rbtree.UpperBound(31.2f); 
+      // lb = rbtree.UpperBound(2.2f);
+      // lb = rbtree.UpperBound(29.1f);
+      // lb = rbtree.UpperBound(26.1f);
+      // lb = rbtree.UpperBound(11.3f);
+      // lb = rbtree.UpperBound(125.1f);
+      // SPG_ASSERT(lb == rbtree.end());
+    }
+
+    SPG_INFO("Deleting {} values at random ", RB_NUM_VALS_TO_DEL);
+    for(int i=0; i<RB_NUM_VALS; i++ ) {
+      if(!rb_value_deleted[i])
+        continue;
+      //SPG_WARN("Erasing:: {}", rb_values[i]);
+      rbtree.Erase(rb_values[i]);
+      //rbtree.Validate();
+    }
+    SPG_INFO("Tree Size: {}", rbtree.Size());
+    rbtree.Validate();
+
+//************************************************************************************** */
+
+    // SPG_WARN("Copy------------");
+    // Geom::RBTree rbtree_copy(rb_values);
+    // rbtree_copy.Validate();
+
+    // SPG_INFO("Values of copy (Ranged for loop) --------------------------");
+    // for(auto& val : rbtree_copy) {
+    //   SPG_TRACE("{}", val);
+    // }
+    // SPG_INFO("--------------------------");
+
+    // SPG_INFO("Deleting {} values at random from copy", RB_NUM_VALS_TO_DEL);
+    // for(int i=0; i<RB_NUM_VALS; i++ ) {
+    //   if(!rb_value_deleted[i])
+    //     continue;
+    //   SPG_WARN("Erasing:: {}", rb_values[i]);
+    //   rbtree_copy.Erase(rb_values[i]);
+    //   rbtree_copy.Validate();
+    // }
+    // SPG_INFO("Tree Size: {}", rbtree_copy.Size());
+    // rbtree_copy.Validate();
+
+  
+    // LOG_WARN(m_logger,"Forward --------------------------");
+    // auto rbt_itr = rbtree.begin();
+    // while(rbt_itr != rbtree.end()) {
+    //   auto val = *rbt_itr;
+    //   LOG_TRACE(m_logger, "{}", val);
+    //   ++rbt_itr;
+    // }
+
+    // LOG_WARN(m_logger,"Back --------------------------");
+    // rbt_itr = rbtree.Find(125);
+    // while(rbt_itr != rbtree.end()) {
+    //   auto val = *rbt_itr;
+    //   LOG_TRACE(m_logger, "{}", val);
+    //   --rbt_itr;
+    // }
+
+    // LOG_WARN(m_logger,"Ranged for loop --------------------------");
+    // for(auto& val : rbtree) {
+    //   LOG_TRACE(m_logger, "{}", val);
+    // }
+
+  
+    // LOG_TRACE(m_logger, "Contains 2 ? {} ", rbtree.Contains(2));
+    // rbtree.Erase(2);
+    // LOG_TRACE(m_logger, "Contains 2 ? {} ", rbtree.Contains(2));
+
+    // LOG_TRACE(m_logger, "Contains 32 ? {} ", rbtree.Contains(32));
+    // rbtree.Erase(32);
+    // LOG_TRACE(m_logger, "Contains 32 ? {} ", rbtree.Contains(32));
+
+    // LOG_TRACE(m_logger, "Contains 11 ? {} ", rbtree.Contains(11));
+    // rbtree.Erase(11);
+    // LOG_TRACE(m_logger, "Contains 11 ? {} ", rbtree.Contains(11));
+
+    //just delete the root
+
+    // LOG_TRACE(m_logger, "Contains 15 ? {} ", rbtree.Contains(15));
+    // rbtree.Erase(15);
+    // LOG_TRACE(m_logger, "Contains 15 ? {} ", rbtree.Contains(15));
+
+    // LOG_TRACE(m_logger, "Contains 15 ? {} ", rbtree.Contains(15));
+    // rbtree.Erase(15);
+    // LOG_TRACE(m_logger, "Contains 15 ? {} ", rbtree.Contains(15));
+
+    // LOG_TRACE(m_logger, "Contains 71 ? {} ", rbtree.Contains(71));
+    // rbtree.Erase(71);
+    // LOG_TRACE(m_logger, "Contains 71 ? {} ", rbtree.Contains(71));
+
+    // LOG_WARN(m_logger,"Ranged for loop (after deletions) --------------------------");
+    // for(auto& val : rbtree) {
+    //   LOG_TRACE(m_logger, "{}", val);
+    // }
+    //rbtree.Validate();
+
+#endif    
 
     //-------------------------------------------------------------------------------
     //Intersection Set
@@ -741,7 +659,7 @@ namespace Spg
     // eq = Geom::Equal(seg1.start, seg2.start) && Geom::Equal(seg1.end, seg2.end);
 
     Geom::ItersectSet::IntersectionSet intersection_set{segs};
-    intersection_set.Process();
+    //intersection_set.Process();
 
     //-------------------------------------------------------------------------------
     //DCEL
@@ -766,17 +684,14 @@ namespace Spg
       {17.04,6.99}      //O 15
     };
 
-    Geom::DCEL mt_poly = Geom::DCEL(mt_poly_points);
-    // mt_poly.Validate();
-    // mt_poly.PrintVertices();
-    // mt_poly.PrintHalfEdges();
-    // mt_poly.PrintFaces();
-    Geom::MonotonePartitionAlgo monotone_spawner(mt_poly_points);
-    monotone_spawner.MakeMonotone();
-    Geom::DCEL& partitioned_polygon = monotone_spawner.GetDCEL();
-    partitioned_polygon.PrintFaces();
-    partitioned_polygon.PrintVertices();
-    partitioned_polygon.PrintHalfEdges();
+    // Geom::DCEL mt_poly = Geom::DCEL(mt_poly_points);
+    // Geom::MonotonePartitionAlgo monotone_spawner(mt_poly_points);
+    // monotone_spawner.MakeMonotone();
+    // Geom::DCEL& partitioned_polygon = monotone_spawner.GetDCEL();
+    // partitioned_polygon.PrintFaces();
+    // partitioned_polygon.PrintVertices();
+    // partitioned_polygon.PrintHalfEdges();
+
     
   }
 

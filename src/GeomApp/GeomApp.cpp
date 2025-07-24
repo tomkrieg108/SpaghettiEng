@@ -39,6 +39,12 @@ namespace Spg
 
     DefaultLayer* layer = new DefaultLayer(m_app_context, std::string("Default Layer"));
     PushLayer(layer);
+    float log2 = glm::log2(1000.0f);
+    float sqr_root = glm::sqrt(1000.0f);
+
+    SPG_WARN("log2 {}", log2);
+    SPG_WARN("log2_sq {}", log2*log2);
+    SPG_WARN("sqr_root {}", sqr_root);
   }
 
   GeomApp::~GeomApp()

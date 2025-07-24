@@ -40,6 +40,7 @@ namespace Geom
     m_vertices.clear();
   }
 
+  //Assumes that points ordered CCW
   void DCEL::Set(const std::vector<Point2d>& points)
   {
     SPG_ASSERT(m_vertices.size() == 0);
@@ -81,22 +82,22 @@ namespace Geom
         h->next = (i+2 >= m_half_edges.size() ? m_half_edges[(i+2) - m_half_edges.size()] : m_half_edges[i+2] );
         h->prev = (i-2 < 0 ? m_half_edges[m_half_edges.size() + (i-2)] : m_half_edges[i-2] );
       }
-      else {
+      else { //CW
         h->prev = (i+2 >= m_half_edges.size() ? m_half_edges[(i+2) - m_half_edges.size()] : m_half_edges[i+2] );
         h->next = (i-2 < 0 ? m_half_edges[m_half_edges.size() + (i-2)] : m_half_edges[i-2] );
       }
-    }
+    } 
 
     //faces
     tag = 0;
     Face* face = new Face();
     face->tag = (tag++);
-    face->outer = *(m_half_edges.begin()); 
+    face->outer = *(m_half_edges.begin()); //first CCW edge
 
     Face* face_unbound = new Face();
     face_unbound->tag = (tag++);
     face_unbound->outer = nullptr;
-    face_unbound->inner.push_back((*(m_half_edges.begin()+1)));
+    face_unbound->inner.push_back((*(m_half_edges.begin()+1))); //first CW edge
 
     for(size_t i=0; i< m_half_edges.size(); i+=2) {
       HalfEdge* e = m_half_edges[i];
@@ -120,83 +121,87 @@ namespace Geom
     return nullptr;
   }
 
-  bool DCEL::IsInteriorOnRight(Vertex* v, Face* f)
-  {
-    return false;
+  #define DCEL_VALIDATE(check) \
+  if(!(check)) { \
+      SPG_ERROR("DCEL validation failed. File: {}, Line {}", __FILE__, __LINE__); \
+      return false; \
   }
 
-  void DCEL::Validate()
+  bool DCEL::Validate() const
   {
+      SPG_INFO("Validating DCEL");
       //Vertices
       for(Vertex* v : m_vertices) {
-        SPG_ASSERT(v != nullptr);
+        DCEL_VALIDATE(v != nullptr);
         HalfEdge* e_first = v->incident_edge; 
-        SPG_ASSERT(e_first != nullptr);
+        DCEL_VALIDATE(e_first != nullptr);
         //v doesn't need to be the origin of incident_edge, although here it is setup to be like this
         if(e_first->origin != v)
           e_first = e_first->twin;
-        SPG_ASSERT(e_first->origin == v) ;
+        DCEL_VALIDATE(e_first->origin == v) ;
         HalfEdge* e = e_first;
         uint32_t iters = 0;
         do {
           e = e->twin;
-          SPG_ASSERT(e != nullptr);
+          DCEL_VALIDATE(e != nullptr);
           e = e->next;
-          SPG_ASSERT(e->origin == v);
-          SPG_ASSERT(e != nullptr);
-          SPG_ASSERT(++iters < 10);
+          DCEL_VALIDATE(e->origin == v);
+          DCEL_VALIDATE(e != nullptr);
+          DCEL_VALIDATE(++iters < 10);
         } while (e != e_first);
       }
 
-      SPG_ASSERT(m_half_edges.size() == 2*m_vertices.size());
+      //Doesn't apply once diagonals have been added
+      //DCEL_VALIDATE(m_half_edges.size() == 2*m_vertices.size());
 
       for(HalfEdge* e : m_half_edges)
       {
-        SPG_ASSERT(e->origin != nullptr);
-        SPG_ASSERT(e->next != nullptr);
-        SPG_ASSERT(e->prev != nullptr);
-        SPG_ASSERT(e->twin != nullptr);
-        SPG_ASSERT(e->twin->twin == e);
-        SPG_ASSERT(e->incident_face != nullptr);
+        DCEL_VALIDATE(e->origin != nullptr);
+        DCEL_VALIDATE(e->next != nullptr);
+        DCEL_VALIDATE(e->prev != nullptr);
+        DCEL_VALIDATE(e->twin != nullptr);
+        DCEL_VALIDATE(e->twin->twin == e);
+        DCEL_VALIDATE(e->incident_face != nullptr);
 
-        SPG_ASSERT(e->prev->twin != nullptr);
-        SPG_ASSERT(e->prev->twin->origin == e->origin);
-        SPG_ASSERT(e->twin->twin->origin == e->origin);
+        DCEL_VALIDATE(e->prev->twin != nullptr);
+        DCEL_VALIDATE(e->prev->twin->origin == e->origin);
+        DCEL_VALIDATE(e->twin->twin->origin == e->origin);
 
         if(e->incident_face->outer != nullptr) {
-          SPG_ASSERT(e->incident_face == e->incident_face->outer->incident_face);
+          DCEL_VALIDATE(e->incident_face == e->incident_face->outer->incident_face);
         }
         
       }
 
       for(Face* f : m_faces) {
-        SPG_ASSERT( (f->outer != nullptr) || ( (f->inner.size()>=1) && f->inner[0] != nullptr));
+        DCEL_VALIDATE( (f->outer != nullptr) || ( (f->inner.size()>=1) && f->inner[0] != nullptr));
 
         if(f->outer != nullptr) {
           HalfEdge* e = f->outer;
-          SPG_ASSERT(e->incident_face == f);
+          DCEL_VALIDATE(e->incident_face == f);
           uint32_t iters = 0;
           do {
             e = e->next;
-            SPG_ASSERT(e->incident_face == f);
-            SPG_ASSERT(++iters < 100);
+            DCEL_VALIDATE(e->incident_face == f);
+            DCEL_VALIDATE(++iters < 100);
           } while(e != f->outer);
         }
 
         if(f->inner.size()>=1) {
           HalfEdge* e = f->inner[0];
-            SPG_ASSERT(e != nullptr);
-          SPG_ASSERT(e->incident_face == f);
+          DCEL_VALIDATE(e != nullptr);
+          DCEL_VALIDATE(e->incident_face == f);
           uint32_t iters = 0;
           do {
             e = e->next;
-            SPG_ASSERT(e->incident_face == f);
-            SPG_ASSERT(++iters < 100);
+            DCEL_VALIDATE(e->incident_face == f);
+            DCEL_VALIDATE(++iters < 100);
           } while(e != f->inner[0]);
         }
 
       }
-      SPG_INFO("DCEL structure validated - no guarantees though!");
+      SPG_INFO("DCEL structure validated!");
+      return true;
   }
 
   std::vector<HalfEdge*> DCEL::GetDepartingEdges(Vertex* v)
@@ -217,9 +222,15 @@ namespace Geom
 
   HalfEdge* DCEL::GetDepartingEdge(Vertex* v, Face* f) 
   {
+    auto departing_edges = GetDepartingEdges(v);
+    for(auto half_edge : departing_edges) {
+      if(half_edge->incident_face == f)
+        return half_edge;
+    }
     return nullptr;
   }
 
+  //The common face must be bounded so that the edges are oriented CCW
   auto DCEL::FindDepartingEdgesWithCommonFace(Vertex* v1, Vertex* v2) -> std::pair<HalfEdge*,HalfEdge*>
   {
     auto departing_edges_v1 = GetDepartingEdges(v1);
@@ -227,10 +238,13 @@ namespace Geom
 
     for(auto e1 : departing_edges_v1) {
       Face* f1 = e1->incident_face;
+      SPG_ASSERT(f1 != nullptr);
       for(auto e2 : departing_edges_v2) {
         Face* f2 = e2->incident_face;
-        if(f1 == f2)
+        SPG_ASSERT(f2 != nullptr);
+        if((f1 == f2) && (f1->outer != nullptr) && (f2->outer != nullptr)) {
           return std::make_pair(e1,e2);
+        } 
       }
     }
     return std::make_pair(nullptr,nullptr);
@@ -271,73 +285,76 @@ namespace Geom
     Point2d v_prev = GetOriginPoint(orig_depart_edge->prev);
     LineSeg2D candidate_seg = GetLineSeg2d(orig,dest);
 
-    //interior/exterior check based on CCW otientation
+    //interior/exterior check based on CCW orientation
     if(IsConvex(orig, orig_depart_edge)) { //The 2 neighbours must be on different sides of candidate line
       bool interior = Right(candidate_seg, v_next) && Left(candidate_seg, v_prev);
       return interior;
     }
-    //orig is a reflex vert.  
+    //orig is a reflex vert.  To be exterior, next must be on the left and prev must be on the right - can't just be on opposite sides
     bool exterior = Left(candidate_seg, v_next) && Right(candidate_seg, v_prev);
     return !exterior;
   }
 
-  DiagonalData DCEL::DiagonalCheck(Vertex* v1, Vertex* v2)
+  DiagonalData DCEL:: DiagonalCheck(Vertex* v1, Vertex* v2)
   {
-    DiagonalData diagonal_data{nullptr,nullptr,false};
+    DiagonalData d{nullptr,nullptr,false};
     if(v1 == v2)
-      return diagonal_data;
+      return d;
           
     auto [e1_depart, e2_depart] = FindDepartingEdgesWithCommonFace(v1,v2);
     if( (e1_depart == nullptr) || ((e2_depart == nullptr)))
-      return diagonal_data;
+      return d;
 
     //Check if v1 and v2 are neighbours
     if(e1_depart->next->origin == v2)
-      return diagonal_data;
+      return d;
     if(e2_depart->next->origin == v1)
-      return diagonal_data;
+      return d;
 
-    if(AnyIntersectionsExist(v1, v2, e1_depart))
-      return diagonal_data;
+    //According to ChatGPT need to check both cases here to ensure symmetry?? 
+    if(AnyIntersectionsExist(v1, v2, e1_depart) || AnyIntersectionsExist(v2, v1, e2_depart))
+      return d;
 
-    diagonal_data.is_valid = MakesInteriorConnection(v1,v2,e1_depart) && 
+    d.is_valid = MakesInteriorConnection(v1,v2,e1_depart) && 
         MakesInteriorConnection(v2,v1,e2_depart);
 
-    diagonal_data.departing_edge_v1 = e1_depart;
-    diagonal_data.departing_edge_v2 = e2_depart;   
+    d.departing_edge_v1 = e1_depart;
+    d.departing_edge_v2 = e2_depart;   
 
-    return diagonal_data;
+    return d;
   }
 
   void DCEL::Split(Vertex* v1, Vertex* v2)
   {
-    DiagonalData diagonal_data = DiagonalCheck(v1,v2);
-    if(!diagonal_data.is_valid)
+    DiagonalData d = DiagonalCheck(v1,v2);
+    if(!d.is_valid)
       return;
+    //diagonal_data stores the departing edge of v1 and v2 respectively that share the same incident face
     
     //2 new half hedges, 1 new face
+    //Todo - tags for these
     HalfEdge* e1 = new HalfEdge();
     HalfEdge* e2 = new HalfEdge();
-    Face* f1 = diagonal_data.departing_edge_v1->incident_face;
+    Face* f1 = d.departing_edge_v1->incident_face;
     Face* f2 = new Face();
 
     e1->origin = v1;
-    e1->next = diagonal_data.departing_edge_v2;
-    e1->prev = diagonal_data.departing_edge_v1->prev;
+    e1->next = d.departing_edge_v2;
+    e1->prev = d.departing_edge_v1->prev;
     e1->twin = e2;
     e1->incident_face = f1;
     
     e2->origin = v2;
-    e2->next = diagonal_data.departing_edge_v1;
-    e2->prev = diagonal_data.departing_edge_v2->prev;
+    e2->next = d.departing_edge_v1;
+    e2->prev = d.departing_edge_v2->prev;
     e2->twin = e1;
     e2->incident_face = f2;
 
-    diagonal_data.departing_edge_v1->prev->next = e1;
-    diagonal_data.departing_edge_v1->prev = e2;
+    d.departing_edge_v1->prev->next = e1;
+    d.departing_edge_v1->prev = e2;
 
-    diagonal_data.departing_edge_v2->prev->next = e2;
-    diagonal_data.departing_edge_v2->prev = e1;
+    d.departing_edge_v2->prev->next = e2;
+    d.departing_edge_v2->prev = e1;
 
     HalfEdge* e_cur = e2;
     do {
@@ -352,6 +369,31 @@ namespace Geom
     m_half_edges.push_back(e1);
     m_half_edges.push_back(e2);
     m_faces.push_back(f2);
+  }
+
+  std::vector<Vertex*> DCEL::GetVertices(Face* face)
+  {
+    std::vector<Vertex*> vertices;
+    SPG_ASSERT(face != nullptr);
+
+    if(face->outer == nullptr)
+      return vertices;
+
+    Vertex* v_start = face->outer->origin;
+    vertices.push_back(v_start);
+
+    SPG_ASSERT(face->outer->next != nullptr);
+    HalfEdge* next_edge = face->outer->next;
+    
+    while(next_edge->origin != v_start) {
+      SPG_ASSERT(next_edge->origin != nullptr); 
+      vertices.push_back(next_edge->origin);
+      next_edge = next_edge->next;
+      SPG_ASSERT(next_edge != nullptr);
+      SPG_ASSERT(vertices.size() < 50);
+    }
+    SPG_ASSERT(vertices.size() >= 3);
+    return vertices;
   }
 
   void DCEL::PrintVertices()

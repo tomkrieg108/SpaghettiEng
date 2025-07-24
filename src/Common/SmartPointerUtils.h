@@ -1,7 +1,7 @@
 #pragma once
 //#include <memory> //Todo - include in PCH
 
-namespace Spg
+namespace Spg //todo everything else in Common uses Utils namespace
 {
   enum class PtrType {Scope,Ref,Raw};
 

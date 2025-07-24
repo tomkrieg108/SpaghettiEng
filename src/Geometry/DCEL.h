@@ -1,10 +1,10 @@
 #pragma once
 #include "GeomUtils.h"
 #include <Common/Common.h>
-#include <queue>
-#include <vector>
-#include <set>
-#include <map>
+//#include <queue>
+// #include <vector>
+// #include <set>
+// #include <map>
 
 namespace Geom
 {
@@ -36,7 +36,7 @@ namespace Geom
     struct Face
     {
       HalfEdge* outer = nullptr; // A half edge for the outer boundary of the face. null if unbounded
-      std::vector<HalfEdge*> inner; //A Half edges for each inner boundary (hole) of contained in the face
+      std::vector<HalfEdge*> inner; //A Half edges for each inner boundary (hole) contained in the face
       int32_t tag = -1; //for testing
     };
 
@@ -94,34 +94,41 @@ namespace Geom
 
     DiagonalData DiagonalCheck(Vertex* v1, Vertex* v2);
     void Split(Vertex* v1, Vertex* v2);
-    void Validate();
-    
+    bool Validate() const;
+
+    //Bunch of Helperfunctions
     Vertex* GetVertex(int32_t tag); 
     std::vector<HalfEdge*> GetDepartingEdges(Vertex* v);
     auto FindDepartingEdgesWithCommonFace(Vertex* v1, Vertex* v2) -> std::pair<HalfEdge*,HalfEdge*>;
     bool AnyIntersectionsExist(Vertex* orig, Vertex* dest, HalfEdge* orig_depart_edge);
     bool IsConvex(Vertex* v, HalfEdge* departing_edge);
     bool MakesInteriorConnection(Vertex* orig, Vertex* dest, HalfEdge* orig_depart_edge);
-
     HalfEdge* GetDepartingEdge(Vertex* v, Face* f); 
-    bool IsInteriorOnRight(Vertex* v, Face* f);
-
-    //Helpers
-    Point2d GetOriginPoint(HalfEdge* e) {
+  
+    Point2d GetOriginPoint(HalfEdge* e) const {
       return e->origin->point;
     }
-    Point2d GetDestinationPoint(HalfEdge* e) {
+    Point2d GetDestinationPoint(HalfEdge* e) const {
       return e->twin->origin->point;
     }
-    LineSeg2D GetLineSeg2d(HalfEdge* e) {
+    LineSeg2D GetLineSeg2d(HalfEdge* e) const {
         return LineSeg2D{GetOriginPoint(e),GetDestinationPoint(e)};
     }
-    LineSeg2D GetLineSeg2d(Vertex* v_start, Vertex* v_end) {
+    LineSeg2D GetLineSeg2d(Vertex* v_start, Vertex* v_end) const {
       return LineSeg2D{v_start->point, v_end->point};
     }
-    const auto& GetVertices() const {
+    auto& GetVertices() {
       return m_vertices;
     }
+    auto& GetHalfEdges() {
+      return m_half_edges;
+    }
+    auto& GetFaces() {
+      return m_faces;
+    }
+
+    //Returns the vertices defining the input face
+    std::vector<DCEL::Vertex*> GetVertices(DCEL::Face* face);
 
     //logging
     void PrintVertices();
