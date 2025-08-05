@@ -1,6 +1,6 @@
 #include "RBTree.h"
 #include "GeomUtils.h"
-#include <functional>
+#include <functional> //std::less
 
 /*
 Red-Black Trees
@@ -102,7 +102,7 @@ namespace Geom
   RBTree::Iterator RBTree::Find(float value)
   {
     RBTNode* node = m_root;
-    while( (node != m_nil) && !Geom::EqualRel(value, node->value))  {
+    while( (node != m_nil) && !Geom::Equal(value, node->value))  {
       if(value < node->value) 
         node = node->left;
       else if (value > node->value) 
@@ -163,12 +163,13 @@ namespace Geom
     while(node != m_nil) {
 
       //note: std::less<> is a class, std::less<>() instantiates an object of the class. std::less<>()(node->value, key) calls the () operator on the object.  The type of the parameters are deduced automatically
+      // Can also create an object via std::less<>{} (preferred - calls default ctr with no args)
 
       // if(!std::less<>()(node->value, key) && !std::less<>()(key, node->value)) //equivalence
       if(Geom::Equal(node->value, key))
         return Iterator(*this,node);
 
-      if(!std::less<>()(node->value, key)) {
+      if(!std::less<>{}(node->value, key)) {
         if( (candidate_node == m_nil) || (node->value < candidate_node->value))
           candidate_node = node;
       }
@@ -342,6 +343,7 @@ namespace Geom
     return node;  
   }
 
+  //Todo - should be a member of Iterator - it is only called there
   RBTree::RBTNode* RBTree::Next(RBTNode* node)
   {
     if(node == m_nil)
@@ -358,6 +360,7 @@ namespace Geom
     return m_nil;  
   }
 
+  //Todo - should be a member of Iterator - it is only called there
   RBTree::RBTNode* RBTree::Previous(RBTNode* node)
   {
     if(node == m_nil)
@@ -400,7 +403,7 @@ namespace Geom
     if(node == m_nil)
       return;
 
-    SPG_ASSERT( !((node->left != m_nil) && (node->right != m_nil)) ); //todo - triggered sometimes
+    SPG_ASSERT( !((node->left != m_nil) && (node->right != m_nil)) ); 
     if( (node->left == m_nil) && (node->right == m_nil)) { 
       Transplant(node, node->right);   //m_nil->parant = node->parent
     }
@@ -417,9 +420,8 @@ namespace Geom
     if(node == m_nil)
       return;
 
-    //if replacement is nil, node should have no children
-    if(replacement == m_nil) 
-      SPG_ASSERT( (node->left == m_nil) && (node->right == m_nil)); //todo - triggered sometimes
+    if(replacement == m_nil)  //if replacement is nil, node should have no children
+      SPG_ASSERT( (node->left == m_nil) && (node->right == m_nil)); 
     
     Transplant(node,replacement); 
     if(replacement != m_nil) {
@@ -429,10 +431,6 @@ namespace Geom
       node->left->parent = replacement;
       node->right->parent = replacement;
     }
-
-    //todo - if replacement is null this is a problem!
-    //node->left->parent = replacement;
-    //node->right->parent = replacement;
   }
 
   void RBTree::EraseWithoutFixup(RBTNode* node)
@@ -551,8 +549,8 @@ namespace Geom
   void RBTree::RotateLeft(RBTNode* node)
   {
     SPG_ASSERT(node != m_nil);
-    SPG_ASSERT(node->right != m_nil); //todo - triggered sometimes
-    auto y = node->right; // right child 
+    SPG_ASSERT(node->right != m_nil);
+    auto y = node->right; 
 
     node->right = y->left;
     if(y->left != m_nil)
@@ -793,15 +791,10 @@ namespace Geom
       SPG_ASSERT(node->right->value > node->value);  
 
     node_count++;  
-      
-    if(node->colour == RBTree::Colour::Black)  {
-      Validate(node->left, black_depth+1, depth+1, black_depths, depths, node_count);
-      Validate(node->right, black_depth+1, depth+1, black_depths, depths, node_count);
-    }
-    else {
-      Validate(node->left, black_depth, depth+1, black_depths, depths, node_count);
-      Validate(node->right, black_depth, depth+1, black_depths, depths, node_count);  
-    }
+    black_depth += (node->colour == RBTree::Colour::Black) ? 1 : 0;
+    
+    Validate(node->left, black_depth, depth+1, black_depths, depths, node_count);
+    Validate(node->right, black_depth, depth+1, black_depths, depths, node_count);
   }
 
   void RBTree::Validate(RBTNode* node, BlackHeights& black_heights, PathStack& path_stack)

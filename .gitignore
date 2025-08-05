@@ -18,9 +18,8 @@ build/
 assets/
 html/
 .vscode/
-external/glad
-external/stb_image
-
+#external/glad
+#external/stb_image
 #external/
 
 ################################

@@ -223,7 +223,9 @@ namespace Spg
 
   void DefaultLayer::GeomTest()
   {
-  //Test out some geom stuff
+    //-----------------------------------------------------------------------
+    //General Geom Stuff
+    //----------------------------------------------------------------------
 #if 0
     
     Geom::LineSeg2D seg1(Geom::Point2d{0,0}, Geom::Point2d{10,0});
@@ -294,71 +296,8 @@ namespace Spg
       Geom::ComputeIntersection(seg1,seg2, intersection);
     }
 #endif    
-
-    //-----------------------------------------------------------------------
-    //BST
-    //----------------------------------------------------------------------
-#if 0  
-    LOG_WARN(m_logger,"--------------------------");
-    LOG_WARN(m_logger,"BST Tree (original)");
-    LOG_WARN(m_logger,"--------------------------");
-    std::vector<float> values{2,11,4,125,15,3,9,32,71,43,27,1};
-    std::list<float> list;
-    Geom::BST bst(values);
-    bst.InOrderTraverse(bst.GetRootNode(), list);
-    for(auto val : list) {
-      LOG_TRACE(m_logger, "{},", val);
-    }
-    float predecessor,sucessor;
-    auto success = bst.Predecessor(15,predecessor);
-    LOG_TRACE(m_logger, "Predecessor of 15 is {} ", predecessor);
-    success = bst.Successor(32,sucessor);
-    LOG_TRACE(m_logger, "Sucessor of 32 is {} ", sucessor);
-
-    success = bst.Predecessor(2,predecessor);
-    if(success) {
-      LOG_TRACE(m_logger, "predecessor of 2 is {} ", predecessor);
-    }
-    else {
-      LOG_TRACE(m_logger, "2 does not have a predecessor");   
-    }
-
-    success = bst.Successor(125,sucessor);
-    if(success) {
-      LOG_TRACE(m_logger, "Sucessor of 125 is {} ", sucessor);
-    }
-    else {
-      LOG_TRACE(m_logger, "125 does not have a successor");   
-    }
-
-
-    bst.Delete(32.0);
-    list.clear();
-    bst.InOrderTraverse(bst.GetRootNode(), list);
-    LOG_TRACE(m_logger, "Delete 32");   
-    for(auto val : list) {
-      LOG_TRACE(m_logger, "{},", val);
-    }
-
-    bst.Insert(32.0);
-    list.clear();
-    bst.InOrderTraverse(bst.GetRootNode(), list);
-    LOG_TRACE(m_logger, "Insert 32");   
-    for(auto val : list) {
-      LOG_TRACE(m_logger, "{},", val);
-    }
-
-    bst.Delete(99.0);
-    list.clear();
-    bst.InOrderTraverse(bst.GetRootNode(), list);
-    LOG_TRACE(m_logger, "Delete 99");   
-    for(auto val : list) {
-      LOG_TRACE(m_logger, "{},", val);
-    }
-#endif  
-
     //-------------------------------------------------------------------------------
-    //BSTree (new)
+    //BSTree
     //----------------------------------------------------------------------------------
 #if 0    
     LOG_WARN(m_logger,"--------------------------");
@@ -438,44 +377,50 @@ namespace Spg
     } 
 #endif
     //-------------------------------------------------------------------------------
-    //RBTree (new)
+    //RBTree
     //----------------------------------------------------------------------------------
-#if 1    
+#if 0    
     LOG_WARN(m_logger,"--------------------------");
     LOG_WARN(m_logger,"Red-Black TREE (NEW)");
     LOG_WARN(m_logger,"--------------------------");
     
     //std::vector<float> rb_values{2,11,4,125,15,3,9,32,71,43,27,1};
     std::vector<float> rb_values;
-    std::vector<bool> rb_value_deleted;
+    std::vector<bool> rb_values_to_delete;
 
     //Add a bunch of random values
-    const uint32_t RB_NUM_VALS = 2000;
+    const uint32_t RB_NUM_VALS = 100000;
     const float RB_MIN_VAL = 0;
     const float RB_MAX_VAL = 1000;
-    const int RB_NUM_VALS_TO_DEL = 1000;
+   
 
     std::random_device rd;                         
     std::mt19937 mt(rd()); 
     std::uniform_real_distribution<float> fdist(RB_MIN_VAL, RB_MAX_VAL); 
-    std::uniform_int_distribution<int> idist(0, RB_NUM_VALS-1);  
+    
+
+    Geom::RBTree rbtree;
 
     for(int i=0; i< RB_NUM_VALS; i++) {
-      rb_values.push_back(fdist(mt));
-      rb_value_deleted.push_back(false);
+      float val = fdist(mt);
+      if(rbtree.Insert(val)) {
+        rb_values.push_back(val);
+        rb_values_to_delete.push_back(false);    
+      }
     }
+    std::uniform_int_distribution<int> idist(0, rb_values.size()-1);  
+    const uint32_t RB_NUM_VALS_TO_DEL = rb_values.size()/2;
 
     //pick values to delete at random
     for(int i=0; i<RB_NUM_VALS_TO_DEL; i++ ) {
       int idx = 0;
       do {
         idx = idist(mt);
-      } while (rb_value_deleted[idx] == true);
-      rb_value_deleted[idx] = true;
+      } while (rb_values_to_delete[idx] == true);
+      rb_values_to_delete[idx] = true;
     }
 
-  
-    Geom::RBTree rbtree(rb_values);
+    //Geom::RBTree rbtree(rb_values);
     rbtree.Validate();
 
     // SPG_INFO("Values (Ranged for loop) --------------------------");
@@ -537,14 +482,14 @@ namespace Spg
     }
 
     SPG_INFO("Deleting {} values at random ", RB_NUM_VALS_TO_DEL);
-    for(int i=0; i<RB_NUM_VALS; i++ ) {
-      if(!rb_value_deleted[i])
+
+    for(int i=0; i<rb_values_to_delete.size(); i++ ) {
+      if(!rb_values_to_delete[i])
         continue;
       //SPG_WARN("Erasing:: {}", rb_values[i]);
       rbtree.Erase(rb_values[i]);
       //rbtree.Validate();
     }
-    SPG_INFO("Tree Size: {}", rbtree.Size());
     rbtree.Validate();
 
 //************************************************************************************** */
@@ -628,7 +573,41 @@ namespace Spg
 #endif    
 
     //-------------------------------------------------------------------------------
+    //KDTree
+    //----------------------------------------------------------------------------------
+#if 1
+     std::vector<Geom::Point2d> kd_values;
+
+    //Add a bunch of random values
+    const uint32_t KD_NUM_VALS = 1000;
+    const float KD_MIN_VAL = 0;
+    const float KD_MAX_VAL = 200;
+    
+    std::random_device rd;                         
+    std::mt19937 mt(rd()); 
+    std::uniform_real_distribution<float> fdist(KD_MIN_VAL, KD_MAX_VAL); 
+    
+    for(int i=0; i< KD_NUM_VALS; i++) {
+      Geom::Point2d p(fdist(mt),fdist(mt));
+      kd_values.push_back(p);
+    }
+
+    Geom::KDTree2D kdtree(kd_values);
+    Geom::KDTree2D kdtree2(std::move(kd_values));
+
+    auto points1 = kdtree.CollectAllPoints();
+    auto points2 = kdtree2.CollectAllPoints();
+
+    Geom::KDTree2D::Range range{20,80,20,80};
+    auto points3 = kdtree.RangeSearch(range);
+    auto points4 = kdtree2.RangeSearch(range);
+
+    kdtree.ValidateSearch(range);
+#endif
+    //-------------------------------------------------------------------------------
     //Intersection Set
+    //-------------------------------------------------------------------------------
+#if 0    
     LOG_WARN(m_logger, "-----------------------------------");  
     LOG_TRACE(m_logger, "iNTERSECTION TESTING");  
     std::vector<Geom::LineSeg2D> segs 
@@ -659,11 +638,12 @@ namespace Spg
     // eq = Geom::Equal(seg1.start, seg2.start) && Geom::Equal(seg1.end, seg2.end);
 
     Geom::ItersectSet::IntersectionSet intersection_set{segs};
-    //intersection_set.Process();
-
+    intersection_set.Process();
+#endif
     //-------------------------------------------------------------------------------
     //DCEL
-    //----------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+#if 0    
     //MONOTON PARTITION
     std::vector<Geom::Point2d> mt_poly_points =
     {
@@ -691,7 +671,7 @@ namespace Spg
     // partitioned_polygon.PrintFaces();
     // partitioned_polygon.PrintVertices();
     // partitioned_polygon.PrintHalfEdges();
-
+#endif
     
   }
 
