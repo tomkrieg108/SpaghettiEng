@@ -10,6 +10,7 @@
 #include <spdlog/spdlog.h>
 #include "ft2build.h"
 #include <freetype/freetype.h>
+#include <entt/entity/registry.hpp>
 
 namespace Spg
 {
@@ -83,6 +84,8 @@ namespace Spg
     std::cout << "\n";
 
     SPG_WARN( "FREETYPE: {}.{}.{}", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
+
+    SPG_WARN("Entt {},{},{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR, ENTT_VERSION_PATCH );
 
     std::cout << "####################################################\n\n";
 

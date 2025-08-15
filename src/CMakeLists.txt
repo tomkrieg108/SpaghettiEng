@@ -22,7 +22,7 @@ target_include_directories(${APP_GEOM}  PUBLIC
 if(ENABLE_TESTING)
   add_subdirectory(Tests)
 
-  #this caises an error?
+  #this causes an error?
   # target_include_directories(${TEST_GEOM}  PUBLIC 
   # "${CMAKE_CURRENT_SOURCE_DIR}"
 endif()

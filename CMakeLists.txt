@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(ENABLE_TESTING "Enable a Unit Testing Build" ON)
+option(ENABLE_TESTING "Enable a Unit Testing Build" OFF)
 
 #include() looks in cmake dir 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
@@ -31,6 +31,7 @@ cpmaddpackage("gh:nlohmann/json#v3.11.3") # gh: look in github
 cpmaddpackage("gh:fmtlib/fmt#11.0.2")
 cpmaddpackage("gh:gabime/spdlog#v1.15.0")
 cpmaddpackage("gh:jarro2783/cxxopts#v3.2.0")
+cpmaddpackage("gh:skypjack/entt#v3.15.0")
 
 cpmaddpackage(
   NAME glfw

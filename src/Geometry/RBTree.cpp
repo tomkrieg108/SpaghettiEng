@@ -1,6 +1,6 @@
 #include "RBTree.h"
 #include "GeomUtils.h"
-#include <functional> //std::less
+
 
 /*
 Red-Black Trees
