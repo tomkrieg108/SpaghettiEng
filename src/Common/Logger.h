@@ -1,9 +1,8 @@
 #pragma once
 #include <spdlog/spdlog.h>
-#include <type_traits>
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
+//#include <fmt/format.h>
 
 #define SPG_LOGGING_ENABLED_RELEASE	
 
@@ -23,23 +22,41 @@ namespace Utils
 	};
 }
 
-template<typename OStream, glm::length_t L, typename T, glm::qualifier Q>
-inline OStream& operator<<(OStream& os, const glm::vec<L, T, Q>& vector)
-{
-	return os << glm::to_string(vector);
-}
+template<glm::length_t L, typename T, glm::qualifier Q>
+struct fmt::formatter<glm::vec<L,T,Q>> {
+	constexpr auto parse(format_parse_context& ctx) {
+		return ctx.begin();
+	}
 
-template<typename OStream, glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
-inline OStream& operator<<(OStream& os, const glm::mat<C, R, T, Q>& matrix)
-{
-	return os << glm::to_string(matrix);
-}
+	template <typename FormatContext>
+	auto format(const glm::vec<L,T,Q>& v, FormatContext& ctx) const  {
+		return fmt::format_to(ctx.out(), "{}", glm::to_string(v));
+	}
+};
 
-template<typename OStream, typename T, glm::qualifier Q>
-inline OStream& operator<<(OStream& os, glm::qua<T, Q> quaternion)
-{
-	return os << glm::to_string(quaternion);
-}
+template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
+struct fmt::formatter<glm::mat<C,R,T,Q>> {
+	constexpr auto parse(format_parse_context& ctx) {
+		return ctx.begin();
+	}
+
+	template <typename FormatContext>
+	auto format(const glm::mat<C,R,T,Q>& m, FormatContext& ctx) const  {
+		return fmt::format_to(ctx.out(), "{}", glm::to_string(m));
+	}
+};
+
+template<typename T, glm::qualifier Q>
+struct fmt::formatter<glm::qua<T, Q>> {
+	constexpr auto parse(format_parse_context& ctx) {
+		return ctx.begin();
+	}
+
+	template <typename FormatContext>
+	auto format(const glm::qua<T, Q>& q, FormatContext& ctx) const  {
+		return fmt::format_to(ctx.out(), "{}", glm::to_string(q));
+	}
+};
 
 
 #if defined SPG_DEBUG || defined(SPG_LOGGING_ENABLED_RELEASE)

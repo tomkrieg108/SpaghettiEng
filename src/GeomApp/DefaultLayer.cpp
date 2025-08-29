@@ -223,83 +223,10 @@ namespace Spg
 
   void DefaultLayer::GeomTest()
   {
-    //-----------------------------------------------------------------------
-    //General Geom Stuff
-    //----------------------------------------------------------------------
+//-------------------------------------------------------------------------------
+//BSTree
+//-------------------------------------------------------------------------------
 #if 0
-    
-    Geom::LineSeg2D seg1(Geom::Point2d{0,0}, Geom::Point2d{10,0});
-    Geom::LineSeg2D seg2(Geom::Point2d{0,0}, Geom::Point2d{10,10});
-    //angle difference
-    seg1.Set({-10,-10},{-40,10});
-    seg2.Set({-10,-10},{15,5});
-    auto angle = Geom::ComputeAngleInDegrees(seg1,seg2);
-    LOG_WARN(m_logger, "Angle between seg 1 and seg 2: {} ", angle);
-
-    //area
-    Geom::Point2d p1{13.16,-47.2};
-    Geom::Point2d p2{42.98,-26.07};
-    Geom::Point2d p3{-13.52,-38.96};
-    auto area1 =Geom::ComputeSignedArea(p1,p2,p3);
-    auto area2 =Geom::ComputeSignedArea(p3,p1,p2);
-    auto area3 =Geom::ComputeSignedArea(p2,p3,p1);
-    LOG_WARN(m_logger, "Signed Area of Triangle p1,p2,p3: {} {} {} ", area1, area2, area3);
-
-    auto area4 =Geom::ComputeSignedArea(p1,p3,p2);
-    auto area5 =Geom::ComputeSignedArea(p2,p1,p3);
-    auto area6 =Geom::ComputeSignedArea(p3,p2,p1);
-    LOG_WARN(m_logger, "Signed Area of Triangle p1,p2,p3: {} {} {} ", area4, area5, area6);
-  
-    //orientation test
-    p1 = {-4,-2};
-    p2 = {2,1};
-    p3 = {-3,3};
-    auto orient = Geom::Orientation2d(p1,p2,p3);  //Left
-    orient = Geom::Orientation2d(p1,p3,p2);  //Right
-
-    p1 = {-4,-4};
-    p2 = {4,4};
-    p3 = {-2,-2};
-    orient = Geom::Orientation2d(p1,p2,p3);  //Between
-    orient = Geom::Orientation2d(p3,p2,p1);  //Behind
-    orient = Geom::Orientation2d(p1,p3,p2);  //beyond
-    orient = Geom::Orientation2d(p1,p2,p1);  //origin
-    orient = Geom::Orientation2d(p1,p2,p2);  //destination
-    //-----------------------------------------
-
-    //equality test
-    float f1 = 1.123004;
-    float f2 = 1.123005;
-    bool eq = Geom::Equal(f1,f2);
-    eq = Geom::Equal(f2,f1);
-
-    p1 = {1.0001f, 2.0002f};
-    p2 = {1.0002f, 2.0001f};
-    eq = Geom::Equal(p1,p2);
-    eq = Geom::Equal(p2,p1);
-
-    //------------------------------------------------------------------------------
-    //Intersection test
-    p1 = {-8.8, 2.88}; //intersect
-    //p1 = {-2.94, 1.39}; //no intersect
-    p2 = {8.2, -3.1};
-    p3 = {-9.27, -6.49};
-    Geom::Point2d p4 = {-1.69,6.4};
-    Geom::Point2d intersection(0,0);
-
-    seg1 = {p1,p2};
-    seg2 = {p3,p4};
-
-    bool intersect = Geom::IntersectionExists(seg1,seg2);
-    if(intersect)
-    {
-      Geom::ComputeIntersection(seg1,seg2, intersection);
-    }
-#endif    
-    //-------------------------------------------------------------------------------
-    //BSTree
-    //----------------------------------------------------------------------------------
-#if 0    
     LOG_WARN(m_logger,"--------------------------");
     LOG_WARN(m_logger,"BST TREE (NEW)");
     LOG_WARN(m_logger,"--------------------------");
@@ -376,412 +303,12 @@ namespace Spg
       LOG_TRACE(m_logger, "{},", val);
     } 
 #endif
-    //-------------------------------------------------------------------------------
-    //RBTree
-    //----------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+//RBTree V3 (templated)
+//-------------------------------------------------------------------------------
 #if 0
-    LOG_WARN(m_logger,"--------------------------");
-    LOG_WARN(m_logger,"Red-Black TREE");
-    LOG_WARN(m_logger,"--------------------------");
-    
-    //std::vector<float> rb_values{2,11,4,125,15,3,9,32,71,43,27,1};
-    std::vector<float> rb_values;
-    std::vector<bool> rb_values_to_delete;
-
-    //Add a bunch of random values
-    const uint32_t RB_NUM_VALS = 10000;
-    const float RB_MIN_VAL = 0;
-    const float RB_MAX_VAL = 1000;
-   
-
-    std::random_device rd;                         
-    std::mt19937 mt(rd()); 
-    std::uniform_real_distribution<float> fdist(RB_MIN_VAL, RB_MAX_VAL); 
-    
-
-    Geom::RBTree rbtree;
-
-    for(int i=0; i< RB_NUM_VALS; i++) {
-      float val = fdist(mt);
-      if(rbtree.Insert(val)) {
-        rb_values.push_back(val);
-        rb_values_to_delete.push_back(false);    
-      }
-    }
-    std::uniform_int_distribution<int> idist(0, rb_values.size()-1);  
-    const uint32_t RB_NUM_VALS_TO_DEL = rb_values.size()/2;
-
-    //pick values to delete at random
-    for(int i=0; i<RB_NUM_VALS_TO_DEL; i++ ) {
-      int idx = 0;
-      do {
-        idx = idist(mt);
-      } while (rb_values_to_delete[idx] == true);
-      rb_values_to_delete[idx] = true;
-    }
-
-    //Geom::RBTree rbtree(rb_values);
-    rbtree.Validate();
-
-    // SPG_INFO("Values (Ranged for loop) --------------------------");
-    // for(auto& val : rbtree) {
-    //   SPG_TRACE("{}", val);
-    // }
-    // SPG_INFO("--------------------------");
-
-    //LowerBound() and UpperBound()
-    {
-      // auto lb = rbtree.LowerBound(15.f);
-      // lb = rbtree.LowerBound(4.f);
-      // lb = rbtree.LowerBound(71.f);
-      // lb = rbtree.LowerBound(2.f);
-      // lb = rbtree.LowerBound(11.f);
-      // lb = rbtree.LowerBound(32.f);
-      // lb = rbtree.LowerBound(125.f);
-      // lb = rbtree.LowerBound(1.f);
-      // lb = rbtree.LowerBound(3.f);
-      // lb = rbtree.LowerBound(9.f);
-      // lb = rbtree.LowerBound(27.f);
-      // lb = rbtree.LowerBound(43.f);
-
-      // lb = rbtree.LowerBound(-20.f);
-      // lb = rbtree.LowerBound(0.5f);
-      // lb = rbtree.LowerBound(32.2f); 
-      // lb = rbtree.LowerBound(31.2f); 
-      // lb = rbtree.LowerBound(2.2f);
-      // lb = rbtree.LowerBound(29.1f);
-      // lb = rbtree.LowerBound(26.1f);
-      // lb = rbtree.LowerBound(11.3f);
-      // lb = rbtree.LowerBound(125.1f);
-      // SPG_ASSERT(lb == rbtree.end());
-
-      // lb = rbtree.UpperBound(15.f);
-      // lb = rbtree.UpperBound(4.f);
-      // lb = rbtree.UpperBound(71.f);
-      // lb = rbtree.UpperBound(2.f);
-      // lb = rbtree.UpperBound(11.f);
-      // lb = rbtree.UpperBound(32.f);
-      // lb = rbtree.UpperBound(125.f);
-      // SPG_ASSERT(lb == rbtree.end());
-      // lb = rbtree.UpperBound(1.f);
-      // lb = rbtree.UpperBound(3.f);
-      // lb = rbtree.UpperBound(9.f);
-      // lb = rbtree.UpperBound(27.f);
-      // lb = rbtree.UpperBound(43.f);
-
-      // lb = rbtree.UpperBound(-20.f);
-      // lb = rbtree.UpperBound(0.5f);
-      // lb = rbtree.UpperBound(32.2f); 
-      // lb = rbtree.UpperBound(31.2f); 
-      // lb = rbtree.UpperBound(2.2f);
-      // lb = rbtree.UpperBound(29.1f);
-      // lb = rbtree.UpperBound(26.1f);
-      // lb = rbtree.UpperBound(11.3f);
-      // lb = rbtree.UpperBound(125.1f);
-      // SPG_ASSERT(lb == rbtree.end());
-    }
-
-    SPG_INFO("Deleting {} values at random ", RB_NUM_VALS_TO_DEL);
-
-    for(int i=0; i<rb_values_to_delete.size(); i++ ) {
-      if(!rb_values_to_delete[i])
-        continue;
-      //SPG_WARN("Erasing:: {}", rb_values[i]);
-      rbtree.Erase(rb_values[i]);
-      //rbtree.Validate();
-    }
-    rbtree.Validate();
-
-    //Geom::rbtree_v2::RBTree<float,int>::Iterator itr;
-
-//************************************************************************************** */
-
-    // SPG_WARN("Copy------------");
-    // Geom::RBTree rbtree_copy(rb_values);
-    // rbtree_copy.Validate();
-
-    // SPG_INFO("Values of copy (Ranged for loop) --------------------------");
-    // for(auto& val : rbtree_copy) {
-    //   SPG_TRACE("{}", val);
-    // }
-    // SPG_INFO("--------------------------");
-
-    // SPG_INFO("Deleting {} values at random from copy", RB_NUM_VALS_TO_DEL);
-    // for(int i=0; i<RB_NUM_VALS; i++ ) {
-    //   if(!rb_value_deleted[i])
-    //     continue;
-    //   SPG_WARN("Erasing:: {}", rb_values[i]);
-    //   rbtree_copy.Erase(rb_values[i]);
-    //   rbtree_copy.Validate();
-    // }
-    // SPG_INFO("Tree Size: {}", rbtree_copy.Size());
-    // rbtree_copy.Validate();
-
-  
-    // LOG_WARN(m_logger,"Forward --------------------------");
-    // auto rbt_itr = rbtree.begin();
-    // while(rbt_itr != rbtree.end()) {
-    //   auto val = *rbt_itr;
-    //   LOG_TRACE(m_logger, "{}", val);
-    //   ++rbt_itr;
-    // }
-
-    // LOG_WARN(m_logger,"Back --------------------------");
-    // rbt_itr = rbtree.Find(125);
-    // while(rbt_itr != rbtree.end()) {
-    //   auto val = *rbt_itr;
-    //   LOG_TRACE(m_logger, "{}", val);
-    //   --rbt_itr;
-    // }
-
-    // LOG_WARN(m_logger,"Ranged for loop --------------------------");
-    // for(auto& val : rbtree) {
-    //   LOG_TRACE(m_logger, "{}", val);
-    // }
-
-  
-    // LOG_TRACE(m_logger, "Contains 2 ? {} ", rbtree.Contains(2));
-    // rbtree.Erase(2);
-    // LOG_TRACE(m_logger, "Contains 2 ? {} ", rbtree.Contains(2));
-
-    // LOG_TRACE(m_logger, "Contains 32 ? {} ", rbtree.Contains(32));
-    // rbtree.Erase(32);
-    // LOG_TRACE(m_logger, "Contains 32 ? {} ", rbtree.Contains(32));
-
-    // LOG_TRACE(m_logger, "Contains 11 ? {} ", rbtree.Contains(11));
-    // rbtree.Erase(11);
-    // LOG_TRACE(m_logger, "Contains 11 ? {} ", rbtree.Contains(11));
-
-    //just delete the root
-
-    // LOG_TRACE(m_logger, "Contains 15 ? {} ", rbtree.Contains(15));
-    // rbtree.Erase(15);
-    // LOG_TRACE(m_logger, "Contains 15 ? {} ", rbtree.Contains(15));
-
-    // LOG_TRACE(m_logger, "Contains 15 ? {} ", rbtree.Contains(15));
-    // rbtree.Erase(15);
-    // LOG_TRACE(m_logger, "Contains 15 ? {} ", rbtree.Contains(15));
-
-    // LOG_TRACE(m_logger, "Contains 71 ? {} ", rbtree.Contains(71));
-    // rbtree.Erase(71);
-    // LOG_TRACE(m_logger, "Contains 71 ? {} ", rbtree.Contains(71));
-
-    // LOG_WARN(m_logger,"Ranged for loop (after deletions) --------------------------");
-    // for(auto& val : rbtree) {
-    //   LOG_TRACE(m_logger, "{}", val);
-    // }
-    //rbtree.Validate();
-
-#endif    
-
-    //-------------------------------------------------------------------------------
-    //RBTree V2 (templated)
-    //----------------------------------------------------------------------------------
-#if 0
-    SPG_WARN("-------------------------------------------------------------------------");
-    SPG_WARN("Red-Black Tree V2 (Templated)");
-    SPG_WARN("-------------------------------------------------------------------------");
-    {
-      std::vector<std::pair<const int,int>> rb2_vals {{2,200},{11,1100},{4,400},{125,12500},{15,1500},{3,300},{9,900},{32,3200},{71,7100},{43,4300},{27,2700},{1,100}};
-
-      Geom::rbtree_v2::RBTree<int,int> rbtree_v2(rb2_vals);
-      rbtree_v2.Validate();
-
-      
-
-      //Traversal and iterating
-      {
-        std::vector<std::pair<const int,int>> elements_out;
-        SPG_INFO("In Order Traverse");
-        rbtree_v2.InOrderTraverse(elements_out);
-        for(auto& [key,val]: elements_out) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        
-        SPG_INFO("Ranged for loop traverse");
-        for(auto& [key,val] : rbtree_v2) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-
-        SPG_INFO("Loop using Iterator")
-        for(auto itr = rbtree_v2.begin(); itr != rbtree_v2.end(); ++itr) {
-          auto& [key,val] = *itr;
-          SPG_TRACE("[{},{}]", key, val);
-        }
-      }
-
-      //Find(), Contains()
-      {
-        for(auto& [key, value]: rb2_vals) {
-          SPG_INFO("Contains {}? {}", key, rbtree_v2.Contains(key));
-        }
-        SPG_INFO("Contains {}? {}", -15, rbtree_v2.Contains(-15));
-        SPG_INFO("Contains {}? {}", 0, rbtree_v2.Contains(0));
-        SPG_INFO("Contains {}? {}", 160, rbtree_v2.Contains(160));
-        SPG_INFO("Contains {}? {}", 33, rbtree_v2.Contains(33));
-      }
-
-      //LowerBound() UpperBound()
-      {
-        for(auto& [key, value]: rb2_vals) {
-          auto itr = rbtree_v2.LowerBound(key);
-          if(itr == rbtree_v2.end()) {
-            SPG_INFO("LowerBound {}? end", key);
-          }
-          else {
-            SPG_INFO("LowerBound {}? {}", key, (*itr).first);
-          }
-        }
-        for(auto& [key, value]: rb2_vals) {
-          int k = key-10;
-          auto itr = rbtree_v2.LowerBound(k);
-          if(itr == rbtree_v2.end()) {
-            SPG_INFO("LowerBound {}? end", k);
-          }
-          else {
-            SPG_INFO("LowerBound {}? {}", k, (*itr).first);
-          }
-        }
-        for(auto& [key, value]: rb2_vals) {
-          auto itr = rbtree_v2.UpperBound(key);
-          if(itr == rbtree_v2.end()) {
-            SPG_INFO("UpperBound {}? end", key);
-          }
-          else {
-            SPG_INFO("UpperBound {}? {}", key, (*itr).first);
-          }
-        }
-        for(auto& [key, value]: rb2_vals) {
-          int k = key-10;
-          auto itr = rbtree_v2.UpperBound(k);
-          if(itr == rbtree_v2.end()) {
-            SPG_INFO("UpperBound {}? end", k);
-          }
-          else {
-            SPG_INFO("UpperBound {}? {}", k, (*itr).first);
-          }
-        }
-        
-      }
-
-      //Deletion
-      {
-        rbtree_v2.Erase(1);
-        rbtree_v2.Erase(71);
-        rbtree_v2.Erase(27);
-        std::vector<std::pair<const int,int>> elements_out;
-        SPG_INFO("In Order Traverse After erase");
-        rbtree_v2.InOrderTraverse(elements_out);
-        for(auto& [key,val]: elements_out) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        rbtree_v2.Validate();
-      }
-
-      //Stress test with large data, insertion, erasure, clear
-      {
-        rbtree_v2.Clear();
-        //Add a bunch of random values
-        std::vector<int> rb_values;
-        std::vector<bool> rb_values_to_delete;
-      
-        const uint32_t RB_NUM_VALS = 10000;
-        const int RB_MIN_VAL = -100000;
-        const int RB_MAX_VAL = 100000;
-    
-        std::random_device rd;                         
-        std::mt19937 mt(rd()); 
-        std::uniform_int_distribution<int> dist(RB_MIN_VAL, RB_MAX_VAL); 
-      
-        for(int i=0; i< RB_NUM_VALS; i++) {
-          int val = dist(mt);
-          auto element = std::make_pair(val,val*100);
-          if(rbtree_v2.Insert(element)) {
-            rb_values.push_back(val);
-            rb_values_to_delete.push_back(false);    
-          }
-        }
-        rbtree_v2.Validate();
-
-        //pick values to delete at random
-        std::uniform_int_distribution<int> idist(0, rb_values.size()-1);  
-        const uint32_t RB_NUM_VALS_TO_DEL = rb_values.size()/2;
-        for(int i=0; i<RB_NUM_VALS_TO_DEL; i++ ) {
-          int idx = 0;
-          do {
-            idx = idist(mt);
-          } while (rb_values_to_delete[idx] == true);
-          rb_values_to_delete[idx] = true;
-        }
-        
-        SPG_INFO("Deleting {} values at random ", RB_NUM_VALS_TO_DEL);
-        for(int i=0; i<rb_values_to_delete.size(); i++ ) {
-          if(!rb_values_to_delete[i])
-            continue;
-          rbtree_v2.Erase(rb_values[i]);
-        }
-        rbtree_v2.Validate();
-        SPG_INFO("Clearing Tree");
-        rbtree_v2.Clear();
-        rbtree_v2.Validate();
-        SPG_INFO("Tree Size {}: ", rbtree_v2.Size());
-
-        SPG_INFO("Add a few more elements");
-        for(auto& element : rb2_vals)
-          rbtree_v2.Insert(element);
-        SPG_INFO("Ranged for loop traverse");
-        for(auto& [key,val] : rbtree_v2) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        SPG_INFO("Tree Size {}: ", rbtree_v2.Size());
-        rbtree_v2.Validate();
-      }
-    
-      //Copy move constructor, assignment operator
-      {
-      auto t2 = rbtree_v2; //copy constructor
-      Geom::rbtree_v2::RBTree<int,int> t3;
-      t3 = t2; //copy assignment;
-      SPG_INFO("t2:");
-      for(auto& [key,val] : t2) {
-        SPG_TRACE("[{},{}]", key, val);
-      }
-      SPG_INFO("t3:");
-      for(auto& [key,val] : t3) {
-        SPG_TRACE("[{},{}]", key, val);
-      }
-      auto t4 = std::move(t2); //move ctr
-      Geom::rbtree_v2::RBTree<int,int> t5;
-      t5 = std::move(t3);
-
-      SPG_INFO("After move:");
-      SPG_INFO("t2:");
-      for(auto& [key,val] : t2) {
-        SPG_TRACE("[{},{}]", key, val);
-      }
-      SPG_INFO("t3:");
-      for(auto& [key,val] : t3) {
-        SPG_TRACE("[{},{}]", key, val);
-      }
-
-      SPG_INFO("t4:");
-      for(auto& [key,val] : t4) {
-        SPG_TRACE("[{},{}]", key, val);
-      }
-      SPG_INFO("t5:");
-      for(auto& [key,val] : t5) {
-        SPG_TRACE("[{},{}]", key, val);
-      }
-    }
-
-    }
-    
-#endif
-
-#if 1
-     //-------------------------------------------------------------------------------
-    //RBTree V3 (templated)
-    //----------------------------------------------------------------------------------
+     
     SPG_WARN("-------------------------------------------------------------------------");
     SPG_WARN("Red-Black Tree V3 (Templated)");
     SPG_WARN("-------------------------------------------------------------------------");
@@ -789,7 +316,7 @@ namespace Spg
       
       std::vector<std::pair<const int,int>> map_vals {{2,200},{11,1100},{4,400},{125,12500},{15,1500},{3,300},{9,900},{32,3200},{71,7100},{43,4300},{27,2700},{1,100}};
 
-      Geom::rbtree_v3::Map<int, int> my_map(map_vals);
+      Geom::Map<int, int> my_map(map_vals);
       my_map.Validate();
 
       //Traversal and iterating
@@ -943,7 +470,7 @@ namespace Spg
       //Copy move constructor, assignment operator
       {
         auto t2 = my_map; //copy constructor
-        Geom::rbtree_v3::Map<int,int> t3;
+        Geom::Map<int,int> t3;
         t3 = t2; //copy assignment;
         SPG_INFO("t2:");
         for(auto& [key,val] : t2) {
@@ -954,7 +481,7 @@ namespace Spg
           SPG_TRACE("[{},{}]", key, val);
         }
         auto t4 = std::move(t2); //move ctr
-        Geom::rbtree_v3::Map<int,int> t5;
+        Geom::Map<int,int> t5;
         t5 = std::move(t3); //move assignment
 
         SPG_INFO("After move:");
@@ -979,9 +506,23 @@ namespace Spg
     }
 #endif
 
-    //-------------------------------------------------------------------------------
-    //KDTree
-    //----------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
+//RangeTree1D
+//-------------------------------------------------------------------------------
+#if 0
+    Geom::RangeTree1D::Test();
+#endif
+
+//-------------------------------------------------------------------------------
+//RangeTree2D
+//-------------------------------------------------------------------------------
+#if 1
+    Geom::RangeTree2D::Test();
+#endif
+
+//-------------------------------------------------------------------------------
+//KDTree
+//-------------------------------------------------------------------------------
 #if 0
      std::vector<Geom::Point2d> kd_values;
 
@@ -1011,9 +552,10 @@ namespace Spg
 
     kdtree.ValidateSearch(range);
 #endif
-    //-------------------------------------------------------------------------------
-    //Intersection Set
-    //-------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+//Intersection Set
+//-------------------------------------------------------------------------------
 #if 0    
     LOG_WARN(m_logger, "-----------------------------------");  
     LOG_TRACE(m_logger, "iNTERSECTION TESTING");  
@@ -1047,9 +589,10 @@ namespace Spg
     Geom::ItersectSet::IntersectionSet intersection_set{segs};
     intersection_set.Process();
 #endif
-    //-------------------------------------------------------------------------------
-    //DCEL
-    //--------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
+//DCEL
+//--------------------------------------------------------------------------------
 #if 0    
     //MONOTON PARTITION
     std::vector<Geom::Point2d> mt_poly_points =
@@ -1084,193 +627,4 @@ namespace Spg
 
     ///std::type_index type1 = typeid(int);
   }
-
-#if 0
-  void PolygonRenderData::AddPolygon(const std::string& name, const std::vector<Geom::Point2d>& points, GLShader* shader)
-   {
-      auto default_point_color = glm::vec4(1,1,0,1);  
-      std::vector<PolygonRenderData::Layout> mesh_points;
-      for(auto p : points) {
-        mesh_points.push_back({{p.x, p.y,-0.1f},default_point_color});
-      }
-      
-      auto default_seg_color = glm::vec4(0.5f,0.5f,0,1);  
-      std::vector<PolygonRenderData::Layout> mesh_segs;
-      for(uint32_t i=0; i<points.size(); ++i) {
-        uint32_t i_next = (i==points.size()-1) ? 0 : i+1;
-        glm::vec3 p_cur = {points[i].x, points[i].y, 0.1f};
-        glm::vec3 p_next = {points[i_next].x, points[i_next].y, -0.1f};
-        mesh_segs.push_back({p_cur, default_seg_color});
-        mesh_segs.push_back({p_next, default_seg_color});
-      }
-
-      uint32_t size_in_bytes = static_cast<uint32_t>(mesh_points.size() * sizeof(Layout));
-      auto vbo_points = GLVertexBuffer(mesh_points.data(), size_in_bytes, PolygonRenderData::s_buffer_layout); 
-      uint32_t size_in_bytes_segs = static_cast<uint32_t>(mesh_segs.size() * sizeof(Layout));
-      auto vbo_segs = GLVertexBuffer{ mesh_segs.data(), size_in_bytes_segs, PolygonRenderData::s_buffer_layout}; 
-      
-      Drawable drawable_points(vbo_points,shader,GLRenderer::PrimitiveType::Point);
-      Drawable drawable_segs(vbo_segs,shader,GLRenderer::PrimitiveType::Line);
-      
-      point_drawables[name] = drawable_points;
-      seg_drawables[name] = drawable_segs;
-
-      point_meshes[name] = mesh_points;
-      seg_meshes[name] = mesh_segs;
-
-      polygon_points[name] = points; 
-
-      //Stuff below for figuring out a compiler error - can be deleted
-      //todo - don't seem to get these compile errors when doing the same thing in Visual Studio 22! with c++ 17/20
-      //auto dcel = monotone_spawner.GetDCEL();
-      //DCEL_Polygon d1 = dcel; //error
-      //Geom::DCEL::Polygon d2 = std::move(dcel); // error
-      // auto pp = points;
-      // DCEL_Polygon p1 = DCEL_Polygon(pp); //ok
-      // DCEL_Polygon p3 = p1; // ok
-      //DCEL_Polygon p2 = DCEL_Polygon(points); //error
-      // std::vector<DCEL_Polygon> poly_vec;
-      // poly_vec.push_back(p1); //ok
-      //poly_vec.push_back(dcel); //error
-   }
-
-  void PolygonRenderData::InitialiseMonotoneAlgoVisuals(const std::string& name, GLShader* shader)
-  {
-    auto& monotone_event_points = this->monotone_spawner.GetEventPoints();
-    auto itr = point_meshes.find(name);
-    SPG_ASSERT(itr != point_meshes.end());
-    auto& point_mesh = itr->second;
-    SPG_ASSERT(monotone_event_points.size() == point_mesh.size());
-    for(uint32_t i=0; i< point_mesh.size(); ++i) {
-      if(monotone_event_points[i].vertex_category == Geom::Monotone_V2::VertexCategory::Start) {
-        SetPointColor(name,i,glm::vec4(0,1,0,1)); //green
-      }
-      if(monotone_event_points[i].vertex_category == Geom::Monotone_V2::VertexCategory::End) {
-        SetPointColor(name,i,glm::vec4(1,0,0,1)); //red
-      }
-      if(monotone_event_points[i].vertex_category == Geom::Monotone_V2::VertexCategory::Merge) {
-        SetPointColor(name,i,glm::vec4(0,0,1,1)); //blue
-      }
-      if(monotone_event_points[i].vertex_category == Geom::Monotone_V2::VertexCategory::Split) {
-        SetPointColor(name,i,glm::vec4(1,1,1,1)); //white
-      }
-      if(monotone_event_points[i].vertex_category == Geom::Monotone_V2::VertexCategory::Regular) {
-         SetPointColor(name,i,glm::vec4(1,1,0,1)); //yellow
-      }
-      if(monotone_event_points[i].vertex_category == Geom::Monotone_V2::VertexCategory::Invalid) {
-        SetPointColor(name,i,glm::vec4(0.3f,0.3f,0.3f,1)); //gray
-      }
-    }
-
-    auto& event_queue = this->monotone_spawner.GetEventQueue();
-    auto& first_event_point = event_queue.back();
-    float sweep_y = first_event_point.vertex->point.y + 20.0f;
-    std::array<Layout,2> sweep_line_mesh;
-    sweep_line_mesh[0].pos = glm::vec3(-500.0f, sweep_y, 0.1f);
-    sweep_line_mesh[1].pos = glm::vec3(500.0f, sweep_y, 0.1f);
-    sweep_line_mesh[0].col = sweep_line_mesh[1].col = {0.f,0.f,0.8f,1};
-    uint32_t size_in_bytes = static_cast<uint32_t>(sweep_line_mesh.size() * sizeof(Layout));
-    if(seg_drawables.find("sweep_line") == seg_drawables.end()) {
-      auto vbo_sweep_line = GLVertexBuffer{ sweep_line_mesh.data(), size_in_bytes, PolygonRenderData::s_buffer_layout};
-      Drawable drawable_sweep_line(vbo_sweep_line,shader,GLRenderer::PrimitiveType::Line);
-      seg_drawables["sweep_line"] = drawable_sweep_line;
-    }
-    else {
-      auto& vbo = seg_drawables["sweep_line"].VAO.GetVertexBuffer();
-      vbo.UpdateVertexData(0,size_in_bytes, sweep_line_mesh.data());
-    }
-
-    UpdateMonotoneAlgoLabels(name);
-  }
-
-  void PolygonRenderData::UpdateMonotoneAlgoLabels(const std::string& name)
-  {
-    m_labels.clear();
-    auto& monotone_event_points = this->monotone_spawner.GetEventPoints();
-    auto itr = point_meshes.find(name);
-    SPG_ASSERT(itr != point_meshes.end());
-
-    for(auto& event_point : monotone_event_points) {
-      Label label;
-      label.pos = event_point.vertex->point;
-      label.text = std::to_string(event_point.tag);
-      m_labels.push_back(label);
-    }
-  }
-
-  
-
-  void PolygonRenderData::SetPointColor(const std::string& name, uint32_t index, const glm::vec4& color)
-  {
-    auto itr = point_meshes.find(name);
-    SPG_ASSERT(itr != point_meshes.end());
-    auto& point_mesh = itr->second;
-    SPG_ASSERT(index < point_mesh.size());
-    
-    auto itr2 = point_drawables.find(name);
-    SPG_ASSERT(itr2 != point_drawables.end());
-    auto& point_drawable = itr2->second;
-    auto& vbo = point_drawable.VAO.GetVertexBuffer();
-
-    PolygonRenderData::Layout new_data;
-    new_data.col = color;
-    new_data.pos =  point_mesh[index].pos;
-
-    vbo.UpdateVertexData(index, sizeof(new_data), (void *)(&new_data));
-  }
-
-  void PolygonRenderData::SetPointColor(const std::string& name, const glm::vec4& color)
-  {
-    auto itr = point_meshes.find(name);
-    SPG_ASSERT(itr != point_meshes.end());
-    auto& point_mesh = itr->second;
-
-    for(uint32_t i=0; i<point_mesh.size(); ++i) {
-      SetPointColor(name,i,color);
-    }
-  }
-
-  void PolygonRenderData::SetPointColor(const std::string& name, const std::vector<uint32_t>& indicies, const glm::vec4& color)
-  {
-    
-  }
-
-  void PolygonRenderData::SetSegColor(const std::string& name, uint32_t index, const glm::vec4& color)
-  {
-    uint32_t seg_idx = index*2;
-
-    auto itr = seg_meshes.find(name);
-    SPG_ASSERT(itr != seg_meshes.end());
-    auto& seg_mesh = itr->second;
-    SPG_ASSERT(seg_idx+1 < seg_mesh.size()); 
-
-    auto itr2 = seg_drawables.find(name);
-    SPG_ASSERT(itr2 != seg_drawables.end());
-    auto& seg_drawable = itr2->second;
-    auto& vbo = seg_drawable.VAO.GetVertexBuffer();
-
-    PolygonRenderData::Layout new_data[2];
-    new_data[0].col = new_data[1].col = color;
-    new_data[0].pos = seg_mesh[seg_idx].pos;
-    new_data[1].pos = seg_mesh[seg_idx+1].pos;
-
-    vbo.UpdateVertexData(seg_idx, sizeof(new_data), (void *)(&new_data));
-  }
-
-  void PolygonRenderData::SetSegColor(const std::string& name, const std::vector<uint32_t>& indicies, const glm::vec4& color)
-  {
-    
-  }
-
-  void PolygonRenderData::SetSegColor(const std::string& name, const glm::vec4& color)
-  {
-     auto itr = point_meshes.find(name);
-    SPG_ASSERT(itr != point_meshes.end());
-    auto& point_mesh = itr->second;
-
-    for(uint32_t i=0; i<point_mesh.size(); ++i) {
-      SetSegColor(name,i,color);
-    }
-  }
-#endif
 }

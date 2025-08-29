@@ -9,6 +9,7 @@
 #include "BSTree.h"
 #include "RBTree.h"
 #include "KDTree.h"
+#include "RangeTree.h"
 #include "IntersectionSet.h"
 #include "DCEL.h"
 #include "MonotonePartition.h"

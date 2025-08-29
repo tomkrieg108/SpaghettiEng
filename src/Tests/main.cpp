@@ -187,6 +187,7 @@ namespace GeomTest
 
   }
 
+  //Todo - test ComputeIntersection() 
   TEST_CASE( "Intersection Exists", "bool IntersectionExists(const LineSeg2D&, const LineSeg2D&)") {
 
   Geom::LineSeg2D L1{{20,30},{60,20}}, L2{{50,30},{30,20}};
@@ -210,6 +211,8 @@ namespace GeomTest
   L1={{10,30},{20,45}}; L2={{20,40},{60,30}}; 
   REQUIRE(Geom::IntersectionExists(L2,L1) == false); //Segments don't cross FAILS!?
   REQUIRE(Geom::IntersectionExists(L1,L2) == false); //Segments don't cross FAILS!?
+
+  
   }
 
   TEST_CASE( "Compute Angle, Subtended Angle 2d", "ComputeAngleInDegrees(), ComputeSubtendedAngleInDegrees()") 
