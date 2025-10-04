@@ -31,7 +31,6 @@ namespace Spg
     LayerStack m_layer_stack;
     std::string m_app_name;
     bool m_running = true;
-
     static Application* s_instance;
   };
 

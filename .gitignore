@@ -8,14 +8,14 @@
 CMakeUserPresets.json
 .mypy_cache 
 
-cmake/CPM.cmake
+#cmake/CPM.cmake
 external/Readme.txt
 
 ################################
 ########### FOLDERS ############
 ################################
 build/
-assets/
+#assets/
 html/
 .vscode/
 #external/glad
