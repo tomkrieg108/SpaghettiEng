@@ -88,9 +88,6 @@ namespace Spg
     SPG_WARN("Entt {},{},{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR, ENTT_VERSION_PATCH );
 
     std::cout << "####################################################\n\n";
-
-    
-    
   }
 }
 

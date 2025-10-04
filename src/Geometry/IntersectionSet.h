@@ -244,9 +244,13 @@ namespace Geom
         IntersectionSet(const SegList& seg_list);
         void Process();  
         void PrintIntersections();
+
+        static void Test();
       private:
         void HandleEvent(const Event& e);
         void FindNewEvent(const LineSeg2D& seg1, const LineSeg2D& seg2, Point2d p);
+
+        
       private:
         Queue m_queue;
         StatusStructure m_status;

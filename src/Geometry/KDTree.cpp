@@ -76,23 +76,7 @@ namespace Geom
     return points;
   }
 
-  void KDTree2D::ValidateSearch(const Range& input_range)
-  {
-    auto points1 = RangeSearch(input_range);
-    auto points2 = BruteForceRangeSearch(input_range);
-
-    SPG_ASSERT(points1.size() == points2.size());
-    for(uint32_t i = 0; i<points1.size(); ++i) {
-      auto p1 = points1[i];
-      int matches = 0; 
-      for(uint32_t j=0; j<points2.size(); ++j) {
-        auto p2 = points2[j];
-        if(Geom::Equal(p1,p2))
-          matches++;
-      }
-      SPG_ASSERT(matches == 1);
-    }
-  }
+  
 
   void KDTree2D::SearchNode(KDNode2D* node, Range node_range, const Range& input_range,std::vector<Point2d>& points_found)
   {
@@ -182,6 +166,56 @@ namespace Geom
       (range1.y_min > range2.y_max) || (range1.y_max < range2.y_min);
 
     return !no_intersection;
+  }
+
+
+void KDTree2D::ValidateSearch(const Range& input_range)
+  {
+    auto points1 = RangeSearch(input_range);
+    auto points2 = BruteForceRangeSearch(input_range);
+
+    SPG_ASSERT(points1.size() == points2.size());
+    for(uint32_t i = 0; i<points1.size(); ++i) {
+      auto p1 = points1[i];
+      int matches = 0; 
+      for(uint32_t j=0; j<points2.size(); ++j) {
+        auto p2 = points2[j];
+        if(Geom::Equal(p1,p2))
+          matches++;
+      }
+      SPG_ASSERT(matches == 1);
+    }
+  }
+
+  void KDTree2D::Test()
+  {
+     std::vector<Geom::Point2d> kd_values;
+
+    //Add a bunch of random values
+    const uint32_t KD_NUM_VALS = 1000;
+    const float KD_MIN_VAL = 0;
+    const float KD_MAX_VAL = 200;
+    
+    std::random_device rd;                         
+    std::mt19937 mt(rd()); 
+    std::uniform_real_distribution<float> fdist(KD_MIN_VAL, KD_MAX_VAL); 
+    
+    for(int i=0; i< KD_NUM_VALS; i++) {
+      Geom::Point2d p(fdist(mt),fdist(mt));
+      kd_values.push_back(p);
+    }
+
+    Geom::KDTree2D kdtree(kd_values);
+    Geom::KDTree2D kdtree2(std::move(kd_values));
+
+    auto points1 = kdtree.CollectAllPoints();
+    auto points2 = kdtree2.CollectAllPoints();
+
+    Geom::KDTree2D::Range range{20,80,20,80};
+    auto points3 = kdtree.RangeSearch(range);
+    auto points4 = kdtree2.RangeSearch(range);
+
+    kdtree.ValidateSearch(range);
   }
 
 }

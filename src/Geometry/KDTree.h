@@ -37,6 +37,8 @@ namespace Geom
     std::vector<Point2d> CollectAllPoints();
     void ValidateSearch(const Range& input_range);
 
+    static void Test();
+
     /*
       Additional:
 

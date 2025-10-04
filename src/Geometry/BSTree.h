@@ -51,6 +51,8 @@ namespace Geom
     BSTNode* UpperBound(float value);  
     void Transplant(BSTNode* u,BSTNode* v); //u is replaced by v - not used or implemented
     void Erase(BSTNode* node);
+
+   
     
   private:
 

@@ -1015,5 +1015,205 @@ namespace Geom
   //     using typename Base::const_reference;
   //     using typename Base::iterator;
   // };
+
+  static void Test_RB_Tree() 
+  {
+    SPG_WARN("-------------------------------------------------------------------------");
+    SPG_WARN("Red-Black Tree V3 (Templated)");
+    SPG_WARN("-------------------------------------------------------------------------");
+    {
+      
+      std::vector<std::pair<const int,int>> map_vals {{2,200},{11,1100},{4,400},{125,12500},{15,1500},{3,300},{9,900},{32,3200},{71,7100},{43,4300},{27,2700},{1,100}};
+
+      Geom::Map<int, int> my_map(map_vals);
+      my_map.Validate();
+
+      //Traversal and iterating
+      {
+        std::vector<std::pair<const int,int>> elements_out;
+        SPG_INFO("In Order Traverse");
+        my_map.InOrderTraverse(elements_out);
+        for(auto& [key,val]: elements_out) {
+          SPG_TRACE("[{},{}]", key, val);
+        }
+        
+        // SPG_INFO("Ranged for loop traverse");
+        // for(auto& [key,val] : my_map) {
+        //   SPG_TRACE("[{},{}]", key, val);
+        // }
+
+        SPG_INFO("Loop using Iterator")
+        for(auto itr = my_map.begin(); itr != my_map.end(); ++itr) {
+          auto& [key,val] = *itr;
+          SPG_TRACE("[{},{}]", key, val);
+        }
+      }
+
+      //Find(), Contains()
+      {
+        for(auto& [key, value]: map_vals) {
+          SPG_INFO("Contains {}? {}", key, my_map.Contains(key));
+        }
+        SPG_INFO("Contains {}? {}", -15, my_map.Contains(-15));
+        SPG_INFO("Contains {}? {}", 0, my_map.Contains(0));
+        SPG_INFO("Contains {}? {}", 160, my_map.Contains(160));
+        SPG_INFO("Contains {}? {}", 33, my_map.Contains(33));
+      }
+
+      //LowerBound() UpperBound()
+      {
+        for(auto& [key, value]: map_vals) {
+          auto itr = my_map.LowerBound(key);
+          if(itr == my_map.end()) {
+            SPG_INFO("LowerBound {}? end", key);
+          }
+          else {
+            SPG_INFO("LowerBound {}? {}", key, (*itr).first);
+          }
+        }
+        for(auto& [key, value]: map_vals) {
+          int k = key-10;
+          auto itr = my_map.LowerBound(k);
+          if(itr == my_map.end()) {
+            SPG_INFO("LowerBound {}? end", k);
+          }
+          else {
+            SPG_INFO("LowerBound {}? {}", k, (*itr).first);
+          }
+        }
+        for(auto& [key, value]: map_vals) {
+          auto itr = my_map.UpperBound(key);
+          if(itr == my_map.end()) {
+            SPG_INFO("UpperBound {}? end", key);
+          }
+          else {
+            SPG_INFO("UpperBound {}? {}", key, (*itr).first);
+          }
+        }
+        for(auto& [key, value]: map_vals) {
+          int k = key-10;
+          auto itr = my_map.UpperBound(k);
+          if(itr == my_map.end()) {
+            SPG_INFO("UpperBound {}? end", k);
+          }
+          else {
+            SPG_INFO("UpperBound {}? {}", k, (*itr).first);
+          }
+        }
+        
+      }
+
+      //Deletion
+      {
+        my_map.Erase(1);
+        my_map.Erase(71);
+        my_map.Erase(27);
+        std::vector<std::pair<const int,int>> elements_out;
+        SPG_INFO("In Order Traverse After erase");
+        my_map.InOrderTraverse(elements_out);
+        for(auto& [key,val]: elements_out) {
+          SPG_TRACE("[{},{}]", key, val);
+        }
+        my_map.Validate();
+      }
+
+      //Stress test with large data, insertion, erasure, clear
+      {
+        my_map.Clear();
+        //Add a bunch of random values
+        std::vector<int> rb_values;
+        std::vector<bool> rb_values_to_delete;
+      
+        const uint32_t RB_NUM_VALS = 10000;
+        const int RB_MIN_VAL = -100000;
+        const int RB_MAX_VAL = 100000;
+    
+        std::random_device rd;                         
+        std::mt19937 mt(rd()); 
+        std::uniform_int_distribution<int> dist(RB_MIN_VAL, RB_MAX_VAL); 
+      
+        for(int i=0; i< RB_NUM_VALS; i++) {
+          int val = dist(mt);
+          auto element = std::make_pair(val,val*100);
+          if(my_map.Insert(element)) {
+            rb_values.push_back(val);
+            rb_values_to_delete.push_back(false);    
+          }
+        }
+        my_map.Validate();
+
+        //pick values to delete at random
+        std::uniform_int_distribution<int> idist(0, rb_values.size()-1);  
+        const uint32_t RB_NUM_VALS_TO_DEL = rb_values.size()/2;
+        for(int i=0; i<RB_NUM_VALS_TO_DEL; i++ ) {
+          int idx = 0;
+          do {
+            idx = idist(mt);
+          } while (rb_values_to_delete[idx] == true);
+          rb_values_to_delete[idx] = true;
+        }
+        
+        SPG_INFO("Deleting {} values at random ", RB_NUM_VALS_TO_DEL);
+        for(int i=0; i<rb_values_to_delete.size(); i++ ) {
+          if(!rb_values_to_delete[i])
+            continue;
+          my_map.Erase(rb_values[i]);
+        }
+        my_map.Validate();
+        SPG_INFO("Clearing Tree");
+        my_map.Clear();
+        my_map.Validate();
+        SPG_INFO("Tree Size {}: ", my_map.Size());
+
+        SPG_INFO("Add a few more elements");
+        for(auto& element : map_vals)
+          my_map.Insert(element);
+        SPG_INFO("Ranged for loop traverse");
+        for(auto& [key,val] : my_map) {
+          SPG_TRACE("[{},{}]", key, val);
+        }
+        SPG_INFO("Tree Size {}: ", my_map.Size());
+        my_map.Validate();
+      }
+    
+      //Copy move constructor, assignment operator
+      {
+        auto t2 = my_map; //copy constructor
+        Geom::Map<int,int> t3;
+        t3 = t2; //copy assignment;
+        SPG_INFO("t2:");
+        for(auto& [key,val] : t2) {
+          SPG_TRACE("[{},{}]", key, val);
+        }
+        SPG_INFO("t3:");
+        for(auto& [key,val] : t3) {
+          SPG_TRACE("[{},{}]", key, val);
+        }
+        auto t4 = std::move(t2); //move ctr
+        Geom::Map<int,int> t5;
+        t5 = std::move(t3); //move assignment
+
+        SPG_INFO("After move:");
+        SPG_INFO("t2:");
+        for(auto& [key,val] : t2) {
+          SPG_TRACE("[{},{}]", key, val);
+        }
+        SPG_INFO("t3:");
+        for(auto& [key,val] : t3) {
+          SPG_TRACE("[{},{}]", key, val);
+        }
+
+        SPG_INFO("t4:");
+        for(auto& [key,val] : t4) {
+          SPG_TRACE("[{},{}]", key, val);
+        }
+        SPG_INFO("t5:");
+        for(auto& [key,val] : t5) {
+          SPG_TRACE("[{},{}]", key, val);
+        }
+      }
+    }
+
+ }
   
 } //namespace Geom

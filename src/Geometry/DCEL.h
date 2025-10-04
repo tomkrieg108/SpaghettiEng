@@ -135,6 +135,8 @@ namespace Geom
     void PrintHalfEdges();
     void PrintFace(Face* f);
     void PrintFaces();
+
+    static void Test();
   
   private:  
     std::vector<Vertex*> m_vertices;

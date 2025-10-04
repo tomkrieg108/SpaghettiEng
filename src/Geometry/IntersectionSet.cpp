@@ -227,6 +227,40 @@ namespace Geom
       }
     }
 
+    void IntersectionSet::Test()
+    {
+       SPG_WARN("-----------------------------------");  
+        SPG_TRACE("iNTERSECTION TESTING");  
+        std::vector<Geom::LineSeg2D> segs 
+        {
+          {{-1,4},{-2,1}}, //f
+          {{-2,12},{2,-2}}, //g
+          {{0,2},{-4,6}}, //h
+          {{-2,6},{2,10}}, //i
+          {{6,4},{2,10}}, //j
+          {{4,4},{2,10}}, //k
+          {{2,10},{4,14}}, //l
+          {{8,10},{-4,10}}, //m horizontal line - 
+          {{8,9},{-4,10}}, //m near horizontal line - 
+
+        
+          {{-4,6},{-4,10}}, 
+          {{4,4},{6,4}}, //p horizontal line
+          
+          {{-8,8},{-4,8}}, //r horizontal line
+          {{-6,12},{-6,4}}, //q vertical line
+          {{6,14},{6,10}}, //q vertical line
+          //{{6,14},{6,9.1666667}}, //q vertical line
+
+      };
+    
+      // seg1 = {{-4,10},{8,10}};
+      // seg2 = {{-4,10},{8,10}};
+      // eq = Geom::Equal(seg1.start, seg2.start) && Geom::Equal(seg1.end, seg2.end);
+
+      Geom::ItersectSet::IntersectionSet intersection_set{segs};
+      intersection_set.Process();
+    }
 /*****************************************************************************************************
     HERE'S THE START OF THE CODE THAT ACTUALLY DOES STUFF!!
  ***************************************************************************************************/

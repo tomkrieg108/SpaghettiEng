@@ -444,5 +444,33 @@ namespace Geom
     }
   }
 
+  void DCEL::Test()
+  {
+     std::vector<Geom::Point2d> mt_poly_points =
+    {
+      {16.42f,12.51f},  //A 1
+      {13.95,10.36},    //B 2
+      {11.2,18.4},      //C 3
+      {9.2,16.4},       //D 4
+      {6.6,17.8},       //E 5
+      {4,16},           //F 6
+      {6.62,13.16},     //G 7
+      {5.52,9.06},      //H 8
+      {3.38,11.36},     //I 9
+      {2.54,6.49},      //J 10
+      {6.04,3.49},      //K 11
+      {8.99,5.24},      //L 12
+      {12,2},           //M 13
+      {12.26,7.79},     //N 14
+      {17.04,6.99}      //O 15
+    };
 
+    // Geom::DCEL mt_poly = Geom::DCEL(mt_poly_points);
+    // Geom::MonotonePartitionAlgo monotone_spawner(mt_poly_points);
+    // monotone_spawner.MakeMonotone();
+    // Geom::DCEL& partitioned_polygon = monotone_spawner.GetDCEL();
+    // partitioned_polygon.PrintFaces();
+    // partitioned_polygon.PrintVertices();
+    // partitioned_polygon.PrintHalfEdges();
+  }
 }

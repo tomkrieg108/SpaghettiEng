@@ -223,404 +223,47 @@ namespace Spg
 
   void DefaultLayer::GeomTest()
   {
-//-------------------------------------------------------------------------------
-//BSTree
-//-------------------------------------------------------------------------------
-#if 0
-    LOG_WARN(m_logger,"--------------------------");
-    LOG_WARN(m_logger,"BST TREE (NEW)");
-    LOG_WARN(m_logger,"--------------------------");
-    std::vector<float> values{2,11,4,125,15,3,9,32,71,43,27,1};
-    Geom::BSTree bstree(values);
-    std::vector<float> op_vals = bstree.InOrderTraverse();
-    for(auto val : op_vals) {
-      LOG_TRACE(m_logger, "{},", val);
-    } 
-
-    LOG_TRACE(m_logger, "Min is {} ", bstree.Min());
-    LOG_TRACE(m_logger, "Max is {} ", bstree.Max());
-    LOG_TRACE(m_logger, "Size is {} ", bstree.Size());
-
-    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
-    LOG_TRACE(m_logger, "Contains 9 ? {} ", bstree.Contains(9));
-    LOG_TRACE(m_logger, "Contains 32 ? {} ", bstree.Contains(32));
-    LOG_TRACE(m_logger, "Contains 77 ? {} ", bstree.Contains(77));
-    LOG_TRACE(m_logger, "Contains 39 ? {} ", bstree.Contains(39));
-    LOG_TRACE(m_logger, "Contains 127 ? {} ", bstree.Contains(127));
-
-    LOG_TRACE(m_logger, "Sucessor of 1 is {} ", bstree.Next(1));
-    LOG_TRACE(m_logger, "Sucessor of 2 is {} ", bstree.Next(2));
-    LOG_TRACE(m_logger, "Sucessor of 3 is {} ", bstree.Next(3));
-    LOG_TRACE(m_logger, "Sucessor of 4 is {} ", bstree.Next(4));
-    LOG_TRACE(m_logger, "Sucessor of 9 is {} ", bstree.Next(9));
-    LOG_TRACE(m_logger, "Sucessor of 11 is {} ", bstree.Next(11));
-    LOG_TRACE(m_logger, "Sucessor of 15 is {} ", bstree.Next(15));
-    LOG_TRACE(m_logger, "Sucessor of 27 is {} ", bstree.Next(27));
-    LOG_TRACE(m_logger, "Sucessor of 32 is {} ", bstree.Next(32));
-    LOG_TRACE(m_logger, "Sucessor of 43 is {} ", bstree.Next(43));
-    LOG_TRACE(m_logger, "Sucessor of 71 is {} ", bstree.Next(71));
-    LOG_TRACE(m_logger, "Sucessor of 125 is {} ", bstree.Next(125));
-
-    LOG_TRACE(m_logger, "Predecessor of 1 is {} ", bstree.Previous(1));
-    LOG_TRACE(m_logger, "Predecessor of 2 is {} ", bstree.Previous(2));
-    LOG_TRACE(m_logger, "Predecessor of 3 is {} ", bstree.Previous(3));
-    LOG_TRACE(m_logger, "Predecessor of 4 is {} ", bstree.Previous(4));
-    LOG_TRACE(m_logger, "Predecessor of 9 is {} ", bstree.Previous(9));
-    LOG_TRACE(m_logger, "Predecessor of 11 is {} ", bstree.Previous(11));
-    LOG_TRACE(m_logger, "Predecessor of 15 is {} ", bstree.Previous(15));
-    LOG_TRACE(m_logger, "Predecessor of 27 is {} ", bstree.Previous(27));
-    LOG_TRACE(m_logger, "Predecessor of 32 is {} ", bstree.Previous(32));
-    LOG_TRACE(m_logger, "Predecessor of 43 is {} ", bstree.Previous(43));
-    LOG_TRACE(m_logger, "Predecessor of 71 is {} ", bstree.Previous(71));
-    LOG_TRACE(m_logger, "Predecessor of 125 is {} ", bstree.Previous(125));
-
-    LOG_TRACE(m_logger, "Contains 2 ? {} ", bstree.Contains(2));
-    bstree.Erase(2);
-    LOG_TRACE(m_logger, "Contains 2 ? {} ", bstree.Contains(2));
-
-    LOG_TRACE(m_logger, "Contains 32 ? {} ", bstree.Contains(32));
-    bstree.Erase(32);
-    LOG_TRACE(m_logger, "Contains 32 ? {} ", bstree.Contains(32));
-
-    LOG_TRACE(m_logger, "Contains 11 ? {} ", bstree.Contains(11));
-    bstree.Erase(11);
-    LOG_TRACE(m_logger, "Contains 11 ? {} ", bstree.Contains(11));
-
-    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
-    bstree.Erase(15);
-    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
-
-    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
-    bstree.Erase(15);
-    LOG_TRACE(m_logger, "Contains 15 ? {} ", bstree.Contains(15));
-
-    LOG_TRACE(m_logger, "Contains 71 ? {} ", bstree.Contains(71));
-    bstree.Erase(71);
-    LOG_TRACE(m_logger, "Contains 71 ? {} ", bstree.Contains(71));
-
-    op_vals = bstree.InOrderTraverse();
-    for(auto val : op_vals) {
-      LOG_TRACE(m_logger, "{},", val);
-    } 
-#endif
 
 //-------------------------------------------------------------------------------
 //RBTree V3 (templated)
 //-------------------------------------------------------------------------------
 #if 0
-     
-    SPG_WARN("-------------------------------------------------------------------------");
-    SPG_WARN("Red-Black Tree V3 (Templated)");
-    SPG_WARN("-------------------------------------------------------------------------");
-    {
-      
-      std::vector<std::pair<const int,int>> map_vals {{2,200},{11,1100},{4,400},{125,12500},{15,1500},{3,300},{9,900},{32,3200},{71,7100},{43,4300},{27,2700},{1,100}};
-
-      Geom::Map<int, int> my_map(map_vals);
-      my_map.Validate();
-
-      //Traversal and iterating
-      {
-        std::vector<std::pair<const int,int>> elements_out;
-        SPG_INFO("In Order Traverse");
-        my_map.InOrderTraverse(elements_out);
-        for(auto& [key,val]: elements_out) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        
-        // SPG_INFO("Ranged for loop traverse");
-        // for(auto& [key,val] : my_map) {
-        //   SPG_TRACE("[{},{}]", key, val);
-        // }
-
-        SPG_INFO("Loop using Iterator")
-        for(auto itr = my_map.begin(); itr != my_map.end(); ++itr) {
-          auto& [key,val] = *itr;
-          SPG_TRACE("[{},{}]", key, val);
-        }
-      }
-
-      //Find(), Contains()
-      {
-        for(auto& [key, value]: map_vals) {
-          SPG_INFO("Contains {}? {}", key, my_map.Contains(key));
-        }
-        SPG_INFO("Contains {}? {}", -15, my_map.Contains(-15));
-        SPG_INFO("Contains {}? {}", 0, my_map.Contains(0));
-        SPG_INFO("Contains {}? {}", 160, my_map.Contains(160));
-        SPG_INFO("Contains {}? {}", 33, my_map.Contains(33));
-      }
-
-      //LowerBound() UpperBound()
-      {
-        for(auto& [key, value]: map_vals) {
-          auto itr = my_map.LowerBound(key);
-          if(itr == my_map.end()) {
-            SPG_INFO("LowerBound {}? end", key);
-          }
-          else {
-            SPG_INFO("LowerBound {}? {}", key, (*itr).first);
-          }
-        }
-        for(auto& [key, value]: map_vals) {
-          int k = key-10;
-          auto itr = my_map.LowerBound(k);
-          if(itr == my_map.end()) {
-            SPG_INFO("LowerBound {}? end", k);
-          }
-          else {
-            SPG_INFO("LowerBound {}? {}", k, (*itr).first);
-          }
-        }
-        for(auto& [key, value]: map_vals) {
-          auto itr = my_map.UpperBound(key);
-          if(itr == my_map.end()) {
-            SPG_INFO("UpperBound {}? end", key);
-          }
-          else {
-            SPG_INFO("UpperBound {}? {}", key, (*itr).first);
-          }
-        }
-        for(auto& [key, value]: map_vals) {
-          int k = key-10;
-          auto itr = my_map.UpperBound(k);
-          if(itr == my_map.end()) {
-            SPG_INFO("UpperBound {}? end", k);
-          }
-          else {
-            SPG_INFO("UpperBound {}? {}", k, (*itr).first);
-          }
-        }
-        
-      }
-
-      //Deletion
-      {
-        my_map.Erase(1);
-        my_map.Erase(71);
-        my_map.Erase(27);
-        std::vector<std::pair<const int,int>> elements_out;
-        SPG_INFO("In Order Traverse After erase");
-        my_map.InOrderTraverse(elements_out);
-        for(auto& [key,val]: elements_out) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        my_map.Validate();
-      }
-
-      //Stress test with large data, insertion, erasure, clear
-      {
-        my_map.Clear();
-        //Add a bunch of random values
-        std::vector<int> rb_values;
-        std::vector<bool> rb_values_to_delete;
-      
-        const uint32_t RB_NUM_VALS = 10000;
-        const int RB_MIN_VAL = -100000;
-        const int RB_MAX_VAL = 100000;
-    
-        std::random_device rd;                         
-        std::mt19937 mt(rd()); 
-        std::uniform_int_distribution<int> dist(RB_MIN_VAL, RB_MAX_VAL); 
-      
-        for(int i=0; i< RB_NUM_VALS; i++) {
-          int val = dist(mt);
-          auto element = std::make_pair(val,val*100);
-          if(my_map.Insert(element)) {
-            rb_values.push_back(val);
-            rb_values_to_delete.push_back(false);    
-          }
-        }
-        my_map.Validate();
-
-        //pick values to delete at random
-        std::uniform_int_distribution<int> idist(0, rb_values.size()-1);  
-        const uint32_t RB_NUM_VALS_TO_DEL = rb_values.size()/2;
-        for(int i=0; i<RB_NUM_VALS_TO_DEL; i++ ) {
-          int idx = 0;
-          do {
-            idx = idist(mt);
-          } while (rb_values_to_delete[idx] == true);
-          rb_values_to_delete[idx] = true;
-        }
-        
-        SPG_INFO("Deleting {} values at random ", RB_NUM_VALS_TO_DEL);
-        for(int i=0; i<rb_values_to_delete.size(); i++ ) {
-          if(!rb_values_to_delete[i])
-            continue;
-          my_map.Erase(rb_values[i]);
-        }
-        my_map.Validate();
-        SPG_INFO("Clearing Tree");
-        my_map.Clear();
-        my_map.Validate();
-        SPG_INFO("Tree Size {}: ", my_map.Size());
-
-        SPG_INFO("Add a few more elements");
-        for(auto& element : map_vals)
-          my_map.Insert(element);
-        SPG_INFO("Ranged for loop traverse");
-        for(auto& [key,val] : my_map) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        SPG_INFO("Tree Size {}: ", my_map.Size());
-        my_map.Validate();
-      }
-    
-      //Copy move constructor, assignment operator
-      {
-        auto t2 = my_map; //copy constructor
-        Geom::Map<int,int> t3;
-        t3 = t2; //copy assignment;
-        SPG_INFO("t2:");
-        for(auto& [key,val] : t2) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        SPG_INFO("t3:");
-        for(auto& [key,val] : t3) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        auto t4 = std::move(t2); //move ctr
-        Geom::Map<int,int> t5;
-        t5 = std::move(t3); //move assignment
-
-        SPG_INFO("After move:");
-        SPG_INFO("t2:");
-        for(auto& [key,val] : t2) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        SPG_INFO("t3:");
-        for(auto& [key,val] : t3) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-
-        SPG_INFO("t4:");
-        for(auto& [key,val] : t4) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-        SPG_INFO("t5:");
-        for(auto& [key,val] : t5) {
-          SPG_TRACE("[{},{}]", key, val);
-        }
-      }
-    }
+    Geom::Test_RB_Tree();
 #endif
 
 //-------------------------------------------------------------------------------
 //RangeTree1D
 //-------------------------------------------------------------------------------
 #if 0
-    Geom::RangeTree1D::Test();
+  Geom::RangeTree1D::Test();
 #endif
 
 //-------------------------------------------------------------------------------
 //RangeTree2D
 //-------------------------------------------------------------------------------
-#if 1
-    Geom::RangeTree2D::Test();
+#if 0
+  Geom::RangeTree2D::Test();
 #endif
 
 //-------------------------------------------------------------------------------
 //KDTree
 //-------------------------------------------------------------------------------
 #if 0
-     std::vector<Geom::Point2d> kd_values;
-
-    //Add a bunch of random values
-    const uint32_t KD_NUM_VALS = 1000;
-    const float KD_MIN_VAL = 0;
-    const float KD_MAX_VAL = 200;
-    
-    std::random_device rd;                         
-    std::mt19937 mt(rd()); 
-    std::uniform_real_distribution<float> fdist(KD_MIN_VAL, KD_MAX_VAL); 
-    
-    for(int i=0; i< KD_NUM_VALS; i++) {
-      Geom::Point2d p(fdist(mt),fdist(mt));
-      kd_values.push_back(p);
-    }
-
-    Geom::KDTree2D kdtree(kd_values);
-    Geom::KDTree2D kdtree2(std::move(kd_values));
-
-    auto points1 = kdtree.CollectAllPoints();
-    auto points2 = kdtree2.CollectAllPoints();
-
-    Geom::KDTree2D::Range range{20,80,20,80};
-    auto points3 = kdtree.RangeSearch(range);
-    auto points4 = kdtree2.RangeSearch(range);
-
-    kdtree.ValidateSearch(range);
+    Geom::KDTree2D::Test();
 #endif
 
 //-------------------------------------------------------------------------------
 //Intersection Set
 //-------------------------------------------------------------------------------
-#if 0    
-    LOG_WARN(m_logger, "-----------------------------------");  
-    LOG_TRACE(m_logger, "iNTERSECTION TESTING");  
-    std::vector<Geom::LineSeg2D> segs 
-    {
-      {{-1,4},{-2,1}}, //f
-      {{-2,12},{2,-2}}, //g
-      {{0,2},{-4,6}}, //h
-      {{-2,6},{2,10}}, //i
-      {{6,4},{2,10}}, //j
-      {{4,4},{2,10}}, //k
-      {{2,10},{4,14}}, //l
-      {{8,10},{-4,10}}, //m horizontal line - 
-      //{{8,9},{-4,10}}, //m near horizontal line - 
-
-     
-       {{-4,6},{-4,10}}, 
-       {{4,4},{6,4}}, //p horizontal line
-       
-       {{-8,8},{-4,8}}, //r horizontal line
-       {{-6,12},{-6,4}}, //q vertical line
-       {{6,14},{6,10}}, //q vertical line
-       //{{6,14},{6,9.1666667}}, //q vertical line
-
-    };
-   
-    // seg1 = {{-4,10},{8,10}};
-    // seg2 = {{-4,10},{8,10}};
-    // eq = Geom::Equal(seg1.start, seg2.start) && Geom::Equal(seg1.end, seg2.end);
-
-    Geom::ItersectSet::IntersectionSet intersection_set{segs};
-    intersection_set.Process();
+#if 0
+    Geom::ItersectSet::IntersectionSet::Test();
 #endif
 
 //-------------------------------------------------------------------------------
 //DCEL
 //--------------------------------------------------------------------------------
-#if 0    
-    //MONOTON PARTITION
-    std::vector<Geom::Point2d> mt_poly_points =
-    {
-      {16.42f,12.51f},  //A 1
-      {13.95,10.36},    //B 2
-      {11.2,18.4},      //C 3
-      {9.2,16.4},       //D 4
-      {6.6,17.8},       //E 5
-      {4,16},           //F 6
-      {6.62,13.16},     //G 7
-      {5.52,9.06},      //H 8
-      {3.38,11.36},     //I 9
-      {2.54,6.49},      //J 10
-      {6.04,3.49},      //K 11
-      {8.99,5.24},      //L 12
-      {12,2},           //M 13
-      {12.26,7.79},     //N 14
-      {17.04,6.99}      //O 15
-    };
-
-    // Geom::DCEL mt_poly = Geom::DCEL(mt_poly_points);
-    // Geom::MonotonePartitionAlgo monotone_spawner(mt_poly_points);
-    // monotone_spawner.MakeMonotone();
-    // Geom::DCEL& partitioned_polygon = monotone_spawner.GetDCEL();
-    // partitioned_polygon.PrintFaces();
-    // partitioned_polygon.PrintVertices();
-    // partitioned_polygon.PrintHalfEdges();
+#if 0
+    Geom::DCEL::Test();
 #endif
     //#include <typeindex>
     //#include <typeinfo>

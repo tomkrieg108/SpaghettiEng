@@ -15,7 +15,6 @@ namespace Geom
 
   BSTree::~BSTree()
   {
-    
   }
 
   bool BSTree::Insert(float value)
@@ -314,6 +313,7 @@ namespace Geom
       BSTNode* successor = Next(node);
       node->value = successor->value;
       Erase(successor);
-    }  
+    }
   }
+
 }
