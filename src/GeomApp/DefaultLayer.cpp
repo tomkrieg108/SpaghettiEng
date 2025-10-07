@@ -16,7 +16,9 @@ namespace Spg
     Layer(app_context, name),
     m_window(app_context.Get<Window>("Window")),
     m_renderer(app_context.Get<GLRenderer>("GLRenderer")),
+  #ifdef _WIN32
     m_text_renderer(app_context.Get<GLTextRenderer>("GLTextRenderer")),
+  #endif  
     m_camera(app_context.Get<Camera2D>("Camera2D")),
     m_camera_controller(app_context.Get<CameraController2D>("CameraController2D"))
   {
@@ -48,7 +50,7 @@ namespace Spg
 
     //clear any child meshes & labels from previous run
     for(auto& item : mesh.children) {
-      m_renderer.Delete(item.second.render_id);
+      m_renderer.Delete(item.second->render_id);
     }
     mesh.children.clear();
     mesh.labels.clear();
@@ -59,34 +61,35 @@ namespace Spg
     m_monotone_spawner.Set(vertices); //initialise DCEL
     
     //Add the vertex (points) mesh as child
-    Mesh point_mesh;
-    point_mesh.vertices = vertices;
-    point_mesh.type = MeshType::PointSet;
-    point_mesh.active = true;
-    point_mesh.render_id = m_renderer.Submit(point_mesh.vertices,glm::vec4(1,1,0,1),GLRenderer::PrimitiveType::Point);
+    Mesh* point_mesh = new Mesh;
+    point_mesh->vertices = vertices;
+    point_mesh->type = MeshType::PointSet;
+    point_mesh->active = true;
+    point_mesh->render_id = m_renderer.Submit(point_mesh->vertices,glm::vec4(1,1,0,1),GLRenderer::PrimitiveType::Point);
+    //mesh.children["Points"] = std::make_unique<Mesh>(std::move(point_mesh));
     mesh.children["Points"] = point_mesh;
     
     //set the colours on the polygon vertices based on their category
     //Todo - could update the mootone event to store the index of the original passed in vertex, then use the to supply the correct index in UpdateColour.  This save having to record the unsorted events in the monotone algo and passing those back in GetEventPoints(). Might have been less effort just to implement this thing rather than type out this todo.
     auto& monotone_event_points = m_monotone_spawner.GetEventPoints();
-    for(uint32_t i=0; i< point_mesh.vertices.size(); ++i) {
+    for(uint32_t i=0; i< point_mesh->vertices.size(); ++i) {
       if(monotone_event_points[i].vertex_category == VertexCategory::Start) {
-        m_renderer.UpdateColour(point_mesh.render_id,glm::vec4(0,1,0,1),i); //green
+        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(0,1,0,1),i); //green
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::End) {
-        m_renderer.UpdateColour(point_mesh.render_id,glm::vec4(1,0,0,1),i); //red
+        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(1,0,0,1),i); //red
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::Merge) {
-        m_renderer.UpdateColour(point_mesh.render_id,glm::vec4(0,0,1,1),i); //blue
+        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(0,0,1,1),i); //blue
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::Split) {
-        m_renderer.UpdateColour(point_mesh.render_id,glm::vec4(1,1,1,1),i); //white
+        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(1,1,1,1),i); //white
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::Regular) {
-        m_renderer.UpdateColour(point_mesh.render_id,glm::vec4(1,1,0,1),i); //yellow
+        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(1,1,0,1),i); //yellow
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::Invalid) {
-        m_renderer.UpdateColour(point_mesh.render_id,glm::vec4(0.3f,0.3f,0.3f,1),i); //grey
+        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(0.3f,0.3f,0.3f,1),i); //grey
       }
     }
 
@@ -96,11 +99,12 @@ namespace Spg
     float sweep_y = first_event_point.vertex->point.y + 20.0f;
     
     //Add sweep line as a child of polygon mesh
-    Mesh sweep_line_mesh;
-    sweep_line_mesh.vertices = std::vector{ glm::vec2(-500.0f, sweep_y),  glm::vec2(500.0f, sweep_y)};
-    sweep_line_mesh.active;
-    sweep_line_mesh.type = MeshType::LineSet;
-    sweep_line_mesh.render_id = m_renderer.Submit(sweep_line_mesh.vertices, glm::vec4(0,1,1,1),GLRenderer::PrimitiveType::Line);
+    Mesh* sweep_line_mesh = new Mesh;
+    sweep_line_mesh->vertices = std::vector{ glm::vec2(-500.0f, sweep_y),  glm::vec2(500.0f, sweep_y)};
+    sweep_line_mesh->active;
+    sweep_line_mesh->type = MeshType::LineSet;
+    sweep_line_mesh->render_id = m_renderer.Submit(sweep_line_mesh->vertices, glm::vec4(0,1,1,1),GLRenderer::PrimitiveType::Line);
+    //mesh.children["Sweepline"] = std::make_unique<Mesh>(std::move(sweep_line_mesh));
     mesh.children["Sweepline"] = sweep_line_mesh;
 
     //Set up the labels for the poygon vertices
@@ -122,7 +126,9 @@ namespace Spg
     camera_params.top = m_canvas_size;
     camera_params.bottom = -m_canvas_size;
     m_camera.SetParams(camera_params);
+  #ifdef _WIN32
     m_text_renderer.UpdateView();
+  #endif
   }
 
   void DefaultLayer::OnUpdate(double delta_time) 
@@ -131,15 +137,18 @@ namespace Spg
     m_renderer.Draw(m_camera);
     
     //Text Rendering
+  #ifdef _WIN32
     if(m_mesh_list.find(s_active_mesh) == m_mesh_list.end()) {
       m_text_renderer.Render("Hello from TexRenderer!!", -50,-50,0.5f,glm::vec3(0,1,0));
       return;
     }
+  
 
     Mesh& mesh = m_mesh_list[s_active_mesh];
     for(auto& label : mesh.labels) {
       m_text_renderer.Render(label.text, label.pos.x, label.pos.y, 0.35f, {1,1,1});
     }
+   #endif 
   }
 
   void DefaultLayer::OnAttach()
@@ -164,8 +173,9 @@ namespace Spg
       m_camera_controller.Pan(e.delta_x*factor, e.delta_y*factor);
     }
     e.handled = true;
-
-     m_text_renderer.UpdateView();
+    #ifdef _WIN32
+       m_text_renderer.UpdateView();
+    #endif 
   }
 
   void DefaultLayer::OnMouseScrolled(EventMouseScrolled& e)
@@ -178,7 +188,9 @@ namespace Spg
     }
     e.handled = true;
 
+    #ifdef _WIN32
      m_text_renderer.UpdateView();
+    #endif
   }
 
   void DefaultLayer::OnMouseButtonPressed(EventMouseButtonPressed& e)
@@ -241,7 +253,7 @@ namespace Spg
 //-------------------------------------------------------------------------------
 //RangeTree2D
 //-------------------------------------------------------------------------------
-#if 0
+#if 1
   Geom::RangeTree2D::Test();
 #endif
 

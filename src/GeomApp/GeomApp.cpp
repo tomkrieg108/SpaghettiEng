@@ -8,8 +8,10 @@
 #include <nlohmann/json.hpp>
 
 #include <spdlog/spdlog.h>
-#include "ft2build.h"
-#include <freetype/freetype.h>
+#ifdef _WIN32
+  #include "ft2build.h"
+  #include <freetype/freetype.h>
+#endif
 #include <entt/entity/registry.hpp>
 
 namespace Spg
@@ -32,11 +34,15 @@ namespace Spg
     camera->SetPosition(cam_pos);
     camera->LookAt(look_pos);
     auto controller = CreateRef<CameraController2D>(*camera);
-    auto text_renderer = CreateRef<GLTextRenderer>(*camera);
+    #ifdef _WIN32
+      auto text_renderer = CreateRef<GLTextRenderer>(*camera);
+    #endif
 
     m_app_context.Set("Camera2D", camera);
     m_app_context.Set("CameraController2D", controller);
-    m_app_context.Set("GLTextRenderer", text_renderer);
+    #ifdef _WIN32
+      m_app_context.Set("GLTextRenderer", text_renderer);
+    #endif
 
     DefaultLayer* layer = new DefaultLayer(m_app_context, std::string("Default Layer"));
     PushLayer(layer);
@@ -83,7 +89,9 @@ namespace Spg
     std::cout << "SPDLOG....:" << SPDLOG_VER_MAJOR << "." << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << "\n";
     std::cout << "\n";
 
-    SPG_WARN( "FREETYPE: {}.{}.{}", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
+    #ifdef _WIN32
+      SPG_WARN( "FREETYPE: {}.{}.{}", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
+    #endif
 
     SPG_WARN("Entt {},{},{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR, ENTT_VERSION_PATCH );
 

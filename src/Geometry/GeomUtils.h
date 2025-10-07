@@ -91,6 +91,7 @@ namespace Geom
     return glm::degrees(theta);
   }
 
+  
   /*
     TESTED (Catch2)
     Angle in degrees between seg1 and seg2. Output range [-180,180].  Oriented CCW => positive.  Otherwise negative
@@ -109,6 +110,7 @@ namespace Geom
   */
   float ComputeSubtendedAngleInDegrees(const Point2d& a, const Point2d& b, const Point2d& c);
 
+ #ifdef _WIN32
   float AngleLinePlaneInDegrees(const Line3d& line, const Plane& plane);
 
   float AnglePlanes(const Plane& p1, const Plane& p2);
@@ -118,6 +120,7 @@ namespace Geom
 
   //3D lines in 2D can either be parallel or intersect or skewed
   float AngleLines3D(const Line3d& l1, const Line3d& l2);
+#endif
 
   Point2d ComputeCentroid(const std::vector<Point2d>& points);
 

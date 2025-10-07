@@ -15,10 +15,16 @@ target_sources(${LIB_ENG} PRIVATE
   "./OpenGL32/GL32Buffer.cpp"
   "./OpenGL32/GL32VertexArray.cpp"
   "./OpenGL32/GL32Renderer.cpp"
-  "./OpenGL32/GL32TextRenderer.cpp"
+  #"./OpenGL32/GL32TextRenderer.cpp"
   "./Camera/Camera2D.cpp"
   "./Camera/CameraController2D.cpp"
   )
+
+if(WIN32)
+  target_sources(${LIB_ENG} PRIVATE 
+  "./OpenGL32/GL32TextRenderer.cpp"
+  )
+endif()
 
 target_sources(${LIB_ENG} PRIVATE
   "./Core/Application.h"
@@ -39,10 +45,16 @@ target_sources(${LIB_ENG} PRIVATE
   "./OpenGL32/GL32VertexArray.h"
   "./OpenGL32/GL32BufferLayout.h"
   "./OpenGL32/GL32Renderer.h"
-   "./OpenGL32/GL32TextRenderer.h"
+  #"./OpenGL32/GL32TextRenderer.h"
   "./Camera/Camera2D.h"
   "./Camera/CameraController2D.h"
 )
+
+if(WIN32)
+  target_sources(${LIB_ENG} PRIVATE 
+  "./OpenGL32/GL32TextRenderer.h"
+  )
+endif()
 
 target_sources(${LIB_ENG} PUBLIC 
   "./SpaghettiEng.h"

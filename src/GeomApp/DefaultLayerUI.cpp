@@ -61,7 +61,7 @@ namespace Spg
           m_renderer.Disable(mesh.render_id);
           //also clear any child meshes from this mesh
           for(auto& item : mesh.children) {
-            m_renderer.Delete(item.second.render_id);
+            m_renderer.Delete(item.second->render_id);
           }
           mesh.children.clear();
 
@@ -79,7 +79,9 @@ namespace Spg
       if( s_active_mesh != "") {
         ImGui::Text("Selected: "); 
         ImGui::SameLine();
+      #ifdef _WIN32 
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), s_active_mesh.c_str());
+      #endif
         Mesh& mesh = m_mesh_list[s_active_mesh];
         if(mesh.render_id == std::numeric_limits<uint32_t>::max())
         {
@@ -114,7 +116,7 @@ namespace Spg
             mesh.active = false;
             m_renderer.Disable(mesh.render_id);
             for(auto& item : mesh.children) {
-              m_renderer.Delete(item.second.render_id);
+              m_renderer.Delete(item.second->render_id);
             }
             mesh.children.clear();
             mesh.labels.clear();
@@ -135,7 +137,7 @@ namespace Spg
             Mesh& mesh = m_mesh_list[s_active_mesh];
             m_renderer.Enable(mesh.render_id);
             for(auto& item : mesh.children) {
-              m_renderer.Enable(item.second.render_id);
+              m_renderer.Enable(item.second->render_id);
             }
           } 
         }
@@ -172,7 +174,7 @@ namespace Spg
           m_renderer.Disable(mesh.render_id);
           //also clear any child meshes from this mesh
           for(auto& item : mesh.children) {
-            m_renderer.Delete(item.second.render_id);
+            m_renderer.Delete(item.second->render_id);
           }
           mesh.children.clear();
 
@@ -200,7 +202,7 @@ namespace Spg
           mesh.active = false;
           m_renderer.Disable(mesh.render_id);
           for(auto& item : mesh.children) {
-            m_renderer.Delete(item.second.render_id);
+            m_renderer.Delete(item.second->render_id);
           }
           mesh.children.clear();
 
@@ -221,7 +223,7 @@ namespace Spg
           Mesh& mesh = m_mesh_list[s_active_mesh];
           m_renderer.Enable(mesh.render_id);
           for(auto& item : mesh.children) {
-            m_renderer.Enable(item.second.render_id);
+            m_renderer.Enable(item.second->render_id);
           }
         } 
       }
@@ -240,7 +242,9 @@ namespace Spg
       else if( s_active_mesh != "") {
         ImGui::Text("Selected: "); 
         ImGui::SameLine();
+      #ifdef _WIN32  
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), s_active_mesh.c_str());
+      #endif  
 
         SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
         Mesh& mesh = m_mesh_list[s_active_mesh];
@@ -248,17 +252,17 @@ namespace Spg
         if(!mesh.children.empty()) {
           ImGui::Text("Convex hull completed");
           for(auto& item : mesh.children) {
-            m_renderer.Enable(item.second.render_id);
+            m_renderer.Enable(item.second->render_id);
           }
         }
         else if(ImGui::Button("Run")) {
           Mesh& mesh = m_mesh_list[s_active_mesh];
-          Mesh hull_mesh;
+          Mesh* hull_mesh = new Mesh;
           //diagonal_mesh.vertices =  Geom::ConvexHull2D_GiftWrap(mesh.vertices);
-          hull_mesh.vertices =  Geom::Convexhull2D_ModifiedGrahams(mesh.vertices);
-          hull_mesh.type = MeshType::LineSet;
-          hull_mesh.active = true;
-          hull_mesh.render_id = m_renderer.Submit( hull_mesh.vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::LineLoop);
+          hull_mesh->vertices =  Geom::Convexhull2D_ModifiedGrahams(mesh.vertices);
+          hull_mesh->type = MeshType::LineSet;
+          hull_mesh->active = true;
+          hull_mesh->render_id = m_renderer.Submit( hull_mesh->vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::LineLoop);
           mesh.children["Hull"] = hull_mesh;
         }
       }
@@ -277,7 +281,9 @@ namespace Spg
       else if( s_active_mesh != "") {
         ImGui::Text("Selected: "); 
         ImGui::SameLine();
+      #ifdef _WIN32  
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), s_active_mesh.c_str());
+      #endif  
 
         SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
         Mesh& mesh = m_mesh_list[s_active_mesh];
@@ -285,7 +291,7 @@ namespace Spg
         if(!mesh.children.empty()) {
           ImGui::Text("Triangulation completed");
           for(auto& item : mesh.children) {
-            m_renderer.Enable(item.second.render_id);
+            m_renderer.Enable(item.second->render_id);
           }
         }
         else if(ImGui::Button("Run")) {
@@ -293,11 +299,12 @@ namespace Spg
           auto poly_points = mesh.vertices;
           Geom::PolygonSimple polygon = Geom::PolygonSimple(poly_points);
 
-          Mesh diagonal_mesh;
-          diagonal_mesh.vertices =  Geom::GenerateEarClipplingDiagonals(&polygon);
-          diagonal_mesh.type = MeshType::LineSet;
-          diagonal_mesh.active = true;
-          diagonal_mesh.render_id = m_renderer.Submit( diagonal_mesh.vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::Line);
+          Mesh* diagonal_mesh = new Mesh;
+          diagonal_mesh->vertices =  Geom::GenerateEarClipplingDiagonals(&polygon);
+          diagonal_mesh->type = MeshType::LineSet;
+          diagonal_mesh->active = true;
+          diagonal_mesh->render_id = m_renderer.Submit( diagonal_mesh->vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::Line);
+          //mesh.children["Diagonals"] = std::make_unique<Mesh>(std::move(diagonal_mesh));
           mesh.children["Diagonals"] = diagonal_mesh;
         }
       }
@@ -320,7 +327,9 @@ namespace Spg
       else {
         ImGui::Text("Selected: "); 
         ImGui::SameLine();
+      #ifdef _WIN32
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), s_active_mesh.c_str());
+      #endif
         valid_mesh = true;
       }
 
@@ -340,7 +349,7 @@ namespace Spg
 
       else if(s_montotone_algo_state == 1) { //post-init
         if(ImGui::Button("Step")) {
-          auto render_id = mesh.children["Sweepline"].render_id;
+          auto render_id = mesh.children["Sweepline"]->render_id;
           MonotoneAlgoSweepLineUpdate(render_id); 
           m_monotone_spawner.Step();
           s_montotone_algo_state = 2; //algo running
@@ -358,7 +367,7 @@ namespace Spg
           s_montotone_algo_state = 3; //algo complete
         }
         else if(ImGui::Button("Step")) {
-          Mesh& sweep_line_mesh = mesh.children["Sweepline"];
+          Mesh& sweep_line_mesh = *(mesh.children["Sweepline"]);
           MonotoneAlgoSweepLineUpdate(sweep_line_mesh.render_id);
           m_monotone_spawner.Step();
           if(m_monotone_spawner.FinishedProcessing()) {
@@ -373,11 +382,12 @@ namespace Spg
         
         if(ImGui::Button("Show Diagonals")) {
           SPG_ASSERT(mesh.children.find("Diagonals") == mesh.children.end());
-          Mesh diagonal_mesh;
-          diagonal_mesh.vertices = m_monotone_spawner.GetMonotonDiagonals();
-          diagonal_mesh.type = MeshType::LineSet;
-          diagonal_mesh.active = true;
-          diagonal_mesh.render_id = m_renderer.Submit( diagonal_mesh.vertices, glm::vec4(1,1,0,1),      GLRenderer::PrimitiveType::Line);
+          Mesh* diagonal_mesh = new Mesh;
+          diagonal_mesh->vertices = m_monotone_spawner.GetMonotonDiagonals();
+          diagonal_mesh->type = MeshType::LineSet;
+          diagonal_mesh->active = true;
+          diagonal_mesh->render_id = m_renderer.Submit( diagonal_mesh->vertices, glm::vec4(1,1,0,1),      GLRenderer::PrimitiveType::Line);
+          //mesh.children["Diagonals"] = std::make_unique<Mesh>(std::move(diagonal_mesh));
           mesh.children["Diagonals"] = diagonal_mesh;
           s_montotone_algo_state = 4;
         }
@@ -400,11 +410,12 @@ namespace Spg
       else if (s_montotone_algo_state == 5) {
         ImGui::Text("Triangulation completed");
         if(ImGui::Button("Show Triabgulation")) {
-          Mesh trianglulation_diag_mesh;
-          trianglulation_diag_mesh.vertices = m_monotone_spawner.GetTriangulationDiagonals();
-          trianglulation_diag_mesh.type = MeshType::LineSet;
-          trianglulation_diag_mesh.active = true;
-          trianglulation_diag_mesh.render_id = m_renderer.Submit( trianglulation_diag_mesh.vertices, glm::vec4(1,1,1,1),GLRenderer::PrimitiveType::Line);
+          Mesh* trianglulation_diag_mesh = new Mesh;
+          trianglulation_diag_mesh->vertices = m_monotone_spawner.GetTriangulationDiagonals();
+          trianglulation_diag_mesh->type = MeshType::LineSet;
+          trianglulation_diag_mesh->active = true;
+          trianglulation_diag_mesh->render_id = m_renderer.Submit( trianglulation_diag_mesh->vertices, glm::vec4(1,1,1,1),GLRenderer::PrimitiveType::Line);
+          //mesh.children["TriDiagonals"] = std::make_unique<Mesh>(std::move(trianglulation_diag_mesh));
           mesh.children["TriDiagonals"] = trianglulation_diag_mesh;
           s_montotone_algo_state = 4;
         }

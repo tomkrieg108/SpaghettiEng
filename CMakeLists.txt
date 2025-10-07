@@ -81,17 +81,19 @@ set(FT_WITH_BROTLI OFF CACHE BOOL "Disable FreeType Brotli support")
 set(FT_WITH_HARFBUZZ OFF CACHE BOOL "Disable FreeType HarfBuzz support")
 
 #Add FreeType
-CPMAddPackage(
-    NAME freetype
-    GITHUB_REPOSITORY freetype/freetype
-    GIT_TAG VER-2-13-3
-    OPTIONS
-        "CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=ON"  # Disable advanced text shaping
-        "CMAKE_DISABLE_FIND_PACKAGE_BZip2=ON"     # Disable BZip2 support
-        "CMAKE_DISABLE_FIND_PACKAGE_BrotliDec=ON" # Disable Brotli support
-        "CMAKE_DISABLE_FIND_PACKAGE_PNG=ON"       # Disable PNG support
-        "CMAKE_DISABLE_FIND_PACKAGE_ZLIB=ON"      # Disable Zlib support
-)
+if(WIN32)
+  CPMAddPackage(
+      NAME freetype
+      GITHUB_REPOSITORY freetype/freetype
+      GIT_TAG VER-2-13-3
+      OPTIONS
+          "CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=ON"  # Disable advanced text shaping
+          "CMAKE_DISABLE_FIND_PACKAGE_BZip2=ON"     # Disable BZip2 support
+          "CMAKE_DISABLE_FIND_PACKAGE_BrotliDec=ON" # Disable Brotli support
+          "CMAKE_DISABLE_FIND_PACKAGE_PNG=ON"       # Disable PNG support
+          "CMAKE_DISABLE_FIND_PACKAGE_ZLIB=ON"      # Disable Zlib support
+  )
+endif()
 
 if(ENABLE_TESTING)
   cpmaddpackage(

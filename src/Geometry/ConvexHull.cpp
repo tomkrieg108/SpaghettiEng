@@ -1,4 +1,4 @@
-#pragma once
+
 #include "ConvexHull.h"
 #include "GeomUtils.h"
 #include "MeshPrimitives2D.h"

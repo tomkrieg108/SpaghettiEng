@@ -5,6 +5,7 @@
 #include <Common.h>
 #include <random>
 #include <numbers>
+#include <cmath>
 
 namespace Geom
 {
@@ -99,7 +100,7 @@ namespace Geom
     for(uint32_t i = 0; i< num_vertices; ++i)
     {
       angle = (i*pi*2) / num_vertices;
-      Point2d p{std::cosf(angle)*radius, std::sinf(angle)*radius};
+      Point2d p{std::cos(angle)*radius, std::sin(angle)*radius};
       points.push_back(p);
     }
     return points;

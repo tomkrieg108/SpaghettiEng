@@ -282,9 +282,12 @@ namespace Geom
     return 180 - angle; //subtended angle is complementary angle.
   }
 
+#ifdef _WIN32
   float AngleLinePlaneInDegrees(const Line3d& line, const Plane& plane)
   { //Vid 16
-    return 90 - AngleLines(line.direction, plane.normal);
+
+
+    return 90 - AngleLines<3,float>(line.direction, plane.normal);
   }
 
   float AnglePlanes(const Plane& p1, const Plane& p2)
@@ -303,6 +306,7 @@ namespace Geom
   { //Vid 16
     return AngleLines(l1.direction, l2.direction);
   }
+#endif
 
   Point2d ComputeCentroid(const std::vector<Point2d>& points)
   {
@@ -316,7 +320,6 @@ namespace Geom
     return centroid;
   }
 
- 
 
   bool Coplanar(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
   { //Vid 17

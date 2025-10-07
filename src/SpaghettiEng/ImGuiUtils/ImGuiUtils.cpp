@@ -17,8 +17,11 @@ namespace Spg
 
     ImGuiIO& io = ImGui::GetIO(); 
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+  
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+  #ifdef WIN32
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport
+  #endif
 		float fontSize = 22.0f; 	//NOTE - different fonts can be downloaded from google fonts
 
     auto font_bold = fs::absolute(fs::current_path() / fs::path{"Fonts/Opensans/OpenSans-Bold.ttf"});
