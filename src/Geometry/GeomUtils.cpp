@@ -308,6 +308,9 @@ namespace Geom
   }
 #endif
 
+  //AAAAC3NzaC1lZDI1NTE5AAAAIAHLRrrRca202kCD/NC8kMqnhSM2LJgLo6szkI6aHgpR
+  //ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAHLRrrRca202kCD/NC8kMqnhSM2LJgLo6szkI6aHgpR tomkrieg108@gmail.com
+
   Point2d ComputeCentroid(const std::vector<Point2d>& points)
   {
     Point2d centroid = {0, 0};
