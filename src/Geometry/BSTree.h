@@ -36,6 +36,8 @@ namespace Geom
     std::vector<float> InOrderTraverse();
 		std::vector<float> PostOrderTraverse();
 
+    static void Test();
+
   private:
     void PreOrderTraverse(BSTNode* node, std::vector<float>& values_out);
     void InOrderTraverse(BSTNode* node, std::vector<float>& values_out);
@@ -52,15 +54,12 @@ namespace Geom
     void Transplant(BSTNode* u,BSTNode* v); //u is replaced by v - not used or implemented
     void Erase(BSTNode* node);
 
-   
     
+
   private:
 
     BSTNode* m_root = nullptr;
     uint32_t m_node_count = 0;
-
-    
-    
     std::vector<BSTNode*> m_node_array; //not used
 
   };

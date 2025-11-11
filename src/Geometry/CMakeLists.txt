@@ -19,6 +19,7 @@ add_library(${LIB_GEOM} STATIC
   "./BSTree.cpp"
   "./BSTree.h"
   "./RBTree.h"
+  "./RBTreeTraversable.h"
   "./KDTree.cpp"
   "./KDTree.h"
   "./RangeTree.cpp"
@@ -27,6 +28,8 @@ add_library(${LIB_GEOM} STATIC
   "./IntersectionSet.h"
   "./DCEL.cpp"
   "./DCEL.h"
+  "./Voronoi.cpp"
+  "./Voronoi.h"
 )
 
 target_include_directories(${LIB_GEOM} PUBLIC 

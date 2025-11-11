@@ -41,7 +41,7 @@ namespace Geom
     };
 
     DCEL() = default;
-    //For now, assume the input points form a simple polygon coriented CCW
+    //For now, assume the input points form a simple polygon oriented CCW
     DCEL(const std::vector<Point2d>& points);
 
     DCEL(const DCEL& other) = default;

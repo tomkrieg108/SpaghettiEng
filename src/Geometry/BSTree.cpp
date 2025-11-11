@@ -316,4 +316,15 @@ namespace Geom
     }
   }
 
+  void BSTree::Test()
+  {
+    std::vector<float> vals{26,32,43,11,15,100,17,7,87,42,150,111, 27, 54,1,33,200,88,99,0};
+    BSTree tree(vals);
+    auto ordered_vals = tree.InOrderTraverse();
+    SPG_WARN("Elements in BSTree {}", tree.Size())
+    for(auto& v : ordered_vals) {
+      SPG_TRACE(v);
+    }
+  }
+
 }

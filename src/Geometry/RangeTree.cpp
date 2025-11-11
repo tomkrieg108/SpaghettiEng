@@ -5,27 +5,28 @@ namespace Geom
 {
   std::vector<float> RangeTree1D::RangeSearch(const Range& range)
   {
-    auto* nil = m_tree.m_nil;
-    auto* n_split = m_tree.FindSplitNode(range.x_min, range.x_max);
     std::vector<float> vals_out;
-    if(n_split == nil)
+
+    auto itr_split = m_tree.FindSplitPos(range.x_min, range.x_max);
+    if( itr_split == m_tree.end())
       return vals_out;
     
-    Search(n_split, range, vals_out);
+    Search(itr_split, range, vals_out);
     return vals_out;
   }
 
-  void RangeTree1D::Search(Tree1D::RBNode* node, const Range& range, std::vector<float>& out)
-  {
-    if(node==m_tree.m_nil)
+   void RangeTree1D::Search(Iterator itr, const Range& range, std::vector<float>& out)
+   {
+    if(itr == m_tree.end())
       return;
-    if((node->value > range.x_min) && (node->left != m_tree.m_nil))
-      Search(node->left, range,out);
-    if(node->value >= range.x_min && node->value <= range.x_max)
-      out.push_back(node->value);
-    if((node->value < range.x_max) && (node->right != m_tree.m_nil) )
-      Search(node->right, range, out);
-  }
+    if((*itr > range.x_min) && (m_tree.LeftChild(itr) != m_tree.end())) 
+      Search(m_tree.LeftChild(itr),range,out);
+    if((*itr >= range.x_min) && (*itr <= range.x_max)) 
+      out.push_back(*itr);
+    if((*itr < range.x_max) && (m_tree.RightChild(itr) != m_tree.end())) 
+      Search(m_tree.RightChild(itr),range,out);
+   }
+
 
   void RangeTree1D::Test()
   {
@@ -98,7 +99,7 @@ namespace Geom
       return node;
     }
 
-    //Todo - check that the median element is only in the lef thalf (not both) for both odd and even number of points
+    //Todo - check that the median element is only in the left half (not both) for both odd and even number of points
     //Todo - figure out why it crashes when using the commented out version
     //Todo - ensure comparators and median choice agree, ensure points that have equal x (and maybe y), median splitting assigns them consistently to L or R to avoid missing points
     //Assume points are sorted by x-coord
@@ -119,18 +120,6 @@ namespace Geom
     return node;
   }
 
-   void RangeTree2D::ReportSubTreeMain(Node* node, std::vector<Point2d>& out_points)
-   {
-    if(node == nullptr)
-      return;
-    if(node->is_leaf) 
-      out_points.push_back(node->point);
-    else {
-      ReportSubTreeMain(node->left,out_points);
-      ReportSubTreeMain(node->right,out_points);
-    }    
-   }
-
   RangeTree2D::Node* RangeTree2D::FindSplitNode(float x_low, float x_high)
   {
     //Todo either return nullptr if low < high or swap the value
@@ -146,70 +135,30 @@ namespace Geom
     return node;
   }
 
-  //Report points that fall in the x range - ignore y range
-  std::vector<Point2d> RangeTree2D::RangeQueryX(const Range& range)
-  {
-    std::vector<Point2d> points;
-    Node* split_node = FindSplitNode(range.x_min, range.x_max);
-    if(split_node == nullptr)
-      return points;
-    
-    if(split_node->is_leaf) {
-      if(split_node->point.x >= range.x_min && split_node->point.x <= range.x_max)
-        points.push_back(split_node->point);
-      return points;  
-    }
-
-    Node* node = split_node->left;
-    while (!node->is_leaf) {
-      if(range.x_min <= node->x_val) {
-        ReportSubTreeMain(node->right, points);
-        node=node->left;
-      }
-      else
-        node = node->right;
-    }
-    if(node->point.x >= range.x_min && node->point.x <= range.x_max)
-      points.push_back(node->point);
-
-    node = split_node->right;
-    while (!node->is_leaf) {
-      if(range.x_max > node->x_val) {
-        ReportSubTreeMain(node->left, points);
-        node=node->right;
-      }
-      else
-        node = node->left;
-    }
-    if(node->point.x >= range.x_min && node->point.x <= range.x_max)
-      points.push_back(node->point);
-    
-    return points;
-  }
-
   std::vector<Point2d> RangeTree2D::RangeQueryY(SecondaryTree& tree, const Range& range)
   {
     //Only the y-coord in Point2d is used (secondary tree ordered on y coord), but key needs to be Point2d
-    auto n_split = tree.FindSplitNode(Point2d{range.x_min,range.y_min},Point2d{range.x_max,range.y_max} );
+    auto itr_split = tree.FindSplitPos(Point2d{range.x_min,range.y_min},    Point2d{range.x_max,range.y_max} );
     std::vector<Point2d> points_out;
-    if(n_split == tree.m_nil)
+    if(itr_split == tree.end())
       return points_out;
-    SeachSubTreeSecondary(tree, n_split, range, points_out);
+    SeachSubTreeSecondary(tree, itr_split, range, points_out);
     return points_out;
   }
 
-  void RangeTree2D::SeachSubTreeSecondary(SecondaryTree& tree, SecondaryNode* node, const Range& range,std::vector<Point2d>& points_out)
+  void RangeTree2D::SeachSubTreeSecondary(SecondaryTree& tree,Iterator itr , const Range& range,std::vector<Point2d>& points_out)
   {
-    if(node == tree.m_nil)
+    if(itr == tree.end())
       return;
-    if((node->value.y > range.y_min) && (node->left != tree.m_nil))
-      SeachSubTreeSecondary(tree, node->left, range, points_out);
-    if(PointInRange(node->value, range))
-      points_out.push_back(node->value);
-    if((node->value.y < range.y_max) && (node->right != tree.m_nil) )
-      SeachSubTreeSecondary(tree, node->right, range, points_out);
+    const auto& point = *itr;  
+    if((point.y > range.y_min) && (tree.LeftChild(itr) != tree.end()))
+      SeachSubTreeSecondary(tree, tree.LeftChild(itr), range, points_out);
+    if(PointInRange(point, range))
+      points_out.push_back(point);
+    if((point.y < range.y_max) && (tree.RightChild(itr) != tree.end()) )
+      SeachSubTreeSecondary(tree, tree.RightChild(itr), range, points_out);
   }
-
+  
   std::vector<Point2d> RangeTree2D::RangeQuery(const Range& range)
   {
     std::vector<Point2d> points;
@@ -254,21 +203,9 @@ namespace Geom
     return points;
   }
 
-  std::vector<Point2d> RangeTree2D::BruteForceRangeQuery(const Range& range) 
-  {
-    std::vector<Point2d> all_points;
-    ReportSubTreeMain(m_root, all_points);
-    std::vector<Point2d> points_in_range;
-    for(auto& p : all_points) {
-      if(PointInRange(p,range))
-        points_in_range.push_back(p);
-    }
-    return points_in_range;
-  }
-
   bool RangeTree2D::PointInRange(Point2d p, const Range& range)
   {
-    //Todo - make syre the inequalities match intended semantics (inclusive ve exclusive bounds).  x<x_max (exclusive upper bound) x >= x_min (inclusive upper bound)
+    //Todo - make sure the inequalities match intended semantics (inclusive ve exclusive bounds).  x<x_max (exclusive upper bound) x >= x_min (inclusive upper bound)
     if(!(p.x < range.x_max))
       return false;
     if(p.x < range.x_min)
@@ -279,6 +216,75 @@ namespace Geom
       return false;
 
     return true;   
+  }
+
+  //================================================================================
+  // Following is used for test / validation only
+  //================================================================================
+
+  void RangeTree2D::ReportSubTreeMain(Node* node, std::vector<Point2d>& out_points)
+   {
+    if(node == nullptr)
+      return;
+    if(node->is_leaf) 
+      out_points.push_back(node->point);
+    else {
+      ReportSubTreeMain(node->left,out_points);
+      ReportSubTreeMain(node->right,out_points);
+    }    
+   }
+
+  //Report points that fall in the x range - ignore y range
+  std::vector<Point2d> RangeTree2D::RangeQueryX(const Range& range)
+  {
+    std::vector<Point2d> points;
+    Node* split_node = FindSplitNode(range.x_min, range.x_max);
+    if(split_node == nullptr)
+      return points;
+    
+    if(split_node->is_leaf) {
+      if(split_node->point.x >= range.x_min && split_node->point.x <= range.x_max)
+        points.push_back(split_node->point);
+      return points;  
+    }
+
+    Node* node = split_node->left;
+    while (!node->is_leaf) {
+      if(range.x_min <= node->x_val) {
+        ReportSubTreeMain(node->right, points);
+        node=node->left;
+      }
+      else
+        node = node->right;
+    }
+    if(node->point.x >= range.x_min && node->point.x <= range.x_max)
+      points.push_back(node->point);
+
+    node = split_node->right;
+    while (!node->is_leaf) {
+      if(range.x_max > node->x_val) {
+        ReportSubTreeMain(node->left, points);
+        node=node->right;
+      }
+      else
+        node = node->left;
+    }
+    if(node->point.x >= range.x_min && node->point.x <= range.x_max)
+      points.push_back(node->point);
+    
+    return points;
+  } 
+
+  std::vector<Point2d> RangeTree2D::BruteForceRangeQuery(const Range& range) 
+  {
+    std::vector<Point2d> all_points;
+    ReportSubTreeMain(m_root, all_points);
+    std::vector<Point2d> points_in_range;
+    for(auto& p : all_points) {
+      if(PointInRange(p,range))
+        points_in_range.push_back(p);
+    }
+    return points_in_range;
   }
 
   void RangeTree2D::ValidateTree(Node* node)
@@ -336,21 +342,6 @@ namespace Geom
 
     RangeTree2D::Range range{400,500,400,500};
 
-    // auto points_in_x_range = tree.RangeQueryX(range);
-    // SPG_WARN("Points in x range [{},{}]", range.x_min, range.x_max);
-    // for(auto& p: points_in_x_range)
-    //   SPG_TRACE(p);
-    // std::sort(points_in_x_range.begin(), points_in_x_range.end(), CompX());
-    // SPG_INFO("MinX,MaxX {}-{}",points_in_x_range.front(), points_in_x_range.back());  
-
-    // auto points_in_y_range = tree.RangeQueryY(tree.m_root->secondary_tree, range);
-    // SPG_WARN("Points in y range [{},{}]", range.y_min, range.y_max);  
-    // for(auto& p: points_in_y_range)
-    //   SPG_TRACE(p);
-    // std::sort(points_in_y_range.begin(), points_in_y_range.end(), CompY());
-    // SPG_INFO("MinY,MaxY {}-{}",points_in_y_range.front(), points_in_y_range.back());
-
-   
     std::vector<Geom::Point2d> points_in_range;
     points_in_range = tree.RangeQuery(range); 
     SPG_WARN("Points in range X:[{},{}] Y:[{},{}]", range.x_min, range.x_max, range.y_min, range.y_max);
