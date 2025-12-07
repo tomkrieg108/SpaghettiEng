@@ -6,6 +6,9 @@
 
 namespace Geom
 {
+  
+
+
   class RangeTree1D
   {
   #ifdef RBTREE_BASE_TRAVERSABLE
@@ -40,11 +43,10 @@ namespace Geom
 
   class RangeTree2D
   {
-
-    //only for validation Test() function
+    //only used int Test() for validation
     struct Comp
     { 
-      bool operator () (const Point2d& p1, const Point2d& p2) 
+      bool operator () (const Point2d& p1, const Point2d& p2) const
       {
         if(p1.x < p2.x) 
           return true;
@@ -57,15 +59,14 @@ namespace Geom
       }
     };
 
-
     struct CompX
     {
-      bool operator () (const Point2d& p1, const Point2d& p2) {return (p1.x < p2.x);}
+      bool operator () (const Point2d& p1, const Point2d& p2) const {return (p1.x < p2.x);}
     };
 
     struct CompY
     {
-      bool operator () (const Point2d& p1, const Point2d& p2)  {return p1.y < p2.y;}
+      bool operator () (const Point2d& p1, const Point2d& p2) const {return p1.y < p2.y;}
     };
 
   #ifdef RBTREE_BASE_TRAVERSABLE
@@ -75,9 +76,6 @@ namespace Geom
   #endif
 
     using Iterator = typename SecondaryTree::Iterator;
-
-    //using SecondaryTree = Geom::Set<Geom::Point2d,CompY>;
-    //using SecondaryNode = SecondaryTree::RBNode;
 
     struct Node
     {
@@ -111,7 +109,6 @@ namespace Geom
       Node* FindSplitNode(float x_low, float x_high);
       bool PointInRange(Point2d, const Range& range);
       std::vector<Point2d> RangeQueryY(SecondaryTree& tree, const Range& range);
-      //void SeachSubTreeSecondary(SecondaryTree& tree, SecondaryNode* node, const Range& range,std::vector<Point2d>& points_out);
       void SeachSubTreeSecondary(SecondaryTree& tree, Iterator itr, const Range& range,std::vector<Point2d>& points_out);
 
       // The following for validation only

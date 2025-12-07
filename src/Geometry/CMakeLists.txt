@@ -18,6 +18,7 @@ add_library(${LIB_GEOM} STATIC
   "./MonotonePartition.h"
   "./BSTree.cpp"
   "./BSTree.h"
+  "./RBTree.cpp"
   "./RBTree.h"
   "./RBTreeTraversable.h"
   "./KDTree.cpp"

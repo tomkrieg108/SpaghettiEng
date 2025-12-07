@@ -8,7 +8,7 @@ namespace Geom
     typename TKey,
     typename TVal,
     typename TComp = std::less<TKey>,
-    typename Traits = DefaultTraits<TKey,TVal>
+    typename Traits = DefaultValueTraits<TKey,TVal>
   >
   class RBTreeTraversable : public RBTree<TKey,TVal,TComp,Traits>
   {
@@ -16,10 +16,42 @@ namespace Geom
     using RBNode = typename Base::RBNode;
     using key_type =  typename Base::key_type;
     using value_type = typename Base::value_type;
-  
-  public:
-    using Iterator = typename Base::Iterator;
 
+    using Base::Base; //Makes Base's constructors available
+
+  public:
+
+    using Iterator = typename Base::Iterator;
+    
+    struct NodeHandle
+    {
+      value_type& Val() {
+        SPG_ASSERT(node != nullptr);
+        return node->value;
+      }
+      value_type const & Val() const {
+        SPG_ASSERT(node != nullptr);
+        return node->value;
+      }
+
+      bool IsNil() const {
+        SPG_ASSERT(node != nullptr);
+        return node == nil;
+      }
+
+      Iterator GetPos() {
+        SPG_ASSERT(node != nullptr);
+        auto itr = Iterator(node, nil);
+      }
+
+      private:
+        friend class RBTreeTraversable;
+        RBNode* node = nullptr;
+        RBNode* nil = nullptr;
+    };
+   
+  public:
+    
     Iterator Root() {
       return Iterator(Base::m_root,Base::m_nil);
     }
@@ -32,18 +64,19 @@ namespace Geom
     Iterator RightChild(Iterator itr) {
       return Iterator(itr.m_node->right,Base::m_nil);
     }
-    bool IsLeaf(Iterator itr) {
+    bool IsLeaf(Iterator itr) const {
       return Base::IsLeaf(itr.m_node);
     }
-    bool IsRoot(Iterator itr) {
+    bool IsRoot(Iterator itr) const {
       return itr.m_node == Base::m_root;
     }
-    bool HasLeft(Iterator itr) {
+    bool HasLeft(Iterator itr) const {
       return itr.m_node->left != Base::m_nil;
     }
-    bool HasRight(Iterator itr) {
+    bool HasRight(Iterator itr) const {
       return itr.m_node->right != Base::m_nil;
     }
+
     Iterator FindSplitPos(const key_type& key_low, const key_type& key_high)
     {
       SPG_ASSERT(Base::Less(key_low,key_high));
@@ -56,10 +89,43 @@ namespace Geom
       }
       return Iterator(node,Base::m_nil);
     }
+  
+    NodeHandle CreateNodeHandle(const value_type& element) {
+      NodeHandle handle;
+      handle.node = Base::CreateNode(element, Base::m_nil);
+      handle.nil = Base::m_nil;
+      return handle;
+    }
+
+    void SetNodeHandle(NodeHandle& handle, const value_type& element) {
+      SPG_ASSERT(handle.node != nullptr);
+      handle.node->value = element;
+    }
+
+    NodeHandle GetNilNodeHandle() {
+      NodeHandle handle;
+      handle.node = Base::m_nil;
+      handle.nil = Base::m_nil;
+      return handle;
+    }
+
+    Iterator InsertNodeHandle(NodeHandle handle) {
+      SPG_ASSERT(handle.node != nullptr);
+      auto itr = Base::Insert(handle.node);
+      // if(itr != Base::end())
+      //   Base::m_node_count++;
+      return itr;
+    }
+
+    Iterator GetHandlePos(NodeHandle handle) {
+      SPG_ASSERT(handle.node != nullptr);
+      auto itr = Iterator(handle.node, Base::m_nil);
+    }
+
   };
   #endif
 
-  static void Test_Tr_RB_Tree() 
+  static void Test_RBTreeTr() 
   {
     SPG_WARN("-------------------------------------------------------------------------");
     SPG_WARN("Traversable Red-Black Tree");
@@ -70,7 +136,7 @@ namespace Geom
     {
       std::vector<std::pair<const int,int>> vals {{2,200},{11,1100},{4,400},{125,12500},{15,1500},{3,300},{9,900},{32,3200},{71,7100},{43,4300},{27,2700},{1,100}};
 
-      Geom::RBTreeTraversable<int,int> tree(vals);
+      Geom::RBTreeTraversable<int,int> tree{vals};
       tree.Validate();
 
       std::vector<int> vals2 {1,5,3,9,2};

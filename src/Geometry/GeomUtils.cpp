@@ -1,11 +1,31 @@
 #include "GeomUtils.h"
 #define GLM_ENABLE_EXPERIMENTAL
+#include <Common/Common.h>
 #include <glm/gtx/norm.hpp> //for length2() (length squared)
 #include <numbers> //for PI
 
 namespace Geom
 {
   constexpr float pi_reciprical = 1/std::numbers::pi;
+
+  Line2d GetBisector(Point2d const& p1, Point2d const& p2)
+  {
+    SPG_ASSERT(!Equal(p1,p2));
+    Point2d midpoint = ComputeMidPoint(p1,p2);
+    glm::vec2 v = p2-p1;
+    glm::vec2 v_perp = glm::vec2(v.y, -v.x);
+
+    Line2d bisector = Line2d::FromPointAndDirection(midpoint,v_perp);
+    return bisector;
+  }
+
+  Point2d ComputeIntersection(Line2d const& l1, Line2d const& l2)
+  {
+    Point2d intersection;
+    float valid = ComputeIntersection(l1.start_point, l1.end_point, l2.start_point, l2.end_point, intersection);
+    SPG_ASSERT(valid); //Triggers if they are parallel
+    return intersection;
+  }
 
   float ComputeSignedArea(const Point2d& a, const Point2d& b, const Point2d& c)
   {
@@ -170,7 +190,7 @@ namespace Geom
   }
 
   bool ComputeIntersection(const Point2d& a, const Point2d& b, const Point2d& c, const Point2d& d, Point2d& out_intersect_point)
-  { //Vid 13
+  { //Vid 13 (Same as Penny's method - see notes)
     glm::vec2 AB = b - a;
     glm::vec2 CD = d - c;
 
@@ -307,9 +327,6 @@ namespace Geom
     return AngleLines(l1.direction, l2.direction);
   }
 #endif
-
-  //AAAAC3NzaC1lZDI1NTE5AAAAIAHLRrrRca202kCD/NC8kMqnhSM2LJgLo6szkI6aHgpR
-  //ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAHLRrrRca202kCD/NC8kMqnhSM2LJgLo6szkI6aHgpR tomkrieg108@gmail.com
 
   Point2d ComputeCentroid(const std::vector<Point2d>& points)
   {

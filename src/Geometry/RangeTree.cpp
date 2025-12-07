@@ -3,6 +3,11 @@
 
 namespace Geom
 {
+  
+//-------------------------------------------------------------------------------
+// RangeTree1D
+//-------------------------------------------------------------------------------
+
   std::vector<float> RangeTree1D::RangeSearch(const Range& range)
   {
     std::vector<float> vals_out;

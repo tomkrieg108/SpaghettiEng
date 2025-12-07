@@ -6,20 +6,31 @@
 
 namespace Geom
 {
+
+  inline Point2d ComputeMidPoint(Point2d const& p1, Point2d const& p2)
+  {
+      return Point2d{(p1.x + p2.x)/2.0f,(p1.y + p2.y)/2.0f };
+  }
+
+  Line2d GetBisector(Point2d const& p1, Point2d const& p2);
+
+  Point2d ComputeIntersection(Line2d const& l1, Line2d const& l2);
+
+
   /*
-    TESTED (Catch2)
+    *TESTED (Catch2)
     Returns signed area of triangle formed by points a,b,c. CCW otiented=> +ve, CW=> negative. Returns zero if colinear.  Check for equality with zero using Geom::Equal()
   */
   float ComputeSignedArea(const Point2d& a, const Point2d& b, const Point2d& c); 
 
   /*
-    TESTED (Catch2)
+    *TESTED (Catch2)
     Orientation of point c relative to a->b.  Returns Origin when c==a, Destination when c==b, Between when c is colinear with a->b and strictly bwteen them, Beyond when c is colinear when a->b and strictly ahead, Behind when  c is colinear when a->b and strictly behind, Left with c is ledt of a->b, Right when c is right of a->b
   */
   RelativePos Orientation2d(const Point2d& a, const Point2d& b, const Point2d& c);
 
    /*
-    TESTED (Catch2) - contains a single call:  Collinear(seg.start, seg.end, p)
+    *TESTED (Catch2) - contains a single call:  Collinear(seg.start, seg.end, p)
     Orientation of point p relative to line_seg (a->b).  Returns Origin when c==a, Destination when c==b, Between when c is colinear with a->b and strictly bwteen them, Beyond when c is colinear when a->b and strictly ahead, Behind when  c is colinear when a->b and strictly behind, Left with c is ledt of a->b, Right when c is right of a->b
    */
   inline RelativePos Orientation2d(const LineSeg2D& line_seg, const Point2d& p)
@@ -32,7 +43,7 @@ namespace Geom
   bool Collinear(const Point3d& a, const Point3d& b, const Point3d& c);
 
   /*
-    TESTED (Catch2)
+    *TESTED (Catch2)
     Returns true when a, b, c are collinear, or any points coincide
   */
   bool Collinear(const Point2d& a, const Point2d& b, const Point2d& c);
@@ -92,20 +103,22 @@ namespace Geom
   }
 
   
+
+  
   /*
-    TESTED (Catch2)
+    *TESTED (Catch2)
     Angle in degrees between seg1 and seg2. Output range [-180,180].  Oriented CCW => positive.  Otherwise negative
   */
   float ComputeAngleInDegrees(const LineSeg2D& seg1, const LineSeg2D& seg2);
 
   /*
-    TESTED (Catch2)
+    *TESTED (Catch2)
     Angle in degrees between vectors a->b, b->c. Output range [-180,180].  Oriented CCW => positive.  Otherwise negative.
   */
   float ComputeAngleInDegrees(const Point2d& a, const Point2d& b, const Point2d& c);
 
   /*
-    TESTED (Catch2)
+    *TESTED (Catch2)
     Angle subtended by sides b->a (initial side) and b->c (terminal side).  i.e. the central angle at point b subtended by side a->c. Output range [0,180].
   */
   float ComputeSubtendedAngleInDegrees(const Point2d& a, const Point2d& b, const Point2d& c);
@@ -173,5 +186,7 @@ namespace Geom
     //same as det[a b c] = volume of parallelapiped = 6 * vol of tetrahedron
     return glm::dot(a, glm::cross(b, c));
   }
+
+
 
 }

@@ -128,7 +128,7 @@ namespace Spg
 
   float Window::GetAspectRatio() const
   {
-    SPG_ASSERT(m_params.buffer_height > 0);
+    SPG_ASSERT(m_params.buffer_height > 0); //Todo - triggered when window minimized
     return (float)(m_params.buffer_width) / (float)(m_params.buffer_height);
   }
 
