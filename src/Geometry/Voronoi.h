@@ -4,16 +4,17 @@
 #include "Geometry/DCEL.h"
 #include "Geometry/GeomUtils.h"
 #include <spdlog/spdlog.h> // format string for Voronoi Node
+#include <array>
 #include <queue>
 #include <variant>
 #include <tuple> //for std::tie
 
 
-#define VORONOI_VERS 1
+
 
 namespace Geom
 {
-  //Todo: Template for float or double?
+  
   struct Parabola
   {
     double a,b,c; //i.e. y=ax^2 + bx + c
@@ -48,113 +49,7 @@ namespace Geom
       bool is_degenerate;
   };
 
-#if (VORONOI_VERS==1)
-
-  class Voronoi
-  {
-    
-  private:
-
-    template<typename,typename,typename> friend struct ::fmt::formatter;
-    struct Node;
-    struct SiteEvent;
-    struct CircleEvent;
-    
-    struct NodeCompare
-    {
-      NodeCompare(Voronoi const* const ctx ) : ctx{ctx} {}
-      bool operator ()(Node const & n1,  Node const& n2) const noexcept;
-      private:
-        bool CompArcToArc(Node const & arc1,  Node const& arc2) const noexcept; 
-        bool CompArcToBP(Node const & arc,  Node const& bp) const noexcept; 
-        bool CompBPToBP(Node const & bp1,  Node const& bp2) const noexcept; 
-      private:  
-        Voronoi const* const ctx;
-    };
-
-    using Beachline =  Geom::RBTreeTraversable<Node,void,NodeCompare>;
-    using BeachItr = Beachline::Iterator;
-    using NodeHandle = Beachline::NodeHandle;
-
-    struct Node
-    {
-      enum class Type {Internal, Leaf};
-
-      Type type = Type::Leaf;
-      uint32_t unique_id;
-
-      //For Internal nodes (breakpoints)
-      Point2d site_left{0,0};
-      Point2d site_right{0,0};
-      NodeHandle arc_left{};
-      NodeHandle arc_right{};
-      DCEL::HalfEdge* half_edge = nullptr; 
-
-      //For Leaf nodes (arcs)
-      Point2d site{0,0};
-      NodeHandle break_left{};
-      NodeHandle break_right{};
-      CircleEvent* circle_event = nullptr;
-
-      static std::string ToString(Node const & n);
-      Voronoi* ctx = nullptr; //To get access to y_sweep, used in ToString() only
-    }; 
-
-    struct SiteEvent
-    {
-      SiteEvent() = default;
-      SiteEvent(float x, float y): site{x,y} {}
-      SiteEvent(Point2d const& p): site{p} {}
-      Point2d site;
-      Point2d GetPoint() const {return site;}
-    };
-
-    struct CircleEvent
-    {
-      CircleEvent() = default;
-      CircleEvent(const Point2d& p) : circle_bottom{p} {}
-      Point2d circle_bottom;
-      NodeHandle leaf_going{};
-      bool false_alarm = false;
-      Point2d GetPoint() const {return circle_bottom;}
-    };
-
-    using Event = std::variant<SiteEvent, CircleEvent>;
-
-    struct EventCompare {
-      bool operator()(const Event& a, const Event& b) const noexcept;
-    };
-
-   
-  public:
-    Voronoi() = default;
-    Voronoi(std::vector<Geom::Point2d>& points);
-    static void Test();
-
-  private:
- 
-    void Build(std::vector<Geom::Point2d>& points);
-    void HandleSiteEvent(SiteEvent e);
-    void HandleCircleEvent(CircleEvent e);
-    static float ComputeBreakpointX(const Node& node, float y_sweep);
-    void GetArcTriples(const Node& arc);
-    uint32_t NextId() {return node_id++;}
-
-    // For testing / validation
-    void AddEventsToQueue(){}
-    void PrintQueue(){}
-    void PrintBeach();
-
-  private:
-    Beachline m_beach = Beachline{NodeCompare{this}};
-    std::priority_queue<Event,std::vector<Event>,EventCompare> m_event_queue;
-    Geom::DCEL m_diagram;
-    float m_sweep{0};
-    uint32_t node_id{0};
-  };
-
-  #endif
-
+  float ComputeBreakpointX(Point2d const& left_site, Point2d const& right_site, float sweep_y);
 
 namespace Voronoi_V2
 {
@@ -193,25 +88,12 @@ namespace Voronoi_V2
         Voronoi* ctx;
     };
 
-#if 0
-    struct BeachNodeComp
-    {
-      BeachNodeComp(Voronoi* ctx ) : ctx{ctx} {}
-      bool operator ()(BeachNode* node1,  BeachNode* node2) const noexcept;
-      private:
-        bool CompArcToBP(BeachNode* arc_node,  BeachNode* bp_node) const noexcept; 
-        bool CompBPToBP(BeachNode* bp1_node,  BeachNode* bp2_node) const noexcept; 
-      private:  
-        Voronoi* ctx;
-    };
-#endif
-
     struct Arc
     {
       Point2d site{0,0};
-      CircleEvent* circle_event = nullptr;
+      CircleEvent* circle_event = nullptr; // The circle event at which this arc disappears
     };
-
+ 
     struct Breakpoint
     {
       Point2d site_left{0,0};
@@ -225,25 +107,20 @@ namespace Voronoi_V2
       uint32_t element_id = 0;
       BeachNode* prev_node = nullptr; 
       BeachNode* next_node = nullptr;
+      static uint32_t next_id;
+      Voronoi* ctx = nullptr; //For access to y_sweep, used in ToString() only
       
       BeachElement() : data{Arc()} {}
       BeachElement(Arc arc) : data{arc} {}
       BeachElement(Breakpoint bp) : data{bp} {}
 
-      bool IsArc() const {
-        return std::holds_alternative<Arc>(data);
-      }
-      bool IsBreakpoint() const {
-        return std::holds_alternative<Breakpoint>(data);
-      }
-      Arc GetArc() const {
-        SPG_ASSERT(IsArc());
-        return std::get<Arc>(data);
-      }
-      Breakpoint GetBreakpoint() const {
-        SPG_ASSERT(IsBreakpoint());
-        return std::get<Breakpoint>(data);
-      }
+      //Todo: use std::get_if()? - only 1 check.  returns a pointer insteaf of ref
+      bool IsArc() const {return std::holds_alternative<Arc>(data);}
+      bool IsBreakpoint() const {return std::holds_alternative<Breakpoint>(data);}
+      Arc const& GetArc() const {return std::get<Arc>(data);}
+      Arc& GetArc() {return std::get<Arc>(data);}
+      Breakpoint const& GetBreakpoint() const {return std::get<Breakpoint>(data);}
+      Breakpoint& GetBreakpoint() {return std::get<Breakpoint>(data);}
 
       static BeachElement MakeArcElement(Point2d site) {
         Arc arc = Arc{site,nullptr};
@@ -259,22 +136,23 @@ namespace Voronoi_V2
         element.data = bp;
         return element;
       }
-
-      std::string ToString(Voronoi* ctx);
-
-      private:
-        static uint32_t next_id;
+      static std::string ToString(BeachElement const & n);
     };
 
     struct BeachNode : public RBNodeBase<BeachNode,BeachElement>
     {
       using Base = RBNodeBase<BeachNode,BeachElement>;
       using Base::Base;
+
+      bool IsArc() const { return value.IsArc();}
+      bool IsBreakpoint() const { return value.IsBreakpoint();}
+      BeachElement const& GetElement() const {return value;}
       BeachElement& GetElement() {return value;}
-      bool IsArc() { return value.IsArc();}
-      bool IsBreakpoint() { return value.IsBreakpoint();}
-      Arc GetArc() {return value.GetArc();}
-      Breakpoint GetBreakpoint() {return value.GetBreakpoint();}
+      Arc const& GetArc() const {return value.GetArc();}
+      Arc& GetArc() {return value.GetArc();}
+      Breakpoint const& GetBreakpoint() const {return value.GetBreakpoint();}
+      Breakpoint& GetBreakpoint() {return value.GetBreakpoint();}
+      
       BeachNode* GetPrevNode() {
         SPG_ASSERT(value.prev_node != nullptr);
         return value.prev_node;
@@ -290,6 +168,9 @@ namespace Voronoi_V2
       void SetPrevNode(BeachNode* prev) {
         SPG_ASSERT(prev != nullptr);
         value.prev_node = prev;
+      }
+      void SetCircleEvent(CircleEvent* e) {
+        SPG_ASSERT(e != nullptr);
       }
       void SetPrevAndNextNodes(BeachNode* prev,BeachNode* next) {
         SetPrevNode(prev);
@@ -314,36 +195,42 @@ namespace Voronoi_V2
         Base(std::forward<Args>(args)...) {}
   #endif
 
-      //Note:  Next two can't be static because they need member of 'this', m_nil
-      BeachNode* MakeArcNode(Point2d site) {
+      //Note:  Next two can't be static because they need non-static member m_nil, 
+      BeachNode* MakeArcNode(Point2d site, Voronoi* ctx) {
         BeachElement arc_el = BeachElement::MakeArcElement(site);
+        arc_el.prev_node = arc_el.next_node = m_nil;
+        arc_el.ctx = ctx;
         return Base::MakeNode(arc_el,m_nil);
       }
 
-      BeachNode* MakeBreakpointNode(Point2d site_left,Point2d site_right) {
+      BeachNode* MakeBreakpointNode(Point2d site_left,Point2d site_right, Voronoi* ctx) {
         BeachElement bp_el = BeachElement::MakeBreakpointElement(site_left,site_right);
+        bp_el.prev_node = bp_el.next_node = m_nil;
+        bp_el.ctx = ctx;
         return Base::MakeNode(bp_el,m_nil);
       }
     };
 
     struct SiteEvent
     {
+      Point2d site;
+
       SiteEvent() = default;
       SiteEvent(float x, float y): site{x,y} {}
       SiteEvent(Point2d const& p): site{p} {}
       Point2d GetPoint() const {return site;}
-      Point2d site;
     };
 
     struct CircleEvent
     {
-      CircleEvent() = default;
-      CircleEvent(float x, float y): circle_low{x,y} {}
-      CircleEvent(const Point2d& p) : circle_low{p} {}
-      Point2d GetPoint() const {return circle_low;}
-      Point2d circle_low;
+      Point2d circle_point;
       BeachNode* arc_node_going = nullptr;
       bool false_alarm = false;
+
+      CircleEvent() = default;
+      CircleEvent(float x, float y): circle_point{x,y} {}
+      CircleEvent(const Point2d& p) : circle_point{p} {}
+      Point2d GetPoint() const {return circle_point;}
     };
 
     using Event = std::variant<SiteEvent, CircleEvent>;
@@ -353,19 +240,26 @@ namespace Voronoi_V2
       bool operator()(const EventPtr& a, const EventPtr& b) const noexcept;
     };
 
+    struct NodePair
+    {
+      BeachNode* left = nullptr;
+      BeachNode* right = nullptr;
+    };
+
     public:
       Voronoi() = default;
       Voronoi(std::vector<Geom::Point2d>& points);
-
       void Build(std::vector<Geom::Point2d>& points);
+
+    private:  
       void HandleSiteEvent(SiteEvent e);
       void HandleCircleEvent(CircleEvent e);
-
       float ComputeBreakpointX(const Breakpoint& bp);
+      NodePair GetBreakpointPairleft(BeachNode* arc_node);
+      NodePair GetBreakpointPairRight(BeachNode* arc_node);
+      void AddCircleEventIfRequired(NodePair bp_pair, BeachNode* new_arc);
 
-      //void GetArcTriples(const Node& arc);
-     
-
+    public:
       // For testing / validation
       void PrintBeach();
       static void Test();
@@ -378,75 +272,235 @@ namespace Voronoi_V2
   };
 } //namespace Voronoi_V2
 
-} //namespace Geom
-
-// template<>
-// struct fmt::formatter<Geom::Voronoi_V2::Voronoi::BeachElement> {
-//   constexpr auto parse(format_parse_context& ctx) {
-//     return ctx.begin();
-//   }
-
-//   template <typename FormatContext>
-//   auto format(const Geom::Voronoi_V2::Voronoi::BeachElement& e, FormatContext& ctx) const  {
-//     return fmt::format_to(ctx.out(), "{}", Geom::Voronoi_V2::Voronoi::BeachElement::ToString(e));
-//   }
-// };
-
-
-#if (VORONOI_VERS==1)
-//Need this so that can do SPG_TRACE(node) etc.  Needs to be in global NS
-template<>
-struct fmt::formatter<Geom::Voronoi::Node> {
-  constexpr auto parse(format_parse_context& ctx) {
-    return ctx.begin();
-  }
-
-  template <typename FormatContext>
-  auto format(const Geom::Voronoi::Node& n, FormatContext& ctx) const  {
-    return fmt::format_to(ctx.out(), "{}", Geom::Voronoi::Node::ToString(n));
-  }
-};
-#endif
-
-#if (VORONOI_VERS==2)
-template<>
-struct fmt::formatter<Geom::Voronoi::Node> {
-  constexpr auto parse(format_parse_context& ctx) {
-    return ctx.begin();
-  }
-
-  template <typename FormatContext>
-  auto format(const Geom::Voronoi::Node& n, FormatContext& ctx) const  {
-    return fmt::format_to(ctx.out(), "{}", std::string{"A Beach Node"});
-  }
-};
-#endif
-
-
-//NOTE: std::less<>
-/*
-  std:less (roughly):
-
-  template<class T = void>
-  struct less;
-
-  specializtion for T = void:
-
-  template<>
-  struct less<void> {
-
-      Tells STL that the comparator can compare different but comparable types
-      using is_transparent = void; 
-
-      template<class A, class B>
-      constexpr bool operator()(A&& a, B&& b) const
-          noexcept(noexcept(std::forward<A>(a) < std::forward<B>(b)))
-      {
-          return std::forward<A>(a) < std::forward<B>(b);
-      }
+namespace Voronoi_V3 
+{
+  class Voronoi;
+  struct Arc;
+  struct Breakpoint;
+  struct BeachElement;
+  
+  struct CircleData {
+    Point2d center;
+    float radius;
   };
 
-  Notice how the operator is a template — it can deduce A and B automatically.
+  struct Event
+  {
+    enum class Type {Site, Circle};
+    Type type;
+    Point2d const* point = nullptr; //Used for both Site and Circle events
+    //Following is used if type == circle
+    Arc* diappearing_arc = nullptr; 
+    CircleData circle; //optional - not strictly needed
+    bool valid = true; // Circle events can get invalidated
+  };
 
-  It means you can use std::less<> (or std::greater<>, etc.) without ever mentioning your custom type explicitly.
-*/
+  class EventQueue 
+  {
+    friend class Voronoi;
+  public:
+
+    void Initialize(std::vector<Point2d> const& points);
+
+    void Push(Event* e) {
+      m_queue.push(e);
+    }
+    Event* Pop() {
+      Event* top_event = m_queue.top();
+      m_queue.pop();
+      return top_event;
+    }
+    bool IsEmpty() const {
+      return m_queue.empty();
+    }
+
+  private:
+    struct EventCompare {
+      // bool operator()(const Event& a, const Event& b) const {
+      //   return a.y < b.y;
+      // }
+      bool operator()(Event* e1,  Event* e2) const {
+        if(e1->point->y < e2->point->y)
+          return true;
+        if(e2->point->y < e1->point->y)
+          return false;
+        return e1->point->x < e2->point->x;
+      }
+    };
+  private:
+    //std::priority_queue<Event,std::vector<Event>, EventCompare> m_queue;  
+    std::priority_queue<Event*,std::vector<Event*>, EventCompare> m_queue;  
+  };
+
+  struct Arc 
+  {
+    Point2d const * site = nullptr;
+    Event* circle_event = nullptr;
+    //links to neighbouring breakpoints:
+    Breakpoint* left_bp = nullptr;
+    Breakpoint* right_bp = nullptr;
+
+    //For Validation / debugging:
+    BeachElement* element = nullptr;
+    uint32_t id;
+  };
+
+  struct Breakpoint
+  {
+    Arc* left_arc = nullptr;
+    Arc* right_arc = nullptr;
+    DCEL::HalfEdge* half_edge = nullptr;
+
+    float CurrentX(float sweep_y) const {
+      return ComputeBreakpointX(*left_arc->site, *right_arc->site, sweep_y);
+    }
+
+    //For Validation / debugging:
+    BeachElement* element = nullptr;
+    uint32_t id;
+  };
+
+  struct BeachElement
+  {
+    template<typename,typename,typename> friend struct ::fmt::formatter;
+
+    bool is_arc = true;
+    Arc* arc = nullptr;
+    Breakpoint* breakpoint = nullptr;
+    static uint32_t next_id;
+
+    //For logger (need ctx->m_sweep to calculate and display cur x-pos)
+    Voronoi* ctx = nullptr; 
+    static std::string ToString(BeachElement const & el);
+  };
+
+  struct BeachElementComp
+  { 
+    Voronoi* ctx = nullptr;  //need ctx->m_sweep to calculate cur x-pos
+
+    BeachElementComp() = default;
+    BeachElementComp(Voronoi* ctx) : ctx{ctx} {}
+    void SetContext(Voronoi* ctx) {this->ctx = ctx;} //Todo: Not used
+    bool operator () (BeachElement const& el1, BeachElement const& el2) const;
+    bool CompArcToArc(BeachElement const& arc1,  BeachElement const& arc2) const;
+    bool CompArcToBP(BeachElement const& arc,  BeachElement const& bp) const; 
+    bool CompBPToBP(BeachElement const& bp1,  BeachElement const& bp2) const;
+  };
+
+  struct BreakpointPair
+  {
+    Breakpoint* left = nullptr;
+    Breakpoint* right = nullptr;
+  };
+
+  class BeachTree: public RBTree_V2::RBTree<BeachElement,BeachElementComp>
+  {
+    friend class Voronoi;
+
+    Voronoi* ctx = nullptr; //Passed to BeachElement structs in Makexxx()
+    using Base = RBTree<BeachElement,BeachElementComp>;
+    using BeachNode = typename Base::node_type;
+    using Base::Base;
+
+    void SetComparator(BeachElementComp comp) {this->m_comp = comp;} //Not used
+    BeachNode* MakeArcNode(Point2d const * site);
+    BeachNode* MakeBreakpointNode(Arc* left_arc, Arc* right_arc); //Not used
+    BeachNode* MakeBreakpointNode();
+
+    using ArcTriple = std::array<BeachNode*,5>;
+
+    BeachNode* FindArcNodeAbove(Point2d const * site, float sweep_y);
+    ArcTriple MakeArcTriple(Event* site_event, BeachNode* replaced_arc_node, float sweep_y);
+    void InsertArcTriple(Event* site_event, ArcTriple& arc_triple, BeachNode* replaced_arc_node);
+
+    BreakpointPair GetLeftBreakpointPair(Arc* arc);
+    BreakpointPair GetRightBreakpointPair(Arc* arc);
+   
+    //Not yet implemented
+    void RemoveDissapearingArc(BeachNode* arc_node) {}
+    void RemoveArc(BeachNode* arc_node){}
+
+    //Todo: Make these static as appropriate!
+    //Helpers
+    bool IsArc(BeachNode* node);
+    bool IsBreakpoint(BeachNode* node);
+    Arc* GetArc(BeachNode* arc_node);
+    Breakpoint* GetBreakpoint(BeachNode* bp_node);
+
+    void SetCircleEventValidity(BeachNode* arc_node, bool value);  
+
+    void SetArcNeighbours(BeachNode* arc_node, 
+      Breakpoint* bp_left, Breakpoint* bp_right);
+    void SetBreakpointNeighbours(BeachNode* bp_node, 
+      Arc* arc_left, Arc* arc_right);
+
+     //These not used (yet)  
+    void SetArcNeighbours(BeachNode* arc_node, 
+      BeachNode* bp_node_left, BeachNode* bp_node_right);
+    void SetBreakpointNeighbours(BeachNode* bp_node, 
+      BeachNode* arc_node_left, BeachNode* arc_node_right);  
+
+    Arc* LeftArc(BeachNode* node);
+    Arc* RightArc(BeachNode* node);
+    Breakpoint* LeftBreakpoint(BeachNode* node);
+    Breakpoint* RightBreakpoint(BeachNode* node);
+    //Arc* NthLeftArc(BeachNode* node, uint32_t n);
+    //Arc* NthRightArc(BeachNode* node, uint32_t n);
+    //Breakpoint* NthLeftBreakpoint(BeachNode* node, uint32_t n);
+    //Breakpoint* NthRightBreakpoint(BeachNode* node, uint32_t n);
+  };
+
+  class Voronoi
+  {
+  public:
+    Voronoi() = default;
+    Voronoi(std::vector<Point2d> points);
+    float GetSweepY() {return m_sweep;}
+    BeachTree& GetBeachTree() {return m_beach;}
+
+    // For testing / validation
+    void PrintBeach();
+    static void Test();
+
+  private:
+    void Construct();  
+    void HandleSiteEvent(Event* e);
+    void HandleCircleEvent(Event* e);
+    void InsertCircleEventIfNeeded(BreakpointPair bp_pair, Arc* new_arc);
+
+  private:
+    std::vector<Point2d> m_points;
+    EventQueue m_event_queue;
+    BeachTree m_beach = BeachTree(BeachElementComp(this));
+    Geom::DCEL m_dcel;
+    float m_sweep = 0;
+  };
+
+} //namespace Voronoi_V3
+
+
+} //namespace Geom
+
+template<>
+struct fmt::formatter<Geom::Voronoi_V2::Voronoi::BeachElement> {
+  constexpr auto parse(format_parse_context& ctx) {
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  auto format(const Geom::Voronoi_V2::Voronoi::BeachElement& e, FormatContext& ctx) const  {
+    return fmt::format_to(ctx.out(), "{}", Geom::Voronoi_V2::Voronoi::BeachElement::ToString(e));
+  }
+};
+
+template<>
+struct fmt::formatter<Geom::Voronoi_V3::BeachElement> {
+  constexpr auto parse(format_parse_context& ctx) {
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  auto format(const Geom::Voronoi_V3::BeachElement& e, FormatContext& ctx) const  {
+    return fmt::format_to(ctx.out(), "{}", Geom::Voronoi_V3::BeachElement::ToString(e));
+  }
+};

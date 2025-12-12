@@ -22,7 +22,7 @@ namespace Geom
   Point2d ComputeIntersection(Line2d const& l1, Line2d const& l2)
   {
     Point2d intersection;
-    float valid = ComputeIntersection(l1.start_point, l1.end_point, l2.start_point, l2.end_point, intersection);
+    bool valid = ComputeIntersection(l1.start_point, l1.end_point, l2.start_point, l2.end_point, intersection);
     SPG_ASSERT(valid); //Triggers if they are parallel
     return intersection;
   }
