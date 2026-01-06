@@ -102,9 +102,7 @@ namespace Geom
     return glm::degrees(theta);
   }
 
-  
 
-  
   /*
     *TESTED (Catch2)
     Angle in degrees between seg1 and seg2. Output range [-180,180].  Oriented CCW => positive.  Otherwise negative
@@ -134,8 +132,6 @@ namespace Geom
   //3D lines in 2D can either be parallel or intersect or skewed
   float AngleLines3D(const Line3d& l1, const Line3d& l2);
 #endif
-
-  Point2d ComputeCentroid(const std::vector<Point2d>& points);
 
   bool Coplanar(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c);
 
@@ -187,6 +183,82 @@ namespace Geom
     return glm::dot(a, glm::cross(b, c));
   }
 
+  Point2d ComputeCentroid(const std::vector<Point2d>& points);
 
+  //Signed area or polygon defined by points (assumed radialy sorted) 
+  // A>0 => CCW, A<0 => CW
+  float SignedArea(const std::vector<Point2d>& pts);
+  
+  void ForceCCW(std::vector<Point2d>& pts);
 
+  void SortRadially(std::vector<Point2d>& pts);
+
+  bool PointInPolygon(const std::vector<Point2d>& pts, const Point2d& test);
+
+  bool PointInTriangle(Point2d& a, Point2d& b, Point2d& c, Point2d& p);
+
+  //bool SameSide(Point2d& p1, Point2d& p2, Point2d& a, Point2d& b);
+  //bool PointInTriangle2(Point2d& a, Point2d& b, Point2d& c, Point2d& p);
+
+  Point2d ComputeCentroid(const std::vector<Point2d*> points);
+
+  float SignedArea(const std::vector<Point2d*> pts);
+  
+  void ForceCCW(std::vector<Point2d*> pts);
+
+  void SortRadially(std::vector<Point2d*> pts);
+
+  bool PointInPolygon(const std::vector<Point2d*> pts, const Point2d& test);
+
+  struct BoundingBox
+  {
+    float top = std::numeric_limits<float>::lowest();
+    float bottom = std::numeric_limits<float>::max();
+    float right = std::numeric_limits<float>::lowest();
+    float left = std::numeric_limits<float>::max();
+
+    void Update(Point2d p){
+      if(p.y > top)
+        top = p.y;
+      if(p.y < bottom)
+        bottom = p.y;
+      if(p.x > right)
+        right = p.x;
+      if(p.x < left)
+        left = p.x;  
+    }
+
+    float Width() {
+      return right - left;
+    }
+ 
+    float Height() {
+      return top - bottom;
+    }
+
+    void AddBorder(float size) {
+      top += size;
+      bottom -= size;
+      right += size;
+      left -= size;
+    }
+
+    //Return Bounding box as vector of Point2D, CCW orientation
+    std::vector<Point2d> GetPoints() {
+      std::vector<Point2d> points = {
+         {right,top}, {left,top}, {left,bottom}, {right,bottom}
+      };
+      return points;
+    }
+
+    std::vector<LineSeg2D> GetLineSegs() {
+       std::vector<LineSeg2D> segs = {
+         {{right,top},    {left,top}},
+         {{left,top},     {left,bottom}},
+         {{left,bottom},  {right,bottom}},
+         {{right,bottom},   {right,top}} 
+       };
+       return segs;
+    }
+  };
 }

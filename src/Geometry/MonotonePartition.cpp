@@ -33,7 +33,7 @@ namespace Geom
   void MonotonePartitionAlgo::Set(const std::vector<Point2d>& points)
   {
     Clear();
-    m_polygon.Set(points);
+    m_polygon.Init(points);
     m_polygon.Validate();
     InitialiseEventQueue();
   }
@@ -114,7 +114,7 @@ namespace Geom
       Step();
     }
     for(auto& diagonal : m_monotone_diagonals) {
-      m_polygon.Split(diagonal.first, diagonal.second);
+      m_polygon.Join(diagonal.first, diagonal.second);
     }
   }
 
@@ -146,7 +146,7 @@ namespace Geom
     SPG_ASSERT(itr != m_T.end());
     HelperPoint helper = itr->second;
     if(helper.vertex_category == VertexCategory::Merge) {
-      SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+      SPG_ASSERT(m_polygon.GetDiagonal(e.vertex, helper.vertex).is_valid);
       m_monotone_diagonals.push_back({e.vertex, helper.vertex});
     }
     m_T.erase(itr); 
@@ -164,7 +164,7 @@ namespace Geom
     itr = std::prev(itr); //theoretically points to edge directly left of e.vertex in m_T
     HelperPoint helper = itr->second;
     //Insert diagonal connecting e.vertex to event_point.helper_vertex
-    SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+    SPG_ASSERT(m_polygon.GetDiagonal(e.vertex, helper.vertex).is_valid);
     m_monotone_diagonals.push_back({e.vertex, helper.vertex});
     //helper(ej -> vi)
     auto [it, inserted] = m_T.insert_or_assign(itr->first,e);
@@ -187,7 +187,7 @@ namespace Geom
     
     HelperPoint helper = itr->second; 
     if(helper.vertex_category == VertexCategory::Merge) {
-      SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+      SPG_ASSERT(m_polygon.GetDiagonal(e.vertex, helper.vertex).is_valid);
       m_monotone_diagonals.push_back({e.vertex, helper.vertex});
     }
     //delete e-1 from T
@@ -200,7 +200,7 @@ namespace Geom
     itr = std::prev(itr); //theoretically points to element left of e.vertex in m_T
     helper = itr->second;
     if(helper.vertex_category == VertexCategory::Merge) {
-      SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+      SPG_ASSERT(m_polygon.GetDiagonal(e.vertex, helper.vertex).is_valid);
       m_monotone_diagonals.push_back({e.vertex, helper.vertex});
     }
     //helper(ej <-vi)
@@ -220,7 +220,7 @@ namespace Geom
       
       HelperPoint helper_e_prev = itr_e_prev->second; 
       if(helper_e_prev.vertex_category == VertexCategory::Merge) {
-        SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper_e_prev.vertex).is_valid);
+        SPG_ASSERT(m_polygon.GetDiagonal(e.vertex, helper_e_prev.vertex).is_valid);
         m_monotone_diagonals.push_back({e.vertex, helper_e_prev.vertex});
       }
       m_T.erase(itr_e_prev); //return itr to element following removed element  
@@ -235,7 +235,7 @@ namespace Geom
       itr = std::prev(itr); //theoretically points to element left of e.vertex in m_T
       auto helper = itr->second;
       if(helper.vertex_category == VertexCategory::Merge) {
-        SPG_ASSERT(m_polygon.DiagonalCheck(e.vertex, helper.vertex).is_valid);
+        SPG_ASSERT(m_polygon.GetDiagonal(e.vertex, helper.vertex).is_valid);
         m_monotone_diagonals.push_back({e.vertex, helper.vertex});
       }
       //helper(ej <- vi)
@@ -337,7 +337,7 @@ namespace Geom
       TriangulateFace(face);
     }
     for(auto& diagonal : m_triangulation_diagonals) {
-      m_polygon.Split(diagonal.first, diagonal.second);
+      m_polygon.Join(diagonal.first, diagonal.second);
     }
   }
 
@@ -389,7 +389,7 @@ namespace Geom
             DCEL::Vertex* v_j = stack.back();
             stack.pop_back();
             if(stack.size() >= 1) {
-              SPG_ASSERT(m_polygon.DiagonalCheck(v_i, v_j).is_valid);
+              SPG_ASSERT(m_polygon.GetDiagonal(v_i, v_j).is_valid);
               m_triangulation_diagonals.push_back({v_i, v_j});
             }
           }
@@ -402,7 +402,7 @@ namespace Geom
           stack.pop_back();
           while(!stack.empty()) {
             DCEL::Vertex* v_j = stack.back();
-            if(!m_polygon.DiagonalCheck(v_i,v_j).is_valid)
+            if(!m_polygon.GetDiagonal(v_i,v_j).is_valid)
               break;
             stack.pop_back();
             last_popped = v_j;
@@ -417,7 +417,7 @@ namespace Geom
       DCEL::Vertex* v_n = sorted_vertices.back();
       for(uint32_t i=1; i<stack.size()-1; ++i){
         DCEL::Vertex* v_i = stack[i];  
-        SPG_ASSERT(m_polygon.DiagonalCheck(v_n, v_i).is_valid);
+        SPG_ASSERT(m_polygon.GetDiagonal(v_n, v_i).is_valid);
         m_triangulation_diagonals.push_back({v_n, v_i});
       }
    }

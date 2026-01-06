@@ -3,6 +3,7 @@
 #include <Common/Common.h>
 #include <glm/gtx/norm.hpp> //for length2() (length squared)
 #include <numbers> //for PI
+#include <numeric> //iota
 
 namespace Geom
 {
@@ -69,7 +70,7 @@ namespace Geom
     return Collinear(seg.start, seg.end, p);
   }
 
-   bool Collinear(const glm::vec3& a, const glm::vec3& b)
+  bool Collinear(const glm::vec3& a, const glm::vec3& b)
   { //Vid 17
     //checking that a.x/b.x = a.y/b.y = a.x=z/b.z
     auto v1 = a.x * b.y - a.y * b.x;
@@ -305,8 +306,6 @@ namespace Geom
 #ifdef _WIN32
   float AngleLinePlaneInDegrees(const Line3d& line, const Plane& plane)
   { //Vid 16
-
-
     return 90 - AngleLines<3,float>(line.direction, plane.normal);
   }
 
@@ -327,19 +326,6 @@ namespace Geom
     return AngleLines(l1.direction, l2.direction);
   }
 #endif
-
-  Point2d ComputeCentroid(const std::vector<Point2d>& points)
-  {
-    Point2d centroid = {0, 0};
-    for (const auto& p : points) {
-        centroid.x += p.x;
-        centroid.y += p.y;
-    }
-    centroid.x /= points.size();
-    centroid.y /= points.size();
-    return centroid;
-  }
-
 
   bool Coplanar(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
   { //Vid 17
@@ -377,5 +363,230 @@ namespace Geom
 
     //Note: return value is positive ig Q is on the positive side of the place otherwise negative.  So can use as an orientation check
   }
+
+  // See LevelBuilder project
+  //https://www.geeksforgeeks.org/area-of-a-polygon-with-given-n-ordered-vertices/
+  //https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
+  // This gives opposite sign to the ChatGPT on below
+#if 0
+  float SignedArea(const std::vector<Point2d>& pts)
+  {
+    if(pts.size() < 3)
+      return 0;
+    // Initialze area 
+    float area = 0.0;
+
+    // Calculate value of shoelace formula 
+    int n = pts.size();
+    int j = n - 1;
+    for (int i = 0; i < n; i++)
+    {
+      area += (pts[j].x + pts[i].x) * (pts[j].y - pts[i].y);
+      j = i;  // j is previous vertex to i 
+    }
+    return area / 2;
+  }
+#endif
+
+  Point2d ComputeCentroid(const std::vector<Point2d>& points)
+  {
+    Point2d centroid = {0, 0};
+    for (const auto& p : points) {
+        centroid.x += p.x;
+        centroid.y += p.y;
+    }
+    centroid.x /= points.size();
+    centroid.y /= points.size();
+    return centroid;
+  }
+
+  //CCW => +ve, CW=>-ve (ChatGPT's version)
+  float SignedArea(const std::vector<Point2d>& pts) 
+  {
+     if (pts.size() < 3)
+        return 0.0;
+
+      double area = 0.0;
+      for (size_t i = 0; i < pts.size(); ++i)
+      {
+          const auto& p = pts[i];
+          const auto& q = pts[(i + 1) % pts.size()];
+          area += p.x * q.y - q.x * p.y;
+      }
+      return area * 0.5;
+  }
+
+  // CCW ordering starting from +ve x-axis
+  void SortRadially(std::vector<Point2d>& pts)
+  {
+    Point2d centroid = ComputeCentroid(pts);
+    float cy = centroid.y;
+    float cx = centroid.x;
+
+    std::sort(pts.begin(), pts.end(),
+      [&](const Point2d& a, const Point2d& b)
+      {
+        //atan2 returns angles in (-PI,PI])
+        return std::atan2(a.y - cy, a.x - cx) <
+               std::atan2(b.y - cy, b.x - cx);
+      }
+    );
+  }
+
+  void ForceCCW(std::vector<Point2d>& pts) 
+  {
+    if(SignedArea(pts) <0 )
+      std::reverse(pts.begin(), pts.end());
+  }
+
+  // See LevelBuilder project
+  //https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html
+  bool PointInPolygon(const std::vector<Point2d>& pts, const Point2d& test)
+  {
+    uint32_t nvert = pts.size();
+    if(nvert < 3)
+      return false;
+    uint32_t i, j;
+    double verty_i, verty_j, vertx_i, vertx_j;
+    double test_x = test.x;
+    double test_y = test.y;
+    bool result = false;
+    for (i = 0, j = nvert - 1; i < nvert; j = i++)
+    {
+      verty_i = pts[i].y;
+      verty_j = pts[j].y;
+      vertx_i = pts[i].x;
+      vertx_j = pts[j].x;
+
+      if (((verty_i>test_y) != (verty_j>test.y)) &&
+        (test.x < (vertx_j - vertx_i) * (test.y - verty_i) / (verty_j - verty_i) + vertx_i))
+        result = !result;
+    }
+    return result;
+  }
+
+  // See LevelBuilder project
+  //Barycentric Technique - supposedly faster than the above
+  //http://blackpawn.com/texts/pointinpoly/default.html
+  bool PointInTriangle(Point2d& a, Point2d& b, Point2d& c, Point2d& p)
+  {
+    glm::vec2 v0 = c-a;
+    glm::vec2 v1 = b-a;
+    glm::vec2 v2 = p-a;
+    float dot00 = glm::dot(v0, v0);
+    float dot01 = glm::dot(v0, v1);
+    float dot02 = glm::dot(v0, v2);
+    float dot11 = glm::dot(v1, v1);
+    float dot12 = glm::dot(v1, v2);
+
+    // Compute barycentric coordinates
+    float denom = (dot00 * dot11 - dot01 * dot01);
+    if(Equal(denom,0))
+      return false;
+    float invDenom = 1 / denom;
+    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+    // Check if point is in triangle
+    return (u > 0) && (v > 0) && (u + v < 1);
+  }
+
+  Point2d ComputeCentroid(const std::vector<Point2d*> points)
+  {
+    Point2d centroid = {0, 0};
+    for (const auto& p : points) {
+        centroid.x += p->x;
+        centroid.y += p->y;
+    }
+    centroid.x /= points.size();
+    centroid.y /= points.size();
+    return centroid;
+  }
+
+  float SignedArea(const std::vector<Point2d*> pts)
+  {
+    if (pts.size() < 3)
+        return 0.0;
+
+      double area = 0.0;
+      for (size_t i = 0; i < pts.size(); ++i)
+      {
+          const auto p = pts[i];
+          const auto q = pts[(i + 1) % pts.size()];
+          area += p->x * q->y - q->x * p->y;
+      }
+      return area * 0.5;
+  }
+  
+  void ForceCCW(std::vector<Point2d*> pts)
+  {
+    if(SignedArea(pts) <0 )
+      std::reverse(pts.begin(), pts.end());
+  }
+
+  void SortRadially(std::vector<Point2d*> pts)
+  {
+    Point2d centroid = ComputeCentroid(pts);
+    float cy = centroid.y;
+    float cx = centroid.x;
+
+    std::sort(pts.begin(), pts.end(),
+      [&](Point2d* a, Point2d* b)
+      {
+        //atan2 returns angles in (-PI,PI])
+        return std::atan2(a->y - cy, a->x - cx) <
+               std::atan2(b->y - cy, b->x - cx);
+      }
+    );
+  }
+
+  bool PointInPolygon(const std::vector<Point2d*> pts, const Point2d& test)
+  {
+    uint32_t nvert = pts.size();
+    if(nvert < 3)
+      return false;
+    uint32_t i, j;
+    double verty_i, verty_j, vertx_i, vertx_j;
+    double test_x = test.x;
+    double test_y = test.y;
+    bool result = false;
+    for (i = 0, j = nvert - 1; i < nvert; j = i++)
+    {
+      verty_i = pts[i]->y;
+      verty_j = pts[j]->y;
+      vertx_i = pts[i]->x;
+      vertx_j = pts[j]->x;
+
+      if (((verty_i>test_y) != (verty_j>test.y)) &&
+        (test.x < (vertx_j - vertx_i) * (test.y - verty_i) / (verty_j - verty_i) + vertx_i))
+        result = !result;
+    }
+    return result;
+  }
+
+  // See LevelBuilder project
+  //http://blackpawn.com/texts/pointinpoly/default.html
+#if 0
+  bool SameSide(Point2d& p1, Point2d& p2, Point2d& a, Point2d& b)
+  {
+    glm::vec2 ab = b-a;
+    glm::vec2 a_p1 = p1-a;
+    glm::vec2 a_p2 = p2-a;
+    float cp1 = glm::cross(ab, a_p1);
+    float cp2 = glm::cross(ab, a_p2);
+    return cp1 * cp2 > 0;	//effectively the dot product
+  }
+   // See LevelBuilder project
+  bool PointInTriangle2(Point2d& a, Point2d& b, Point2d& c, Point2d& p)
+  {
+    if (!SameSide(p, a, b, c))
+      return false;
+    if (!SameSide(p, b, a, c))
+      return false;
+    if (!SameSide(p, c, a, b))
+      return false;
+    return true;
+  }
+#endif
 
 }

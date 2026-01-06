@@ -17,7 +17,7 @@ namespace Spg
     glDepthFunc(GL_LESS); 
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glPointSize(12.0f); //can be at least 64.0
+    glPointSize(8.0f); //can be at least 64.0
     glEnable(GL_BLEND); 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //glEnable(GL_CULL_FACE);

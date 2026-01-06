@@ -152,8 +152,8 @@ namespace Spg
       static int32_t num_points = 20;
       static float radius = 400.0f;
       ImGui::SeparatorText("Point field Parameters");
-      ImGui::SliderInt("Num Points", &num_points, 10, 50);
-      ImGui::SliderFloat("Radius", &radius, 300, 500);
+      ImGui::SliderInt("Num Points", &num_points, 3, 50);
+      ImGui::SliderFloat("Radius", &radius, 100, 500);
       ImGui::SeparatorText("Create new point field");
      
       //std::vector<Geom::Point2d> points;
@@ -267,6 +267,63 @@ namespace Spg
         }
       }
     }
+
+     if(ImGui::CollapsingHeader("Voronoi")) {
+      ImGui::Separator();
+      if(s_active_mesh == "")  {
+        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Create a point field.");
+      }
+      //Todo this triggered if this header opened before any point sets created
+      SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
+      if(m_mesh_list[s_active_mesh].type != MeshType::PointSet) {
+        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Select a point field.");
+      }
+      else if( s_active_mesh != "") {
+        ImGui::Text("Selected: "); 
+        ImGui::SameLine();
+      #ifdef _WIN32  
+        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), s_active_mesh.c_str());
+      #endif  
+
+        SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
+        Mesh& mesh = m_mesh_list[s_active_mesh];
+        m_renderer.Enable(mesh.render_id); //should be already enabled 
+        if(!mesh.children.empty()) {
+          ImGui::Text("Voronoi Algo Complete");
+          for(auto& item : mesh.children) {
+            m_renderer.Enable(item.second->render_id);
+          }
+        }
+        else if(ImGui::Button("Run")) {
+          Mesh& mesh = m_mesh_list[s_active_mesh];
+
+          Geom::Voronoi_V3::Voronoi voronoi(mesh.vertices);
+          voronoi.Construct();
+          
+          Mesh* verts_mesh = new Mesh;
+          //diagonal_mesh.vertices =  Geom::ConvexHull2D_GiftWrap(mesh.vertices);
+          verts_mesh->vertices =  voronoi.GetVertexPoints();
+          verts_mesh->type = MeshType::PointSet;
+          verts_mesh->active = true;
+          verts_mesh->render_id = m_renderer.Submit( verts_mesh->vertices, glm::vec4(1,0,0,1), GLRenderer::PrimitiveType::Point);
+          mesh.children["VoronoiVerts"] = verts_mesh;
+
+          Mesh* edges_mesh = new Mesh;
+          edges_mesh->vertices = voronoi.GetConnectedEdgePoints();
+          edges_mesh->type = MeshType::LineSet;
+          edges_mesh->active = true;
+          edges_mesh->render_id = m_renderer.Submit( edges_mesh->vertices, glm::vec4(0,0,1,1), GLRenderer::PrimitiveType::Line);
+          mesh.children["VoronoiEdges"] = edges_mesh;
+
+          Mesh* loose_edges_mesh = new Mesh;
+          loose_edges_mesh->vertices = voronoi.GetLooseEdgePoints();
+          loose_edges_mesh->type = MeshType::LineSet;
+          loose_edges_mesh->active = true;
+          loose_edges_mesh->render_id = m_renderer.Submit( loose_edges_mesh->vertices, glm::vec4(0,1,1,1), GLRenderer::PrimitiveType::Line);
+          mesh.children["VoronoiLooseEdges"] = loose_edges_mesh;
+        }
+      }
+     }
 
     if(ImGui::CollapsingHeader("Polygon Triangulation")) {
       //Todo - this is almost the same as the section above!

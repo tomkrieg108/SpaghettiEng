@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/epsilon.hpp> //epsilonEqual()
+#include <vector>
 #include <algorithm>
 
 namespace Geom
@@ -32,7 +33,24 @@ namespace Geom
   */
   inline bool Equal(float v1, float v2, const float scale_factor = 100.0f) //link error if not inline
   {
-    return std::abs(v1 - v2) < Epsilon(scale_factor);
+    constexpr auto eps = std::numeric_limits<float>::epsilon();
+    return fabs(v1 - v2) <= 32.0* eps * std::max(1.0f, std::max(fabs(v1), fabs(v2)));
+  }
+
+   //ULP: Unit in last place.  Distance between current and next possible number
+   //Each arithmetic op introduces ~ 0.5 ULP error 
+  inline bool EqualULP_1Sided(float a, float b, const float, int max_ulps = 8) 
+  {
+    float spacing = std::nextafter(a, INFINITY) - a;
+    return std::fabs(a - b) <= max_ulps * spacing;
+  }
+
+  inline bool EqualULP(float a, float b, const float, int max_ulps = 4) 
+  {
+    float spacing_a = std::nextafter(a, INFINITY) - a;
+    float spacing_b = std::nextafter(b, INFINITY) - b;
+    float tol = max_ulps * std::max(spacing_a, spacing_b);
+    return std::fabs(a - b) <= tol;
   }
 
   inline bool EqualRel(float v1, float v2, float relTol = 1e-4f) {

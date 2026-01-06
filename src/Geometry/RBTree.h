@@ -1476,6 +1476,50 @@ auto GetPointer(Iterator itr)
           }
         }
       }
+
+      Iterator Insert(node_type* node) {
+        SPG_ASSERT(node != nullptr)
+        if(m_root == m_nil) {
+          m_root = node;
+          m_root->parent = m_nil;
+
+          InsertFixup(m_root); 
+          m_node_count++;
+          return Iterator(m_root,m_nil);
+        }
+
+        node_type* cur = m_root;   
+        while(true) {
+          if(Equal(Key(node->value),Key(cur->value))) {
+            return end();
+          }
+
+          if(Less(Key(node->value),Key(cur->value))) {
+            if(cur->left == m_nil) {
+              cur->left = node;
+              node->parent = cur;
+
+              InsertFixup(cur->left);
+              m_node_count++;
+              return Iterator(cur->left,m_nil);
+            } else {
+              cur = cur->left;
+            }
+          }
+          else {
+            if(cur->right ==  m_nil) {
+              cur->right = node;
+              node->parent = cur;
+
+              InsertFixup(cur->right);
+              m_node_count++;
+              return Iterator(cur->right,m_nil);
+            } else {
+              cur = cur->right;
+            }
+          }
+        }
+      }
     
       bool Erase(const key_type& key) {
         auto itr = Find(key);
@@ -1637,7 +1681,7 @@ auto GetPointer(Iterator itr)
       bool IsLeaf(node_type* n) const {
         return (n->left == m_nil) && (n->right == m_nil); 
       }
-
+  
       bool IsLeftChild(node_type* node) const {
         return ( (node==m_root) ? false : (node->parent->left == node));
       }
@@ -1779,11 +1823,6 @@ auto GetPointer(Iterator itr)
         InOrderTraverse(node->left, values_out);
         values_out.push_back(node->value);
         InOrderTraverse(node->right,values_out);
-      }
-
-      Iterator Insert(node_type* node) {
-        SPG_ASSERT(node != nullptr)
-        return this->Insert(node->value);
       }
 
       void EraseWithoutFixup(node_type* node) {
@@ -2015,7 +2054,7 @@ auto GetPointer(Iterator itr)
     
     public:
 
-      void Validate() const
+  void Validate() const
   {
     uint32_t node_count = 0;
     std::vector<uint32_t> black_depths, tree_depths;
@@ -2074,11 +2113,13 @@ auto GetPointer(Iterator itr)
           SPG_ASSERT(node->left->colour == Colour::Black);
           SPG_ASSERT(node->right->colour == Colour::Black);  
         }
-        if(node->left != m_nil)
+        if(node->left != m_nil) {
           SPG_ASSERT(Less(Key(node->left->value),Key(node->value)));
-        if(node->right != m_nil)
+        }
+        if(node->right != m_nil) {
           SPG_ASSERT(Less(Key(node->value),Key(node->right->value)));  
-
+        }
+  
         node_count++;  
         black_depth += (node->colour == RBTree::Colour::Black) ? 1 : 0;
         
@@ -2159,78 +2200,6 @@ auto GetPointer(Iterator itr)
   
   // * Definition in RBTree.cpp
   void Test_RBTree();
-
-
-  #if 0
-
-    struct BeachElement;  //The payload
-    struct BeachTreeNode; //Tree node containing the payload
-    class Voronoi;
-    struct CircleEvent;
-    struct HalfEdge;
-
-    struct Point2d
-    {
-      float x,y;
-    };
-
-    struct Arc
-    {
-      Point2d site_pt{0,0};
-      CircleEvent* circle_event = nullptr;
-    };
-
-    struct Breakpoint
-    {
-      Point2d site_pt_left{0,0};
-      Point2d site_pt_right{0,0};
-      HalfEdge* half_edge = nullptr; 
-    };
-
-    struct BeachElement
-    {
-      uint32_t id;
-      //std::variant<Arc,Breakpoint> data;
-      Arc arc;
-      Breakpoint bp;
-    };
-
-    struct BeachElementComp
-    {
-      BeachElementComp(Voronoi const* const ctx ) : ctx{ctx} {}
-      bool operator ()(BeachElement const & n1,  BeachElement const& n2) const noexcept;
-      private:
-        bool CompArcToArc(BeachElement const & arc1,  BeachElement const& arc2) const noexcept; 
-        bool CompArcToBP(BeachElement const & arc,  BeachElement const& bp) const noexcept; 
-        bool CompBPToBP(BeachElement const & bp1,  BeachElement const& bp2) const noexcept; 
-      private:  
-        Voronoi const* const ctx;
-    };
-
-    struct BeachTreeNode : RBNodeBase<BeachTreeNode,BeachElement>
-    {
-      using Base = RBNodeBase<BeachTreeNode,BeachElement>;
-      using Base::Base;
-      BeachTreeNode* prev_node = nullptr;
-      BeachTreeNode* next_node = nullptr;
-    };
-
-    class BeachTree:RBTree<BeachElement,BeachElementComp,BeachTreeNode>
-    {
-      friend class Voronoi;
-      using Base = RBTree<BeachElement,BeachElementComp,BeachTreeNode>;
-      using Node = BeachTreeNode;
-      using Base::Base;
-    };
-
-    class Voronoi
-    {
-      private:
-         BeachTree m_beach = BeachTree{BeachElementComp{this}};
-         RBTree<int> my_tree;
-    };
-
-  #endif
 
   } //namespace RBTree_V2 
 
