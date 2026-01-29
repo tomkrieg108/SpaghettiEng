@@ -17,6 +17,7 @@ target_include_directories(${LIB_COMMON}  PUBLIC
 )
 
 target_link_libraries(${LIB_COMMON} PUBLIC 
+  fmt::fmt
   spdlog::spdlog
 )
 
@@ -25,7 +26,6 @@ target_link_libraries(${LIB_COMMON} PUBLIC glm::glm-header-only)
 #For testing libs only
 target_link_libraries(${LIB_COMMON} PUBLIC 
   nlohmann_json::nlohmann_json  
-  fmt::fmt
   cxxopts::cxxopts
 )
 

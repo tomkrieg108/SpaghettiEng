@@ -37,8 +37,15 @@ namespace Geom
     return fabs(v1 - v2) <= 32.0* eps * std::max(1.0f, std::max(fabs(v1), fabs(v2)));
   }
 
+  inline bool Equal(double v1, double v2)
+  {
+    constexpr auto eps = std::numeric_limits<double>::epsilon();
+    return std::fabs(v1 - v2) <= 1000.0 * eps * std::max(1.0, std::max(fabs(v1), fabs(v2)));
+  }
+
    //ULP: Unit in last place.  Distance between current and next possible number
    //Each arithmetic op introduces ~ 0.5 ULP error 
+   //Todo - the next 2 are not currently used anywhere
   inline bool EqualULP_1Sided(float a, float b, const float, int max_ulps = 8) 
   {
     float spacing = std::nextafter(a, INFINITY) - a;

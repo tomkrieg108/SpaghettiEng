@@ -297,7 +297,7 @@ namespace Spg
         else if(ImGui::Button("Run")) {
           Mesh& mesh = m_mesh_list[s_active_mesh];
 
-          Geom::Voronoi_V3::Voronoi voronoi(mesh.vertices);
+          Geom::Voronoi_V4::Voronoi voronoi(mesh.vertices);
           voronoi.Construct();
           
           Mesh* verts_mesh = new Mesh;

@@ -5,7 +5,7 @@ project(
     VERSION 1.0.0
     LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -32,6 +32,7 @@ cpmaddpackage("gh:fmtlib/fmt#11.0.2")
 cpmaddpackage("gh:gabime/spdlog#v1.15.0")
 cpmaddpackage("gh:jarro2783/cxxopts#v3.2.0")
 cpmaddpackage("gh:skypjack/entt#v3.15.0")
+# set(SPDLOG_FMT_EXTERNAL ON) # Force spdlog to use external fmt
 
 cpmaddpackage(
   NAME glfw

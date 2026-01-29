@@ -62,40 +62,34 @@ namespace Spg
   
   void AppPrintHello()
   {
-    std::cout << "Hello From App\n";
+    SPG_WARN("Hello From App");
     
     #ifdef SPG_DEBUG
-      std::cout << "APP: SPG_DEBUG defined\n";
+      SPG_TRACE("APP: SPG_DEBUG defined");
     #elif defined(SPG_RELEASE)
-        std::cout << "APP: SPG_RELEASE defined\n";
+        SPG_TRACE("APP: SPG_RELEASE defined");
     #endif  
 
     #ifdef _WIN32
-      std::cout << "APP: WIN platform\n";
+      SPG_TRACE("APP: WIN platform");
     #elif defined(__linux__)
-      std::cout << "APP: LINUX platform\n";
+      SPG_TRACE("APP: LINUX platform");
     #endif
 
     #if defined(__x86_64__) || defined(_M_X64)
-      std::cout << "APP: x86_64 architecture\n";
+      SPG_TRACE("APP: x86_64 architecture");
     #endif
 
-    std::cout << "External libs linked into App exe:\n";
-    std::cout << "JSON:" << NLOHMANN_JSON_VERSION_MAJOR << "." << NLOHMANN_JSON_VERSION_MINOR << "."
-              << NLOHMANN_JSON_VERSION_PATCH << "\n";
-    std::cout << "FMT:" << FMT_VERSION << "\n";
-    std::cout << "CXXOPTS:" << CXXOPTS__VERSION_MAJOR << "." << CXXOPTS__VERSION_MINOR << "." << CXXOPTS__VERSION_PATCH
-              << "\n";
-    std::cout << "SPDLOG....:" << SPDLOG_VER_MAJOR << "." << SPDLOG_VER_MINOR << "." << SPDLOG_VER_PATCH << "\n";
-    std::cout << "\n";
-
+    SPG_WARN("External libs linked into App exe:\n");
+    SPG_TRACE("JSON: {}.{}.{}", NLOHMANN_JSON_VERSION_MAJOR, NLOHMANN_JSON_VERSION_MINOR, NLOHMANN_JSON_VERSION_PATCH );
+    SPG_TRACE( "FMT: {} ", FMT_VERSION);
+    SPG_TRACE("CXXOPTS: {}.{}.{}",CXXOPTS__VERSION_MAJOR,CXXOPTS__VERSION_MAJOR, CXXOPTS__VERSION_PATCH);
+    SPG_TRACE("SPDLOG: {},{}.{}",SPDLOG_VER_MAJOR,SPDLOG_VER_MINOR,SPDLOG_VER_PATCH);
     #ifdef _WIN32
-      SPG_WARN( "FREETYPE: {}.{}.{}", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
+      SPG_TRACE( "FREETYPE: {}.{}.{}", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
     #endif
-
-    SPG_WARN("Entt {},{},{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR, ENTT_VERSION_PATCH );
-
-    std::cout << "####################################################\n\n";
+    SPG_TRACE("Entt {},{},{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR, ENTT_VERSION_PATCH );
+    SPG_WARN( "####################################################");
   }
 }
 
