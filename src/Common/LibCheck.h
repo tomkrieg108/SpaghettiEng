@@ -2,5 +2,5 @@
 
 namespace Utils
 {
-  void LibCheck();
+  void HelloUtilsLib();
 }

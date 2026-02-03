@@ -1,9 +1,9 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtc/epsilon.hpp> //epsilonEqual()
+#include <glm/gtc/epsilon.hpp> // epsilonEqual()
 #include <vector>
-#include <algorithm>
+#include <algorithm> //std::max()
 
 namespace Geom
 {

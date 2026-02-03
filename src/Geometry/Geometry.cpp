@@ -12,7 +12,7 @@
 
 namespace Geom
 {
-  void GeomLibHello()
+  void HelloGeomLib()
   {
     SPG_WARN("Hello from Geom Lib!");
 

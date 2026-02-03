@@ -46,23 +46,15 @@ namespace Spg
 
     DefaultLayer* layer = new DefaultLayer(m_app_context, std::string("Default Layer"));
     PushLayer(layer);
-    float log2 = glm::log2(1000.0f);
-    float sqr_root = glm::sqrt(1000.0f);
-
-    SPG_WARN("log2 {}", log2);
-    SPG_WARN("log2_sq {}", log2*log2);
-    SPG_WARN("sqr_root {}", sqr_root);
   }
 
   GeomApp::~GeomApp()
   {
   }
 
- 
-  
-  void AppPrintHello()
+  void HelloGeomApp()
   {
-    SPG_WARN("Hello From App");
+    SPG_WARN("Hello From Geom App");
     
     #ifdef SPG_DEBUG
       SPG_TRACE("APP: SPG_DEBUG defined");
@@ -97,9 +89,11 @@ int main()
 {
   Spg::Application::SystemInit();
 #ifdef SPG_LIB_LINK_CHECK 
-  Utils::LibCheck();
-  Geom::GeomLibHello();
-  Spg::AppPrintHello();
+  Utils::HelloUtilsLib();
+  MathX::HelloMathLib();
+  Phys::HelloPhysLib();
+  Geom::HelloGeomLib();
+  Spg::HelloGeomApp();
 #endif
 
   auto app = Spg::CreateApplication();

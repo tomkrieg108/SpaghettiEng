@@ -16,7 +16,7 @@ namespace Utils
 {
   namespace fs = std::filesystem;
 
-  void LibCheck()
+  void HelloUtilsLib()
   {
     
     SPG_WARN("Hello from Common Utils Lib!");
