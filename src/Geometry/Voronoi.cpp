@@ -1,37 +1,11 @@
 #include "Voronoi.h"
+
 #include <iostream>
 #include <optional>
 #include <format>
 #include <locale>
 #include <unordered_set>
 
-//Best practice for # include ordering (according to chatgpt)
-/*
-// 1. Corresponding header
-#include "MyClass.h"
-
-// 2. Standard library headers
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <format>      // C++23
-#include <iostream>
-
-// 3. Third-party libraries
-#include <fmt/format.h>
-#include <spdlog/spdlog.h>
-
-// 4. Project headers
-#include "Utils.h"
-#include "Math/Vector3.h"
-
-Extra rules / tips
-Use forward declarations where possible in headers to reduce unnecessary includes
-Alphabetical order within each section makes it easier to scan
-Blank lines between groups — improves readability
-Minimize #include in headers; prefer .cpp unless needed
-Include guards / #pragma once always
-*/
 
 namespace Geom
 {
@@ -100,91 +74,6 @@ namespace Geom
     auto points = std::pair(Point2d((float)x1,y1), Point2d((float)x2,y2));
     return std::optional(points); 
   }
-
-  #if 0
-  static bool IsValidBreakpoint(Parabola const& arc_left, Parabola const& arc_right, float break_x) 
-  {
-    //todo - in case of degenerate arc?
-    auto eps = 1e-4;
-    int count = 0;  
-    // double arc_left_yl = 0;
-    // double arc_left_yr = 0;
-    // double arc_right_yl = 0;
-    // double arc_right_yr = 0;
-
-    float arc_left_yl = 0;
-    float arc_left_yr = 0;
-    float arc_right_yl = 0;
-    float arc_right_yr = 0;
-
-    while(true) {
-      if(++count > 10)
-        break;
-
-      //  arc_left_yl = arc_left.GetYd(break_x - eps);
-      //  arc_left_yr = arc_left.GetYd(break_x + eps);
-      //  arc_right_yl = arc_right.GetYd(break_x - eps);
-      //  arc_right_yr = arc_right.GetYd(break_x + eps);
-
-       arc_left_yl = arc_left.GetY(break_x - eps);
-       arc_left_yr = arc_left.GetY(break_x + eps);
-       arc_right_yl = arc_right.GetY(break_x - eps);
-       arc_right_yr = arc_right.GetY(break_x + eps);
-
-      if(Equal(arc_left_yl,arc_right_yl) || Equal(arc_left_yr,arc_right_yr))
-        eps *=4;
-      else 
-        return (arc_left_yl < arc_right_yl) && ( arc_right_yr < arc_left_yr);
-    }
-    SPG_ERROR("break X: {}, eps: {}", break_x, eps);
-    /*
-      This seems to occur when y coord of site left and site right are close, which means
-      There will be a very 'high' intersection at a point where the 2 parabolas are close to 
-      colinear and vertical.  
-    */
-    
-    SPG_ASSERT(false);
-    return false;
-  }
-  
-
-  static Point2d ComputeBreakpoint(Point2d const& left_site, Point2d const& right_site, float sweep_y) 
-  {
-    Parabola left_parab(left_site, sweep_y);
-    Parabola right_parab(right_site, sweep_y);
-    
-    if(left_parab.IsDegenerate())
-      return left_site;
-    if(right_parab.IsDegenerate())
-      return right_site;
-
-    auto result = ComputeIntersections(left_parab,right_parab);
-    SPG_ASSERT(result.has_value());
-    auto& [point1,point2] = result.value();
-    if(Equal(point1,point2))
-      return point1;   //1 intersection only => y-coords of sites are equal.
-    
-    bool pnt1_valid = IsValidBreakpoint(left_parab,right_parab,point1.x);
-    bool pnt2_valid = IsValidBreakpoint(left_parab,right_parab,point2.x);
-
-    if(pnt1_valid && !pnt2_valid)
-      return point1;
-    if(pnt2_valid && !pnt1_valid)  
-      return point2; //Todo: It's Always this one that's valid! Investigate
-
-    if(pnt1_valid && pnt2_valid) {
-      IsValidBreakpoint(left_parab,right_parab,point1.x);
-      IsValidBreakpoint(left_parab,right_parab,point2.x);   
-    }
-    if(!pnt1_valid && !pnt2_valid) {
-      IsValidBreakpoint(left_parab,right_parab,point1.x);
-      IsValidBreakpoint(left_parab,right_parab,point2.x);   
-    }
-    SPG_ASSERT(false);
-    return point2;     
-  }
-  #endif
-
 
   namespace Voronoi_V4
   {
@@ -267,95 +156,6 @@ namespace Geom
         return  point1.x > point2.x ? point1 : point2;
     }
 
-  #if 0
-    std::pair<Point2d,Point2d> Voronoi::GetArcEndpointCoords(Arc* arc) {
-
-      SPG_ASSERT(arc != nullptr);
-      Parabola mid_parab(*arc->site, m_sweep);
-      
-      auto arc_triple = m_beach.GetArcTriple(arc);
-      constexpr float INF_MINUS = std::numeric_limits<float>::lowest();
-      constexpr float INF_PLUS = std::numeric_limits<float>::max();
-
-      Point2d left_point = {INF_MINUS,INF_PLUS};
-      Point2d right_point = {INF_PLUS,INF_PLUS};
-
-      if((arc_triple[0] == nullptr) && (arc_triple[2] == nullptr)) {
-        // Unbounded on both sides
-        return std::pair(left_point, right_point); 
-      }
-       
-      if((arc_triple[0] == nullptr) && (arc_triple[2] != nullptr)) {
-        // Unbounded to the left. right_point will be the left intersection
-        Parabola right_parab(*arc_triple[2]->site, m_sweep);
-        auto result = ComputeIntersections(mid_parab,right_parab);
-        SPG_ASSERT(result.has_value());
-        auto& [point1,point2] = result.value();
-        right_point = point1.x < point2.x ? point1 : point2;
-        return std::pair(left_point, right_point); 
-      }
-
-      if((arc_triple[0] != nullptr) && (arc_triple[2] == nullptr)) {
-        // Unbounded to the right. left_point will be the right intersection
-        Parabola left_parab(*arc_triple[0]->site, m_sweep);
-        auto result = ComputeIntersections(left_parab,mid_parab);
-        SPG_ASSERT(result.has_value());
-        auto& [point1,point2] = result.value();
-        left_point = point1.x > point2.x ? point1 : point2;
-        return std::pair(left_point, right_point); 
-      }
-
-      // Arc is bounded on both sides.  
-      if( arc_triple[0]->site == arc_triple[2]->site) { 
-        //The 2 neighbouring arcs are formed by the same parabola
-        Parabola parab(*arc_triple[0]->site, m_sweep);
-        auto result = ComputeIntersections(parab,mid_parab);
-        SPG_ASSERT(result.has_value());
-        auto& [point1,point2] = result.value();
-        if(point1.x < point2.x)
-          return std::pair(point1,point2);
-        else
-          return std::pair(point2,point1);  
-      }
-
-      
-      { // The 2 neighbouring arcs are formed by different parabola 
-        Parabola left_parab(*arc_triple[0]->site, m_sweep);
-        auto result = ComputeIntersections(left_parab,mid_parab);
-        SPG_ASSERT(result.has_value());
-        auto& [point1,point2] = result.value();
-        left_point = point1.y < point2.y ? point1 : point2;  //take the lower of the 2 intersections
-      }
-      { // The 2 neighbouring arcs are formed by different parabola 
-        Parabola right_parab(*arc_triple[2]->site, m_sweep);
-        auto result = ComputeIntersections(mid_parab,right_parab);
-        SPG_ASSERT(result.has_value());
-        auto& [point1,point2] = result.value();
-        right_point = point1.y < point2.y ? point1 : point2;  //take the lower of the 2 intersections
-      }   
-      
-      return std::pair(left_point, right_point);
-    }
-  #endif
-
-#if 0
-    Point2d Voronoi::GetBreakpointCoords(Breakpoint* bp) {
-      SPG_ASSERT(bp != nullptr);
-      auto left_arc_endpoints = GetArcEndpointCoords(bp->left_arc);
-      return left_arc_endpoints.second; //BreakpointX = right endpoint of left arc 
-    }
-
-
-    float Breakpoint::CurrentX(float sweep_y)  {
-      return ComputeBreakpoint(*left_arc->site, *right_arc->site, sweep_y).x;
-    }
-
-    Point2d Breakpoint::CurrentPos(float sweep_y)  {
-      return ComputeBreakpoint(*left_arc->site, *right_arc->site, sweep_y);
-    }
-#endif 
-
-#if 1
     float Breakpoint::CurrentX(float sweep_y)  {
       Voronoi* ctx = tree_node->value.ctx;
       float x_val = ctx->ComputeBreakpointCoords(this).x;
@@ -366,8 +166,6 @@ namespace Geom
       Voronoi* ctx = tree_node->value.ctx;
       return ctx->ComputeBreakpointCoords(this);
     }
-#endif    
-
 
     Voronoi::Voronoi(std::vector<Point2d> points) : m_points{std::move(points)} {
       m_event_queue.Initialize(m_points);
@@ -391,7 +189,6 @@ namespace Geom
     void Voronoi::HandleSiteEvent(Event* e) {
       SPG_WARN("HANDLING SITE EVENT: {}", *e->point)
       m_sweep_prev = m_sweep;
-      //m_sweep = e->point->y - 0.001f; //Prevent degenerate arcs 
       m_sweep = e->point->y;
 
       //* STEP 1.
@@ -408,7 +205,6 @@ namespace Geom
       if(arc_above->circle_event != nullptr) {
          arc_above->circle_event->valid = false;
          SPG_TRACE("Invalidating Circle event at: {}, arc: {}, m_sweep:{}", *arc_above->circle_event->point, Arc::ToString(arc_above, m_sweep),m_sweep);
-        // SPG_TRACE("Invalidating Circle event at: {}, arc: {}, m_sweep:{}", *arc_above->circle_event->point, Arc::ToString(arc_above, this),m_sweep);
       }
        
       //* STEP 3
@@ -460,23 +256,12 @@ namespace Geom
       if(prev_arc->circle_event != nullptr) {
         prev_arc->circle_event->valid = false;
          SPG_TRACE("Invalidating Circle event at: {}, arc {}, m_sweep:{}", *prev_arc->circle_event->point, Arc::ToString(prev_arc, m_sweep), m_sweep);
-         //SPG_TRACE("Invalidating Circle event at: {}, arc {}, m_sweep:{}", *prev_arc->circle_event->point, Arc::ToString(prev_arc, this), m_sweep);
       }
       if(next_arc->circle_event != nullptr) {
         next_arc->circle_event->valid = false;
         SPG_TRACE("Invalidating Circle event at: {}, arc {}, m_sweep:{}", *next_arc->circle_event->point, Arc::ToString(next_arc, m_sweep),m_sweep);
-        //SPG_TRACE("Invalidating Circle event at: {}, arc {}, m_sweep:{}", *next_arc->circle_event->point, Arc::ToString(next_arc, this),m_sweep);
       }
   
-  // Validation...
-  #if 0
-      float x_left = left_bp->CurrentX(m_sweep);
-      float x_right = right_bp->CurrentX(m_sweep);
-      SPG_ASSERT(Equal(x_left,x_right));
-      SPG_ASSERT(Equal(x_left, e->circle.center.x));
-      SPG_ASSERT(Equal(e->circle.center.y - e->circle.radius, m_sweep));
-  #endif
-
       // Create a new breakpoint (the merged left/right bp)
       CircleData circle = e->circle;
       auto* merged_bp_node = m_beach.MakeBreakpointNode();
@@ -518,17 +303,7 @@ namespace Geom
       SPG_TRACE("Arc Disappearing:  {}", arc_triple[1]->tree_node->value);
       SPG_TRACE("BP left:  {}", Breakpoint::ToString(arc_triple[1]->left_bp, m_sweep));
       SPG_TRACE("BP right:  {}", Breakpoint::ToString(arc_triple[1]->right_bp, m_sweep));
-      //SPG_TRACE("BP left:  {}", Breakpoint::ToString(arc_triple[1]->left_bp, this));
-      //SPG_TRACE("BP right:  {}", Breakpoint::ToString(arc_triple[1]->right_bp, this));
-
-  #if 0
-      Line2d bisector_left = GetBisector(*arc_triple[0]->site, *arc_triple[1]->site);
-      Line2d bisector_right = GetBisector(*arc_triple[1]->site, *arc_triple[2]->site);
-      // circumcenter of the 3 points
-      Point2d q = ComputeIntersection(bisector_left,bisector_right); 
-      float radius = glm::length(q-*(arc_triple[0]->site));
-  #endif
-
+     
       //Higher precision than above
       CircleData circle = CircumCircle(*arc_triple[0]->site, *arc_triple[1]->site, *arc_triple[2]->site);
       Point2d q = circle.center;
@@ -566,7 +341,6 @@ namespace Geom
       Event* circle_event = MakeCircleEvent(Point2d(q.x, circle_bottom),CircleData(q,radius), disappearing_arc);
       m_event_queue.Push(circle_event);
       SPG_INFO("ADDED CIRCLE EVENT: Arc Disappearing: {}", Arc::ToString(disappearing_arc, m_sweep));
-      //SPG_INFO("ADDED CIRCLE EVENT: Arc Disappearing: {}", Arc::ToString(disappearing_arc, this));
     }
 
     /*
@@ -631,9 +405,6 @@ namespace Geom
           }
         }
         SPG_ASSERT(found == true);
-
-
-        //bp_segs.push_back(seg);
       }
 
   #if 0
@@ -808,73 +579,10 @@ namespace Geom
       }
     }
 
-  #if 1
     bool BeachElementComp::operator () (BeachElement const& el1, BeachElement const& el2) const {
       // Return true if element1 is to the left of element2
       return el1.x_pos_rank < el2.x_pos_rank;
     }
-  #endif
-
-#if 0
-    bool BeachElementComp::operator () (BeachElement const& el1, BeachElement const& el2) const {
-      // Return true if element1 is to the left of element2
-      if(el1.is_arc && el2.is_arc)
-        return CompArcToArc(el1,el2);
-      if(!el1.is_arc && !el2.is_arc)
-        return CompBPToBP(el1,el2);
-      if(el1.is_arc && !el2.is_arc)
-        return CompArcToBP(el1,el2);   
-      if(el2.is_arc && !el1.is_arc)
-        return !CompArcToBP(el2,el1);   
-      SPG_ASSERT(false);
-      return false;
-    }
-  
-
-    bool BeachElementComp::CompArcToArc(BeachElement const& arc1,  BeachElement const& arc2) const {
-      // return true if arc1 is to the left of arc2
-      if(arc1.arc->left_bp == nullptr || arc2.arc->right_bp == nullptr)
-        return true;
-      if(arc1.arc->right_bp == nullptr || arc2.arc->left_bp == nullptr)
-        return false; 
-      float sweep_y = ctx->GetSweepY();
-      float x1 = arc1.arc->right_bp->CurrentX(sweep_y);
-      float x2 = arc2.arc->right_bp->CurrentX(sweep_y);
-      if(Equal(x1,x2)) {
-        SPG_ASSERT(false); //Should never happen since sweep line nudged down slightly to prevent this/
-        //Todo:  triggered sometimes!
-        return arc1.arc->id < arc2.arc->id; // Occurs for new site events if sweep line not moved down
-      }
-      return x1 < x2;  
-    }
-
-    bool BeachElementComp::CompArcToBP(BeachElement const & arc,  BeachElement const& bp) const {
-      // return true if arc is to the left of bp
-      if(arc.arc->left_bp == nullptr)
-        return true; //arc is at extreme left of beachline
-      if(arc.arc->right_bp == nullptr)
-        return false; //arc is at extreme right of beachline
-      float sweep_y = ctx->GetSweepY();
-      Breakpoint* bp_right = arc.arc->right_bp;
-      float arc_x = bp_right->CurrentX(sweep_y);
-      float bp_x = bp.breakpoint->CurrentX(sweep_y);
-      if(Equal(arc_x,bp_x))
-        return true; //arcs right bp is this bp => arc is to the left
-      return arc_x < bp_x;
-    }
-
-    bool BeachElementComp::CompBPToBP(BeachElement const & bp1,  BeachElement const& bp2) const {
-      // return true if bp1 is to the left of bp2
-      float x1 = bp1.breakpoint->CurrentX(ctx->GetSweepY());
-      float x2 = bp2.breakpoint->CurrentX(ctx->GetSweepY());
-      if(Equal(x1,x2)) {
-        //TODO:  Triggered often (for higher number of points)
-        SPG_ASSERT(false); //Should never happen since sweep line nudged down slightly to prevent this
-        return bp1.breakpoint->id < bp2.breakpoint->id; // Occurs for new site events if sweep line not moved down
-      }
-      return x1 < x2;  
-    }
-#endif
 
     BeachTree::BeachNode* BeachTree::MakeArcNode(Point2d const * site) {
       SPG_ASSERT(site != nullptr);
@@ -897,37 +605,6 @@ namespace Geom
       return node;
     } 
 
-#if 0
-    BeachTree::BeachNode* BeachTree::FindArcNodeAbove(Point2d const * site, float sweep_y) {
-      SPG_ASSERT(site != nullptr);
-
-      auto node = m_root;
-      while(node != m_nil) {
-        float node_x = 0;
-        if(IsBreakpoint(node)) {
-          Breakpoint* bp = GetBreakpoint(node);
-          node_x = ctx->GetBreakpointCoords(bp).x;
-          SPG_ASSERT(!Geom::Equal(node_x, site->x)); //Todo Edge case - need to handle
-        } 
-        else {
-          Arc* arc = GetArc(node);
-          auto endpoints = ctx->GetArcEndpointCoords(arc);
-          if((endpoints.first.x < site->x) && (site->x < endpoints.second.x))
-            return node;
-          node_x = endpoints.second.x;  
-        }
-        if(site->x < node_x)
-          node = node->left;
-        else
-          node = node->right;
-      }
-      SPG_ERROR("Arc above not found");
-      SPG_ASSERT(false);
-      return nullptr;
-    }
-#endif
-
-#if 1
     BeachTree::BeachNode* BeachTree::FindArcNodeAbove(Point2d const * site, float sweep_y) {
       SPG_ASSERT(site != nullptr);
 
@@ -965,7 +642,6 @@ namespace Geom
       SPG_ASSERT(false);
       return nullptr;
     }
-#endif
 
     BeachTree::NodeList BeachTree::MakeNodeList(Event* site_event, BeachNode* arc_node_above) {
       NodeList node_list; 
@@ -1005,12 +681,6 @@ namespace Geom
       SetArcNeighbours(node_list[4], GetBreakpoint(node_list[3]), RightBreakpoint(arc_node_above));
       SetBreakpointNeighbours(node_list[1], GetArc(node_list[0]),GetArc(node_list[2]));
       SetBreakpointNeighbours(node_list[3], GetArc(node_list[2]),GetArc(node_list[4]));
-
-      //Todo - precalculate x-vals for each new element so they they don't need to be recalculated multiple times when inserted
-      //chk only
-      //float sweep_y = ctx->GetSweepY();
-      //float x_bp1 = node_list[1]->value.breakpoint->CurrentX(sweep_y);
-      //float x_bp2 = node_list[3]->value.breakpoint->CurrentX(sweep_y);
 
       return node_list;
     }
@@ -1085,7 +755,6 @@ namespace Geom
       return bp_node->value.breakpoint;
     }
 
-  
     void BeachTree::SetArcNeighbours(BeachNode* arc_node, Breakpoint* bp_left, Breakpoint* bp_right) {
       SPG_ASSERT(IsArc(arc_node))
       Arc* arc = GetArc(arc_node);
@@ -1151,12 +820,10 @@ namespace Geom
       std::string s{""};
       if(el.is_arc) {
         Arc* arc = el.arc;
-        //s = Arc::ToString(arc,el.ctx);
         s = Arc::ToString(arc,sweep_y);
       }
       else {
         Breakpoint* bp = el.breakpoint;
-        //s = Breakpoint::ToString(bp,el.ctx);
         s = Breakpoint::ToString(bp,sweep_y);
       }
       s += std::format(std::locale("en_US.UTF-8"), ", X-Rank: {:L}", el.x_pos_rank);
@@ -1186,7 +853,6 @@ namespace Geom
         } else {  
           s+= std::format("Tw Orig: Null");
         }
-
       }
       return s;
     }
@@ -1207,52 +873,6 @@ namespace Geom
       }
       return s;
     }
-
-    #if 0
-    std::string Breakpoint::ToString(Breakpoint* bp, Voronoi* ctx) {
-      std::string s{""};
-      float bp_x = ctx->GetBreakpointCoords(bp).x;
-      s = std::format("BP:{}, AL:{}({},{}), AR:{}({},{}), X:{}",
-      bp->id, 
-      bp->left_arc->id, bp->left_arc->site->x,bp->left_arc->site->y, 
-      bp->right_arc->id,bp->right_arc->site->x,bp->right_arc->site->y,
-      bp_x);
-
-      DCEL::HalfEdge* h = bp->half_edge;
-      if(h != nullptr) {
-        s += std::format(", HE:{} ", h->tag);
-        if(h->origin != nullptr)
-          s+= std::format("Orig: ({},{}) ", h->origin->point.x, h->origin->point.y);
-        else 
-          s+= std::format("Orig: Null ");    
-        SPG_ASSERT(h->twin != nullptr);
-        s += std::format("HE_tw:{} ", h->twin->tag);
-        if(h->twin->origin != nullptr) {
-           s+= std::format("Tw Orig: ({},{}) ", h->twin->origin->point.x,h->twin->origin->point.y);
-        } else {  
-          s+= std::format("Tw Orig: Null");
-        }
-      }
-      return s;
-    }
-
-    std::string Arc::ToString(Arc* arc, Voronoi* ctx) {
-      std::string s{""};
-      s = std::format("ARC:{}, S:({},{}) ",arc->id, arc->site->x, arc->site->y);
-      if(arc->left_bp == nullptr)
-        s += std::format(", BP_l:Nil");
-      else {
-        s += std::format(", BP_l:{} ", arc->left_bp->id);
-      }
-      if(arc->right_bp == nullptr) 
-        s += std::format(", BP_r:Nil");
-      else {
-        float arc_x = ctx->GetArcEndpointCoords(arc).second.x;
-        s += std::format(", BP_r:{}, X:{} ",arc->right_bp->id ,arc_x);
-      }
-      return s;
-    }
-    #endif
 
     void Voronoi::Test() 
     {
@@ -1392,7 +1012,7 @@ namespace Geom
 
     }
     
-  } //namespace Voronoi_V3
+  } //namespace Voronoi_V4
 
 
 } //namespace Geom

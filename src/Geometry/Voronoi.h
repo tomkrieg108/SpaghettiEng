@@ -74,9 +74,7 @@ namespace Geom
     {
       friend class Voronoi;
     public:
-
       void Initialize(std::vector<Point2d> const& points);
-
       void Push(Event* e) {
         m_queue.push(e);
       }
@@ -88,7 +86,6 @@ namespace Geom
       bool IsEmpty() const {
         return m_queue.empty();
       }
-
     private:
       struct EventCompare {
         bool operator()(Event* e1,  Event* e2) const {
@@ -103,22 +100,16 @@ namespace Geom
       std::priority_queue<Event*,std::vector<Event*>, EventCompare> m_queue;  
     };
 
-   
-
     struct BeachElement
     {
       template<typename,typename,typename> friend struct ::fmt::formatter;
       using XRankType = uint32_t;
-
       bool is_arc = true;
       Arc* arc = nullptr;
       Breakpoint* breakpoint = nullptr;
-
       //Tndicates relative x position on the beachline - used in comparator.  Each element has a unique value.
       uint32_t x_pos_rank = 0;
-
       static uint32_t next_id;
-
       //For logger (need ctx->m_sweep to calculate and display cur x-pos)
       Voronoi* ctx = nullptr; 
       static std::string ToString(BeachElement const & el);
@@ -131,17 +122,6 @@ namespace Geom
       BeachElementComp() = default;
       BeachElementComp(Voronoi* ctx) : ctx{ctx} {}
       bool operator () (BeachElement const& el1, BeachElement const& el2) const;
-      //bool CompArcToArc(BeachElement const& arc1,  BeachElement const& arc2) const;
-      //bool CompArcToBP(BeachElement const& arc,  BeachElement const& bp) const; 
-      //bool CompBPToBP(BeachElement const& bp1,  BeachElement const& bp2) const;
-    };
-
-    //Not used, but might be better
-    struct ArcTriple2 
-    {
-      Arc* left = nullptr;
-      Arc* mid = nullptr;
-      Arc* right = nullptr;
     };
 
     class BeachTree: public RBTree_V2::RBTree<BeachElement,BeachElementComp>
@@ -152,22 +132,10 @@ namespace Geom
       using Base = RBTree<BeachElement,BeachElementComp>;
       using BeachNode = typename Base::node_type;
       using Base::Base;
-
-       //Not used, but might be better
-      struct NodeList2
-      {
-        BeachNode* arc_l = nullptr;
-        BeachNode* bp_l = nullptr;
-        BeachNode* arc_m = nullptr;
-        BeachNode* bp_r = nullptr;
-        BeachNode* arc_r = nullptr;
-      };
-
       using NodeList = std::array<BeachNode*,5>; // arc,bp,arc,bp,arc
       using ArcTriple = std::array<Arc*,3>;
       
     private:
-      
       BeachNode* MakeArcNode(Point2d const * site);
       BeachNode* MakeBreakpointNode();
       BeachNode* FindArcNodeAbove(Point2d const * site, float sweep_y);
@@ -185,8 +153,6 @@ namespace Geom
       Breakpoint* LeftBreakpoint(BeachNode* node);
       Breakpoint* RightBreakpoint(BeachNode* node);
       XRankType ResetPoitionalRankings();
-      
-     
     private:
       Voronoi* ctx = nullptr; //Passed to BeachElement structs in Makexxx()
     };
@@ -200,11 +166,9 @@ namespace Geom
       Breakpoint* right_bp = nullptr;
       //Link to associated tree node
       BeachTree::BeachNode* tree_node = nullptr;
-
       //For Validation / debugging:
       uint32_t id;
       static std::string ToString(Arc* arc,float sweep_y);
-      //static std::string ToString(Arc* arc, Voronoi* ctx);
     };
 
     struct Breakpoint
@@ -214,14 +178,11 @@ namespace Geom
       DCEL::HalfEdge* half_edge = nullptr;
       //Link to associated tree node
       BeachTree::BeachNode* tree_node = nullptr;
-
       float CurrentX(float sweep_y);
       Point2d CurrentPos(float sweep_y);
-    
       //For Validation / debugging:
       uint32_t id;
       static std::string ToString(Breakpoint* bp,float sweep_y);
-      //static std::string ToString(Breakpoint* bp, Voronoi* ctx);
     };
 
     class Voronoi
@@ -237,13 +198,11 @@ namespace Geom
       std::vector<Point2d> GetConnectedEdgePoints();
       std::vector<Point2d> GetLooseEdgePoints();
       std::vector<Point2d> GetVertexPoints();
-
       // For testing / validation
       void PrintBeach();
       static void Test();
-
     private:
-      
+
       void HandleSiteEvent(Event* e);
       void HandleCircleEvent(Event* e);
       void TieLooseEnds(); //Currently not used
@@ -255,8 +214,6 @@ namespace Geom
         Arc* disappearing_arc);
      
     public:
-      //std::pair<Point2d,Point2d> GetArcEndpointCoords(Arc* arc);
-      //Point2d GetBreakpointCoords(Breakpoint* bp);
       Point2d ComputeBreakpointCoords(Breakpoint* bp);
 
     private:
