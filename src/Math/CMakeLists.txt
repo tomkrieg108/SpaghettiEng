@@ -1,4 +1,5 @@
 add_library(${LIB_MATH} STATIC 
+  "./FloatingPoint.h"
   "./MathX.h"
   "./MathX.cpp"
 )

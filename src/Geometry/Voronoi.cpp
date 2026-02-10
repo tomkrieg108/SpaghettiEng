@@ -614,7 +614,7 @@ namespace Geom
         if(IsBreakpoint(node)) {
           Breakpoint* bp = GetBreakpoint(node);
           node_x = bp->CurrentX(sweep_y);
-          SPG_ASSERT(!Geom::Equal(node_x, site->x)); //Todo Edge case - need to handle
+          SPG_ASSERT(!Geom::Equal(node_x, site->x)); //Todo - Triggered once.  Edge case need to handle
         } 
         else {
           Arc* arc = GetArc(node);

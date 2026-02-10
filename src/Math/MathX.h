@@ -1,7 +1,14 @@
 #pragma once
 
+#include "Math/FloatingPoint.h"
+
+#include <algorithm> //std::max()
+#include <limits>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+
+
 
 namespace MathX
 {
@@ -15,11 +22,17 @@ namespace MathX
   using Point2 = Vec2;
   using Point3 = Vec3;
 
-  inline bool Equal(Real v1, Real v2)
+  inline constexpr Real REAL_MAX = std::numeric_limits<Real>::max(); 
+  
+
+  struct Circle
   {
-    constexpr auto eps = std::numeric_limits<Real>::epsilon();
-    return std::fabs(v1 - v2) <= 1000.0 * eps * std::max(1.0, std::max(fabs(v1), fabs(v2)));
-  }
+    Point2 center;
+    Real radius;
+  };
+
+  Circle ComputeCircumCircle(Point2& a, Point2& b, Point2& c);
+
 
   void HelloMathLib();
 }
