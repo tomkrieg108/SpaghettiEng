@@ -17,7 +17,7 @@ target_include_directories(${LIB_GEOM}  PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}"
 ) 
 
-target_include_directories(${LIB_PHYS}  PUBLIC 
+target_include_directories(${LIB_CYCLONE}  PUBLIC 
   "${CMAKE_CURRENT_SOURCE_DIR}"
 ) 
 

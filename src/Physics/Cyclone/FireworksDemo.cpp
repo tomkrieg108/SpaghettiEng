@@ -1,6 +1,6 @@
-#include "Physics/FireworksDemo.h"
+#include "Physics/Cyclone/FireworksDemo.h"
 
-namespace Phys
+namespace Cyc
 {
   void FireworksDemo::OnUpdate(MathX::Real time_step) {
     

@@ -76,6 +76,6 @@ target_link_libraries(${LIB_ENG} PUBLIC freetype)
 target_link_libraries(${LIB_ENG} PUBLIC ${LIB_COMMON} )   #links to spdlog, GLM, json, fmt, cxxopts
 target_link_libraries(${LIB_ENG} PUBLIC ${LIB_MATH} )     #Also links to GLM & Common
 target_link_libraries(${LIB_ENG} PUBLIC ${LIB_GEOM} )     #Also links to GLM & Common
-target_link_libraries(${LIB_ENG} PUBLIC ${LIB_PHYS} )     #Also links to GLM & Common
+target_link_libraries(${LIB_ENG} PUBLIC ${LIB_CYCLONE} )  #Also links to GLM & Common
 target_link_libraries(${LIB_ENG} PUBLIC ${EXT_STB_IMG} )
 target_link_libraries(${LIB_ENG} PUBLIC ${EXT_IMGUI} )    #Also links to glfw

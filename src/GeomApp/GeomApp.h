@@ -1,7 +1,7 @@
 #pragma once
 #include <SpaghettiEng/SpaghettiEng.h>
 #include <Math/MathX.h>
-#include <Physics/Core.h>
+#include <Physics/Cyclone/Core.h>
 #include <Geometry/Geometry.h>
 #include <cstdint>
 #include <limits>

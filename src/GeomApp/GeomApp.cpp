@@ -91,7 +91,7 @@ int main()
 #ifdef SPG_LIB_LINK_CHECK 
   Utils::HelloUtilsLib();
   MathX::HelloMathLib();
-  Phys::HelloPhysLib();
+  Cyc::HelloCycloneLib();
   Geom::HelloGeomLib();
   Spg::HelloGeomApp();
 #endif

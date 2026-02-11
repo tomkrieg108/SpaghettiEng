@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Math/MathX.h"
-#include "Physics/Particle.h"
+#include "Physics/Cyclone/Particle.h"
 
-namespace Phys
+namespace Cyc
 {
   class FireworksDemo
   {

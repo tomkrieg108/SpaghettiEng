@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Physics/Particle.h"
+#include "Physics/Cyclone/Particle.h"
 #include "Math/MathX.h"
 
-namespace Phys
+namespace Cyc
 {
   class ParticleForceGenerator
   {

@@ -1,7 +1,7 @@
-#include "Physics/ParticleContacts.h"
-#include "Physics/Particle.h"
+#include "Physics/Cyclone/ParticleContacts.h"
+#include "Physics/Cyclone/Particle.h"
 
-namespace Phys
+namespace Cyc
 {
   void ParticleContact::Resolve(mx::Real time_step) {
     ResolveVelocity(time_step);

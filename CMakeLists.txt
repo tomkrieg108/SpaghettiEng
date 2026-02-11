@@ -114,7 +114,7 @@ set(EXT_IMGUI "lib_imgui_docking")
 set(LIB_COMMON "lib_common")
 set(LIB_MATH "lib_math")
 set(LIB_GEOM "lib_geom")
-set(LIB_PHYS "lib_phys")
+set(LIB_CYCLONE "lib_cyclone")
 set(LIB_ENG "lib_eng")
 set(APP_GEOM "geom_app")
 

@@ -1,6 +1,6 @@
-#include "Physics/BallisticsDemo.h"
+#include "Physics/Cyclone/BallisticsDemo.h"
 
-namespace Phys
+namespace Cyc
 {
   void BallisticsDemo::OnUpdate(MathX::Real time_step) {
     m_particle.Integrate(time_step);

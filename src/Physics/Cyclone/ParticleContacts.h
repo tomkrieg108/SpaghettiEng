@@ -2,7 +2,7 @@
 
 #include "Math/MathX.h"
 
-namespace Phys
+namespace Cyc
 {
   namespace mx = MathX;
   class Particle;
@@ -20,10 +20,11 @@ namespace Phys
     * contact resolver class.
    */
    
-  struct ParticleContact
+  class ParticleContact
   {
     friend class ParticleContactResolver;
-
+  
+  public:
     // Particles involved in the contact
     Particle* particle[2];
 

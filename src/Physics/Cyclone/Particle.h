@@ -3,7 +3,7 @@
 #include "Math/MathX.h"
 #include "Common/Common.h"
 
-namespace Phys
+namespace Cyc
 {
   using namespace MathX;
 
@@ -45,6 +45,10 @@ namespace Phys
 
       void SetVelocity(MathX::Vec3 const& velocity) {
         m_velocity = velocity;
+      }
+
+      void ClearAccululator() {
+        m_force_accumulator = {0,0,0};
       }
 
       void Integrate(MathX::Real time_step);

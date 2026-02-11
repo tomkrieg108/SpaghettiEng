@@ -1,6 +1,6 @@
-#include "Physics/Particle.h"
+#include "Physics/Cyclone/Particle.h"
 
-namespace Phys
+namespace Cyc
 {
   void Particle::Integrate(MathX::Real time_step) {
 

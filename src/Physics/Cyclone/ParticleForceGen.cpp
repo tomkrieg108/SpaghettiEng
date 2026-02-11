@@ -1,6 +1,6 @@
-#include "Physics/ParticleForceGen.h"
+#include "Physics/Cyclone/ParticleForceGen.h"
 
-namespace Phys
+namespace Cyc
 {
   void ParticleForceRegistry::Add(Particle* particle, ParticleForceGenerator *fg) {
     ParticleForceRegistration registration{particle,fg};
