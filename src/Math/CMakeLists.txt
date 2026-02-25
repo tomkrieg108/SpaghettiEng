@@ -9,6 +9,12 @@ add_library(${LIB_MATH} STATIC
   "./AML/AMLVector3.cpp"
   "./AML/AMLMatrix33.h"
   "./AML/AMLMatrix33.cpp"
+  "./AML/AMLDCM.h"
+  "./AML/AMLDCM.cpp"
+  "./AML/AMLEulerAngles.h"
+  "./AML/AMLEulerAngles.cpp"
+  "./AML/AMLQuaternion.h"
+  "./AML/AMLQuaternion.cpp"
 )
 
 target_include_directories(${LIB_MATH} PUBLIC 
