@@ -15,6 +15,9 @@ add_library(${LIB_CYCLONE} STATIC
   "./BallisticsDemo.cpp"
   "./FireworksDemo.h"
   "./FireworksDemo.cpp"
+
+  "./Body.h"
+  "./Body.cpp"
 )
 
 target_include_directories(${LIB_CYCLONE} PUBLIC 

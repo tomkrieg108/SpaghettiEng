@@ -12,19 +12,19 @@ namespace MathX
     :q0(0.0),q1(0.0),q2(0.0),q3(0.0)
     {}
     
-    Quaternion::Quaternion(double q0_, double q1_, double q2_, double q3_)
+    Quaternion::Quaternion(Real q0_, Real q1_, Real q2_, Real q3_)
     :q0(q0_),q1(q1_),q2(q2_),q3(q3_)
     {}
 
-    Quaternion::Quaternion(double val)
+    Quaternion::Quaternion(Real val)
     :q0(val),q1(val),q2(val),q3(val)
     {}
 
-    Quaternion::Quaternion(const double data_[4])
+    Quaternion::Quaternion(const Real data_[4])
     :q0(data_[0]),q1(data_[1]),q2(data_[2]),q3(data_[3])
     {}
 
-    Quaternion::Quaternion(double scalar, const Vector3& vec)
+    Quaternion::Quaternion(Real scalar, const Vector3& vec)
     :q0(scalar),q1(vec.x),q2(vec.y),q3(vec.z)
     {}
 
@@ -51,10 +51,10 @@ namespace MathX
     }
     Quaternion& Quaternion::operator*=(const Quaternion& rhs)
     {
-        double q0_new = (rhs.q0 * q0) - (rhs.q1 * q1) - (rhs.q2 * q2) - (rhs.q3 * q3);
-        double q1_new = (rhs.q0 * q1) + (rhs.q1 * q0) - (rhs.q2 * q3) + (rhs.q3 * q2);
-        double q2_new = (rhs.q0 * q2) + (rhs.q1 * q3) + (rhs.q2 * q0) - (rhs.q3 * q1);
-        double q3_new = (rhs.q0 * q3) - (rhs.q1 * q2) + (rhs.q2 * q1) + (rhs.q3 * q0);
+        Real q0_new = (rhs.q0 * q0) - (rhs.q1 * q1) - (rhs.q2 * q2) - (rhs.q3 * q3);
+        Real q1_new = (rhs.q0 * q1) + (rhs.q1 * q0) - (rhs.q2 * q3) + (rhs.q3 * q2);
+        Real q2_new = (rhs.q0 * q2) + (rhs.q1 * q3) + (rhs.q2 * q0) - (rhs.q3 * q1);
+        Real q3_new = (rhs.q0 * q3) - (rhs.q1 * q2) + (rhs.q2 * q1) + (rhs.q3 * q0);
         q0 = q0_new;
         q1 = q1_new;
         q2 = q2_new;
@@ -62,7 +62,7 @@ namespace MathX
         return *this;
     }
 
-    Quaternion& Quaternion::operator+=(double rhs)
+    Quaternion& Quaternion::operator+=(Real rhs)
     {
         q0 += rhs;
         q1 += rhs;
@@ -70,7 +70,7 @@ namespace MathX
         q3 += rhs;
         return *this;
     }
-    Quaternion& Quaternion::operator-=(double rhs)
+    Quaternion& Quaternion::operator-=(Real rhs)
     {
         q0 -= rhs;
         q1 -= rhs;
@@ -78,7 +78,7 @@ namespace MathX
         q3 -= rhs;
         return *this;
     }
-    Quaternion& Quaternion::operator*=(double rhs)
+    Quaternion& Quaternion::operator*=(Real rhs)
     {
         q0 *= rhs;
         q1 *= rhs;
@@ -86,7 +86,7 @@ namespace MathX
         q3 *= rhs;
         return *this;
     }
-    Quaternion& Quaternion::operator/=(double rhs)
+    Quaternion& Quaternion::operator/=(Real rhs)
     {
         q0 /= rhs;
         q1 /= rhs;
@@ -115,35 +115,35 @@ namespace MathX
     Quaternion operator*(const Quaternion& lhs, const Quaternion& rhs) {return (Quaternion(lhs) *= rhs);}
 
     // Quaternion / Scalar Operations
-    Quaternion operator+(const Quaternion& lhs, double s) {return (Quaternion(lhs) += s);}
-    Quaternion operator-(const Quaternion& lhs, double s) {return (Quaternion(lhs) -= s);}
-    Quaternion operator*(const Quaternion& lhs, double s) {return (Quaternion(lhs) *= s);}
-    Quaternion operator/(const Quaternion& lhs, double s) {return (Quaternion(lhs) /= s);}
-    Quaternion operator+(double s, const Quaternion& rhs) {return Quaternion(s + rhs.q0, s + rhs.q1, s + rhs.q2, s + rhs.q3);}
-    Quaternion operator-(double s, const Quaternion& rhs) {return Quaternion(s - rhs.q0, s - rhs.q1, s - rhs.q2, s - rhs.q3);}
-    Quaternion operator*(double s, const Quaternion& rhs) {return Quaternion(s * rhs.q0, s * rhs.q1, s * rhs.q2, s * rhs.q3);}
-    Quaternion operator/(double s, const Quaternion& rhs) {return Quaternion(s / rhs.q0, s / rhs.q1, s / rhs.q2, s / rhs.q3);}
+    Quaternion operator+(const Quaternion& lhs, Real s) {return (Quaternion(lhs) += s);}
+    Quaternion operator-(const Quaternion& lhs, Real s) {return (Quaternion(lhs) -= s);}
+    Quaternion operator*(const Quaternion& lhs, Real s) {return (Quaternion(lhs) *= s);}
+    Quaternion operator/(const Quaternion& lhs, Real s) {return (Quaternion(lhs) /= s);}
+    Quaternion operator+(Real s, const Quaternion& rhs) {return Quaternion(s + rhs.q0, s + rhs.q1, s + rhs.q2, s + rhs.q3);}
+    Quaternion operator-(Real s, const Quaternion& rhs) {return Quaternion(s - rhs.q0, s - rhs.q1, s - rhs.q2, s - rhs.q3);}
+    Quaternion operator*(Real s, const Quaternion& rhs) {return Quaternion(s * rhs.q0, s * rhs.q1, s * rhs.q2, s * rhs.q3);}
+    Quaternion operator/(Real s, const Quaternion& rhs) {return Quaternion(s / rhs.q0, s / rhs.q1, s / rhs.q2, s / rhs.q3);}
 
     // Quaternion / Vector Operations
     Vector3 operator*(const Quaternion& lhs, const Vector3& rhs) {return quat2DCM(lhs) * rhs;}
 
     // Quaternion Operations
     Quaternion conjugate(const Quaternion& rhs){return Quaternion(rhs.q0, -rhs.q1, -rhs.q2, -rhs.q3);}
-    double norm(const Quaternion& rhs) {return sqrt(rhs.q0*rhs.q0 + rhs.q1*rhs.q1 + rhs.q2*rhs.q2 + rhs.q3*rhs.q3);}
+    Real norm(const Quaternion& rhs) {return sqrt(rhs.q0*rhs.q0 + rhs.q1*rhs.q1 + rhs.q2*rhs.q2 + rhs.q3*rhs.q3);}
     Quaternion inverse(const Quaternion& rhs) {return (conjugate(rhs) / norm(rhs));}
     Quaternion unit(const Quaternion& rhs) 
     {
-        double mag = norm(rhs);
+        Real mag = norm(rhs);
         if(mag > 0.0){return (Quaternion(rhs)/mag);}
         return Quaternion(rhs);
     }
     void normalise(Quaternion& rhs)
     {
-        double mag = norm(rhs);
+        Real mag = norm(rhs);
         if(mag > 0.0){rhs /= mag;}
     }
-    bool isUnitQuat(const Quaternion& rhs, double tol) {return (fabs(norm(rhs) - 1.0) < 2.0 * tol);}
-    double dot(const Quaternion& lhs, const Quaternion& rhs)
+    bool isUnitQuat(const Quaternion& rhs, Real tol) {return (fabs(norm(rhs) - 1.0) < 2.0 * tol);}
+    Real dot(const Quaternion& lhs, const Quaternion& rhs)
     {
         return (rhs.q0*lhs.q0 + rhs.q1*lhs.q1 + rhs.q2*lhs.q2 + rhs.q3*lhs.q3);
     }
@@ -152,26 +152,26 @@ namespace MathX
     // DCM Conversion Functions
     Matrix33 quat2DCM(const Quaternion& rhs)
     {
-        const double TOL = 0.0001;
+        const Real TOL = 0.0001;
 
         // Check if valid rotation quaternion
         if (isUnitQuat(rhs, TOL))
         {
-            double data[3][3];
-            const double q0   = rhs.q0;
-            const double q1   = rhs.q1;
-            const double q2   = rhs.q2;
-            const double q3   = rhs.q3;
-            const double q0_2 = q0*q0;
-            const double q1_2 = q1*q1;
-            const double q2_2 = q2*q2;
-            const double q3_2 = q3*q3;
-            const double q1q2 = q1*q2;
-            const double q0q3 = q0*q3;
-            const double q1q3 = q1*q3;
-            const double q0q2 = q0*q2;
-            const double q2q3 = q2*q3;
-            const double q0q1 = q0*q1;
+            Real data[3][3];
+            const Real q0   = rhs.q0;
+            const Real q1   = rhs.q1;
+            const Real q2   = rhs.q2;
+            const Real q3   = rhs.q3;
+            const Real q0_2 = q0*q0;
+            const Real q1_2 = q1*q1;
+            const Real q2_2 = q2*q2;
+            const Real q3_2 = q3*q3;
+            const Real q1q2 = q1*q2;
+            const Real q0q3 = q0*q3;
+            const Real q1q3 = q1*q3;
+            const Real q0q2 = q0*q2;
+            const Real q2q3 = q2*q3;
+            const Real q0q1 = q0*q1;
             data[0][0] = q0_2 + q1_2 - q2_2 - q3_2;
             data[0][1] = 2.0 * (q1q2 + q0q3);
             data[0][2] = 2.0 * (q1q3 - q0q2);
@@ -187,32 +187,32 @@ namespace MathX
     }
     Quaternion dcm2Quat(const Matrix33& dcm)
     {
-        const double TOL = 0.0001;
+        const Real TOL = 0.0001;
 
         // Check if DCM is Valid
         if (isValidDCM(dcm, TOL))
         {
-            double q0 = 0.0;
-            double q1 = 0.0;
-            double q2 = 0.0;
-            double q3 = 0.0;
-            const double x4q0_2 = (1.0 + dcm.m11 + dcm.m22 + dcm.m33);
-            const double x4q1_2 = (1.0 + dcm.m11 - dcm.m22 - dcm.m33);
-            const double x4q2_2 = (1.0 - dcm.m11 + dcm.m22 - dcm.m33);
-            const double x4q3_2 = (1.0 - dcm.m11 - dcm.m22 + dcm.m33);
-            const double x4q2q3 = dcm.m23 + dcm.m32;
-            const double x4q1q3 = dcm.m31 + dcm.m13;
-            const double x4q1q2 = dcm.m12 + dcm.m21;
-            const double x4q0q1 = dcm.m23 - dcm.m32;
-            const double x4q0q2 = dcm.m31 - dcm.m13;
-            const double x4q0q3 = dcm.m12 - dcm.m21;
+            Real q0 = 0.0;
+            Real q1 = 0.0;
+            Real q2 = 0.0;
+            Real q3 = 0.0;
+            const Real x4q0_2 = (1.0 + dcm.m11 + dcm.m22 + dcm.m33);
+            const Real x4q1_2 = (1.0 + dcm.m11 - dcm.m22 - dcm.m33);
+            const Real x4q2_2 = (1.0 - dcm.m11 + dcm.m22 - dcm.m33);
+            const Real x4q3_2 = (1.0 - dcm.m11 - dcm.m22 + dcm.m33);
+            const Real x4q2q3 = dcm.m23 + dcm.m32;
+            const Real x4q1q3 = dcm.m31 + dcm.m13;
+            const Real x4q1q2 = dcm.m12 + dcm.m21;
+            const Real x4q0q1 = dcm.m23 - dcm.m32;
+            const Real x4q0q2 = dcm.m31 - dcm.m13;
+            const Real x4q0q3 = dcm.m12 - dcm.m21;
 
             // Check which Trace is Largest
             if (x4q0_2 >= x4q1_2 && 
                 x4q0_2 >= x4q2_2 && 
                 x4q0_2 >= x4q3_2) // 4q0_2 Largest
             {
-                const double x2q0 = sqrt(x4q0_2);
+                const Real x2q0 = sqrt(x4q0_2);
                 q0 = 0.5 * x2q0;
                 q1 = 0.5 * x4q0q1 / x2q0;
                 q2 = 0.5 * x4q0q2 / x2q0;
@@ -222,7 +222,7 @@ namespace MathX
                     x4q1_2 >= x4q2_2 && 
                     x4q1_2 >= x4q3_2) // 4q1_2 Largest
             {
-                const double x2q1 = sqrt(x4q1_2);
+                const Real x2q1 = sqrt(x4q1_2);
                 q0 = 0.5 * x4q0q1 / x2q1;
                 q1 = 0.5 * x2q1;
                 q2 = 0.5 * x4q1q2 / x2q1;
@@ -232,7 +232,7 @@ namespace MathX
                     x4q2_2 >= x4q1_2 && 
                     x4q2_2 >= x4q3_2) // 4q2_2 Largest
             {
-                const double x2q2 = sqrt(x4q2_2);
+                const Real x2q2 = sqrt(x4q2_2);
                 q0 = 0.5 * x4q0q2 / x2q2;
                 q1 = 0.5 * x4q1q2 / x2q2;
                 q2 = 0.5 * x2q2;
@@ -242,7 +242,7 @@ namespace MathX
                     x4q3_2 >= x4q1_2 && 
                     x4q3_2 >= x4q2_2) // 4q3_2 Largest
             {
-                const double x2q3 = sqrt(x4q3_2);
+                const Real x2q3 = sqrt(x4q3_2);
                 q0 = 0.5 * x4q0q3 / x2q3;
                 q1 = 0.5 * x4q1q3 / x2q3;
                 q2 = 0.5 * x4q2q3 / x2q3;
@@ -322,427 +322,427 @@ namespace MathX
     }
 
 
-    Quaternion eulerAngles2Quat_ZXZ(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_ZXZ(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 - s1*c2*s3;
-        const double q1 = c1*c2*s3 + s1*s2*s3;
-        const double q2 = c1*s2*s3 - s1*c2*s3;
-        const double q3 = c1*c2*s3 + c1*c2*s3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 - s1*c2*s3;
+        const Real q1 = c1*c2*s3 + s1*s2*s3;
+        const Real q2 = c1*s2*s3 - s1*c2*s3;
+        const Real q3 = c1*c2*s3 + c1*c2*s3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_XYX(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_XYX(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 - s1*c2*s3;
-        const double q1 = c1*c2*s3 + s1*c2*c3;
-        const double q2 = c1*s2*c3 + s1*s2*s3;
-        const double q3 = c1*s2*s3 - s1*s2*c3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 - s1*c2*s3;
+        const Real q1 = c1*c2*s3 + s1*c2*c3;
+        const Real q2 = c1*s2*c3 + s1*s2*s3;
+        const Real q3 = c1*s2*s3 - s1*s2*c3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_YZY(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_YZY(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 - s1*c2*s3;
-        const double q1 = c1*s2*s3 - s1*s2*c3;
-        const double q2 = c1*c2*s3 + s1*c2*c3;
-        const double q3 = c1*s2*c3 + s1*s2*s3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 - s1*c2*s3;
+        const Real q1 = c1*s2*s3 - s1*s2*c3;
+        const Real q2 = c1*c2*s3 + s1*c2*c3;
+        const Real q3 = c1*s2*c3 + s1*s2*s3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_ZYZ(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_ZYZ(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 - s1*c2*s3;
-        const double q1 = c1*s2*c3 + s1*s2*s3;
-        const double q2 = c1*s2*s3 - s1*s2*c3;
-        const double q3 = c1*c2*s3 + s1*c2*c3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 - s1*c2*s3;
+        const Real q1 = c1*s2*c3 + s1*s2*s3;
+        const Real q2 = c1*s2*s3 - s1*s2*c3;
+        const Real q3 = c1*c2*s3 + s1*c2*c3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_XZX(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_XZX(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 - s1*c2*s3;
-        const double q1 = c1*c2*s3 + s1*c2*c3;
-        const double q2 = s1*s2*c3 - c1*s2*s3;
-        const double q3 = c1*s2*c3 + s1*s2*s3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 - s1*c2*s3;
+        const Real q1 = c1*c2*s3 + s1*c2*c3;
+        const Real q2 = s1*s2*c3 - c1*s2*s3;
+        const Real q3 = c1*s2*c3 + s1*s2*s3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_YXY(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_YXY(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 - s1*c2*s3;
-        const double q1 = c1*s2*c3 + s1*s2*s3;
-        const double q2 = c1*c2*s3 + s1*c2*c3;
-        const double q3 = s1*s2*c3 - c1*s2*s3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 - s1*c2*s3;
+        const Real q1 = c1*s2*c3 + s1*s2*s3;
+        const Real q2 = c1*c2*s3 + s1*c2*c3;
+        const Real q3 = s1*s2*c3 - c1*s2*s3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_XYZ(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_XYZ(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 + s1*s2*s3;
-        const double q1 = s1*c2*c3 - c1*s2*s3;
-        const double q2 = c1*s2*c3 + s1*c2*s3;
-        const double q3 = c1*c2*s3 - s1*s2*c3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 + s1*s2*s3;
+        const Real q1 = s1*c2*c3 - c1*s2*s3;
+        const Real q2 = c1*s2*c3 + s1*c2*s3;
+        const Real q3 = c1*c2*s3 - s1*s2*c3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_YZX(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_YZX(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 + s1*s2*s3;
-        const double q1 = c1*c2*s3 - s1*s2*c3;
-        const double q2 = s1*c2*c3 - c1*s2*s3;
-        const double q3 = c1*s2*c3 + s1*c2*s3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 + s1*s2*s3;
+        const Real q1 = c1*c2*s3 - s1*s2*c3;
+        const Real q2 = s1*c2*c3 - c1*s2*s3;
+        const Real q3 = c1*s2*c3 + s1*c2*s3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_ZXY(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_ZXY(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 + s1*s2*s3;
-        const double q1 = c1*s2*c3 + s1*c2*s3;
-        const double q2 = c1*c2*s3 - s1*s2*c3;
-        const double q3 = s1*c2*c3 - c1*s2*s3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 + s1*s2*s3;
+        const Real q1 = c1*s2*c3 + s1*c2*s3;
+        const Real q2 = c1*c2*s3 - s1*s2*c3;
+        const Real q3 = s1*c2*c3 - c1*s2*s3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_XZY(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_XZY(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 - s1*s2*s3;
-        const double q1 = c1*s2*s3 + s1*c2*c3;
-        const double q2 = c1*c2*s3 + s1*s2*c3;
-        const double q3 = c1*s2*c3 - s1*c2*s3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 - s1*s2*s3;
+        const Real q1 = c1*s2*s3 + s1*c2*c3;
+        const Real q2 = c1*c2*s3 + s1*s2*c3;
+        const Real q3 = c1*s2*c3 - s1*c2*s3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_ZYX(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_ZYX(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 - s1*s2*s3;
-        const double q1 = c1*c2*s3 + s1*s2*c3;
-        const double q2 = c1*s2*c3 - s1*c2*s3;
-        const double q3 = c1*s2*s3 + s1*c2*c3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 - s1*s2*s3;
+        const Real q1 = c1*c2*s3 + s1*s2*c3;
+        const Real q2 = c1*s2*c3 - s1*c2*s3;
+        const Real q3 = c1*s2*s3 + s1*c2*c3;
         return Quaternion(q0, q1, q2, q3);
     }
-    Quaternion eulerAngles2Quat_YXZ(double phi, double theta, double psi)
+    Quaternion eulerAngles2Quat_YXZ(Real phi, Real theta, Real psi)
     {
-        const double c1 = cos(0.5 * phi);
-        const double s1 = sin(0.5 * phi);
-        const double c2 = cos(0.5 * theta);
-        const double s2 = sin(0.5 * theta);
-        const double c3 = cos(0.5 * psi);
-        const double s3 = sin(0.5 * psi);
-        const double q0 = c1*c2*c3 - s1*s2*s3;
-        const double q1 = c1*s2*c3 - s1*c2*s3;
-        const double q2 = c1*s2*s3 + s1*c2*s3;
-        const double q3 = c1*c2*s3 + s1*s2*c3;
+        const Real c1 = cos(0.5 * phi);
+        const Real s1 = sin(0.5 * phi);
+        const Real c2 = cos(0.5 * theta);
+        const Real s2 = sin(0.5 * theta);
+        const Real c3 = cos(0.5 * psi);
+        const Real s3 = sin(0.5 * psi);
+        const Real q0 = c1*c2*c3 - s1*s2*s3;
+        const Real q1 = c1*s2*c3 - s1*c2*s3;
+        const Real q2 = c1*s2*s3 + s1*c2*s3;
+        const Real q3 = c1*c2*s3 + s1*s2*c3;
         return Quaternion(q0, q1, q2, q3);
     }
 
     // Quaternion to Euler Angle Conversions
     EulerAngles quat2EulerAngles_ZXZ(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double phi   = atan2(x2q1q3 - x2q0q2, x2q2q3 + x2q0q1);
-        const double theta = acos(q0_2 - q1_2 - q2_2 + q3_2);
-        const double psi   = atan2(x2q1q3 + x2q0q2, -(x2q2q3 - x2q0q1));   
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real phi   = atan2(x2q1q3 - x2q0q2, x2q2q3 + x2q0q1);
+        const Real theta = acos(q0_2 - q1_2 - q2_2 + q3_2);
+        const Real psi   = atan2(x2q1q3 + x2q0q2, -(x2q2q3 - x2q0q1));   
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::ZXZ);
     }
     EulerAngles quat2EulerAngles_XYX(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double m11 = q0_2 + q1_2 - q2_2 - q3_2;
-        const double m12 = x2q1q2 + x2q0q3;
-        const double m13 = x2q1q3 - x2q0q2;
-        const double m21 = x2q1q2 - x2q0q3;
-        const double m31 = x2q1q3 + x2q0q2;
-        const double phi   = atan2(m21, m31);
-        const double theta = acos(m11);
-        const double psi   = atan2(m12, -m13);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real m11 = q0_2 + q1_2 - q2_2 - q3_2;
+        const Real m12 = x2q1q2 + x2q0q3;
+        const Real m13 = x2q1q3 - x2q0q2;
+        const Real m21 = x2q1q2 - x2q0q3;
+        const Real m31 = x2q1q3 + x2q0q2;
+        const Real phi   = atan2(m21, m31);
+        const Real theta = acos(m11);
+        const Real psi   = atan2(m12, -m13);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::XYX);
     }
     EulerAngles quat2EulerAngles_YZY(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double m12 = x2q1q2 + x2q0q3;
-        const double m21 = x2q1q2 - x2q0q3;
-        const double m22 = q0_2 - q1_2 + q2_2 + q3_2;
-        const double m23 = x2q2q3 + x2q0q1;
-        const double m32 = x2q2q3 - x2q0q1;
-        const double phi   = atan2(m32, m12);
-        const double theta = acos(m22);
-        const double psi   = atan2(m23, -m21);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real m12 = x2q1q2 + x2q0q3;
+        const Real m21 = x2q1q2 - x2q0q3;
+        const Real m22 = q0_2 - q1_2 + q2_2 + q3_2;
+        const Real m23 = x2q2q3 + x2q0q1;
+        const Real m32 = x2q2q3 - x2q0q1;
+        const Real phi   = atan2(m32, m12);
+        const Real theta = acos(m22);
+        const Real psi   = atan2(m23, -m21);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::YZY);
 
     }
     EulerAngles quat2EulerAngles_ZYZ(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double m13 = x2q1q3 - x2q0q2;
-        const double m23 = x2q2q3 + x2q0q1;
-        const double m31 = x2q1q3 + x2q0q2;
-        const double m32 = x2q2q3 - x2q0q1;
-        const double m33 = q0_2 - q1_2 - q2_2 + q3_2;
-        const double phi   = atan2(m23, -m13);
-        const double theta = acos(m33);
-        const double psi   = atan2(m32, m31);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real m13 = x2q1q3 - x2q0q2;
+        const Real m23 = x2q2q3 + x2q0q1;
+        const Real m31 = x2q1q3 + x2q0q2;
+        const Real m32 = x2q2q3 - x2q0q1;
+        const Real m33 = q0_2 - q1_2 - q2_2 + q3_2;
+        const Real phi   = atan2(m23, -m13);
+        const Real theta = acos(m33);
+        const Real psi   = atan2(m32, m31);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::ZYZ);
     }
     EulerAngles quat2EulerAngles_XZX(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double m11 = q0_2 + q1_2 - q2_2 - q3_2;
-        const double m12 = x2q1q2 + x2q0q3;
-        const double m13 = x2q1q3 - x2q0q2;
-        const double m21 = x2q1q2 - x2q0q3;
-        const double m31 = x2q1q3 + x2q0q2;
-        const double phi   = atan2(m31, -m21);
-        const double theta = acos(m11);
-        const double psi   = atan2(m13, m12);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real m11 = q0_2 + q1_2 - q2_2 - q3_2;
+        const Real m12 = x2q1q2 + x2q0q3;
+        const Real m13 = x2q1q3 - x2q0q2;
+        const Real m21 = x2q1q2 - x2q0q3;
+        const Real m31 = x2q1q3 + x2q0q2;
+        const Real phi   = atan2(m31, -m21);
+        const Real theta = acos(m11);
+        const Real psi   = atan2(m13, m12);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::XZX);
     }
     EulerAngles quat2EulerAngles_YXY(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double m12 = x2q1q2 + x2q0q3;
-        const double m21 = x2q1q2 - x2q0q3;
-        const double m22 = q0_2 - q1_2 + q2_2 + q3_2;
-        const double m23 = x2q2q3 + x2q0q1;
-        const double m32 = x2q2q3 - x2q0q1;
-        const double phi   = atan2(m12, -m32);
-        const double theta = acos(m22);
-        const double psi   = atan2(m21, m23);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real m12 = x2q1q2 + x2q0q3;
+        const Real m21 = x2q1q2 - x2q0q3;
+        const Real m22 = q0_2 - q1_2 + q2_2 + q3_2;
+        const Real m23 = x2q2q3 + x2q0q1;
+        const Real m32 = x2q2q3 - x2q0q1;
+        const Real phi   = atan2(m12, -m32);
+        const Real theta = acos(m22);
+        const Real psi   = atan2(m21, m23);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::YXY);
     }
     EulerAngles quat2EulerAngles_XYZ(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double m11 = q0_2 + q1_2 - q2_2 - q3_2;
-        const double m12 = x2q1q2 + x2q0q3;
-        const double m13 = x2q1q3 - x2q0q2;
-        const double m23 = x2q2q3 + x2q0q1;
-        const double m33 = q0_2 - q1_2 - q2_2 + q3_2;
-        const double phi   = atan2(m23, m33);
-        const double theta = -asin(m13);
-        const double psi   = atan2(m12, m11);   
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real m11 = q0_2 + q1_2 - q2_2 - q3_2;
+        const Real m12 = x2q1q2 + x2q0q3;
+        const Real m13 = x2q1q3 - x2q0q2;
+        const Real m23 = x2q2q3 + x2q0q1;
+        const Real m33 = q0_2 - q1_2 - q2_2 + q3_2;
+        const Real phi   = atan2(m23, m33);
+        const Real theta = -asin(m13);
+        const Real psi   = atan2(m12, m11);   
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::XYZ);
     }
     EulerAngles quat2EulerAngles_YZX(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double m11 = q0_2 + q1_2 - q2_2 - q3_2;
-        const double m21 = x2q1q2 - x2q0q3;
-        const double m22 = q0_2 - q1_2 + q2_2 + q3_2;
-        const double m23 = x2q2q3 + x2q0q1;
-        const double m31 = x2q1q3 + x2q0q2;
-        const double phi   = atan2(m31, m11);
-        const double theta = -asin(m21);
-        const double psi   = atan2(m23, m22);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real m11 = q0_2 + q1_2 - q2_2 - q3_2;
+        const Real m21 = x2q1q2 - x2q0q3;
+        const Real m22 = q0_2 - q1_2 + q2_2 + q3_2;
+        const Real m23 = x2q2q3 + x2q0q1;
+        const Real m31 = x2q1q3 + x2q0q2;
+        const Real phi   = atan2(m31, m11);
+        const Real theta = -asin(m21);
+        const Real psi   = atan2(m23, m22);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::YZX);
     }
     EulerAngles quat2EulerAngles_ZXY(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double m12 = x2q1q2 + x2q0q3;
-        const double m22 = q0_2 - q1_2 + q2_2 + q3_2;
-        const double m31 = x2q1q3 + x2q0q2;
-        const double m32 = x2q2q3 - x2q0q1;
-        const double m33 = q0_2 - q1_2 - q2_2 + q3_2;
-        const double phi   = atan2(m12, m22);
-        const double theta = -asin(m32);
-        const double psi   = atan2(m31, m33);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real m12 = x2q1q2 + x2q0q3;
+        const Real m22 = q0_2 - q1_2 + q2_2 + q3_2;
+        const Real m31 = x2q1q3 + x2q0q2;
+        const Real m32 = x2q2q3 - x2q0q1;
+        const Real m33 = q0_2 - q1_2 - q2_2 + q3_2;
+        const Real phi   = atan2(m12, m22);
+        const Real theta = -asin(m32);
+        const Real psi   = atan2(m31, m33);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::ZXY);
     }
     EulerAngles quat2EulerAngles_XZY(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double m11 = q0_2 + q1_2 - q2_2 - q3_2;
-        const double m12 = x2q1q2 + x2q0q3;
-        const double m13 = x2q1q3 - x2q0q2;
-        const double m22 = q0_2 - q1_2 + q2_2 + q3_2;
-        const double m32 = x2q2q3 - x2q0q1;
-        const double phi   = atan2(-m32, m22);
-        const double theta = asin(m12);
-        const double psi   = atan2(-m13, m11);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real m11 = q0_2 + q1_2 - q2_2 - q3_2;
+        const Real m12 = x2q1q2 + x2q0q3;
+        const Real m13 = x2q1q3 - x2q0q2;
+        const Real m22 = q0_2 - q1_2 + q2_2 + q3_2;
+        const Real m32 = x2q2q3 - x2q0q1;
+        const Real phi   = atan2(-m32, m22);
+        const Real theta = asin(m12);
+        const Real psi   = atan2(-m13, m11);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::XZY);
     }
     EulerAngles quat2EulerAngles_ZYX(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double m11 = q0_2 + q1_2 - q2_2 - q3_2;
-        const double m21 = x2q1q2 - x2q0q3;
-        const double m31 = x2q1q3 + x2q0q2;
-        const double m32 = x2q2q3 - x2q0q1;
-        const double m33 = q0_2 - q1_2 - q2_2 + q3_2;
-        const double phi   = atan2(-m21, m11);
-        const double theta = asin(m31);
-        const double psi   = atan2(-m32, m33);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real m11 = q0_2 + q1_2 - q2_2 - q3_2;
+        const Real m21 = x2q1q2 - x2q0q3;
+        const Real m31 = x2q1q3 + x2q0q2;
+        const Real m32 = x2q2q3 - x2q0q1;
+        const Real m33 = q0_2 - q1_2 - q2_2 + q3_2;
+        const Real phi   = atan2(-m21, m11);
+        const Real theta = asin(m31);
+        const Real psi   = atan2(-m32, m33);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::ZYX);
     }
     EulerAngles quat2EulerAngles_YXZ(const Quaternion& quat)
     {
-        const double q0_2   = quat.q0*quat.q0;
-        const double q1_2   = quat.q1*quat.q1;
-        const double q2_2   = quat.q2*quat.q2;
-        const double q3_2   = quat.q3*quat.q3;
-        const double x2q1q2 = 2.0*quat.q1*quat.q2;
-        const double x2q0q3 = 2.0*quat.q0*quat.q3;
-        const double x2q1q3 = 2.0*quat.q1*quat.q3;
-        const double x2q0q2 = 2.0*quat.q0*quat.q2;
-        const double x2q2q3 = 2.0*quat.q2*quat.q3;
-        const double x2q0q1 = 2.0*quat.q0*quat.q1;
-        const double m13 = x2q1q3 - x2q0q2;
-        const double m21 = x2q1q2 - x2q0q3;
-        const double m22 = q0_2 - q1_2 + q2_2 + q3_2;
-        const double m23 = x2q2q3 + x2q0q1;
-        const double m33 = q0_2 - q1_2 - q2_2 + q3_2;
-        const double phi   = atan2(-m13, m33);
-        const double theta = asin(m23);
-        const double psi   = atan2(-m21, m22);
+        const Real q0_2   = quat.q0*quat.q0;
+        const Real q1_2   = quat.q1*quat.q1;
+        const Real q2_2   = quat.q2*quat.q2;
+        const Real q3_2   = quat.q3*quat.q3;
+        const Real x2q1q2 = 2.0*quat.q1*quat.q2;
+        const Real x2q0q3 = 2.0*quat.q0*quat.q3;
+        const Real x2q1q3 = 2.0*quat.q1*quat.q3;
+        const Real x2q0q2 = 2.0*quat.q0*quat.q2;
+        const Real x2q2q3 = 2.0*quat.q2*quat.q3;
+        const Real x2q0q1 = 2.0*quat.q0*quat.q1;
+        const Real m13 = x2q1q3 - x2q0q2;
+        const Real m21 = x2q1q2 - x2q0q3;
+        const Real m22 = q0_2 - q1_2 + q2_2 + q3_2;
+        const Real m23 = x2q2q3 + x2q0q1;
+        const Real m33 = q0_2 - q1_2 - q2_2 + q3_2;
+        const Real phi   = atan2(-m13, m33);
+        const Real theta = asin(m23);
+        const Real psi   = atan2(-m21, m22);
         return EulerAngles(phi, theta, psi, EulerAngles::EulerSequence::YXZ);
     }
 
     // Quaternion Kinematic Functions
-    Quaternion integrateQuat(const Quaternion& quat, const Quaternion& quatRates, double dt)
+    Quaternion integrateQuat(const Quaternion& quat, const Quaternion& quatRates, Real dt)
     {
         Quaternion quatNew = quat + quatRates * dt; // First Order Euler Integration
         normalise(quatNew);                         // Normalisation
@@ -751,29 +751,29 @@ namespace MathX
 
     Quaternion quatKinematicRates_BodyRates(const Quaternion& quat, const Vector3& bodyRates)
     {
-        double p = bodyRates.x;
-        double q = bodyRates.y;
-        double r = bodyRates.z;
-        double q0 = 0.5 * (-quat.q1 * p - quat.q2 * q - quat.q3 * r);
-        double q1 = 0.5 * ( quat.q0 * p + quat.q3 * q - quat.q2 * r);
-        double q2 = 0.5 * (-quat.q3 * p + quat.q0 * q + quat.q1 * r);
-        double q3 = 0.5 * ( quat.q2 * p - quat.q1 * q + quat.q0 * r);
+        Real p = bodyRates.x;
+        Real q = bodyRates.y;
+        Real r = bodyRates.z;
+        Real q0 = 0.5 * (-quat.q1 * p - quat.q2 * q - quat.q3 * r);
+        Real q1 = 0.5 * ( quat.q0 * p + quat.q3 * q - quat.q2 * r);
+        Real q2 = 0.5 * (-quat.q3 * p + quat.q0 * q + quat.q1 * r);
+        Real q3 = 0.5 * ( quat.q2 * p - quat.q1 * q + quat.q0 * r);
         return Quaternion(q0, q1, q2, q3);
     }
     Quaternion quatKinematicRates_WorldRates(const Quaternion& quat, const Vector3& worldRates)
     {
-        double p = worldRates.x;
-        double q = worldRates.y;
-        double r = worldRates.z;
-        double q0 = 0.5 * (-quat.q1 * p - quat.q2 * q - quat.q3 * r);
-        double q1 = 0.5 * ( quat.q0 * p - quat.q3 * q + quat.q2 * r);
-        double q2 = 0.5 * ( quat.q3 * p + quat.q0 * q - quat.q1 * r);
-        double q3 = 0.5 * (-quat.q2 * p + quat.q1 * q + quat.q0 * r);
+        Real p = worldRates.x;
+        Real q = worldRates.y;
+        Real r = worldRates.z;
+        Real q0 = 0.5 * (-quat.q1 * p - quat.q2 * q - quat.q3 * r);
+        Real q1 = 0.5 * ( quat.q0 * p - quat.q3 * q + quat.q2 * r);
+        Real q2 = 0.5 * ( quat.q3 * p + quat.q0 * q - quat.q1 * r);
+        Real q3 = 0.5 * (-quat.q2 * p + quat.q1 * q + quat.q0 * r);
         return Quaternion(q0, q1, q2, q3);
     }
 
     // Quaternion Interpolation Functions
-    Quaternion linearInterpolate(const Quaternion& startQuat, const Quaternion& endQuat, double t)
+    Quaternion linearInterpolate(const Quaternion& startQuat, const Quaternion& endQuat, Real t)
     {
         Quaternion q0 = unit(startQuat);
         Quaternion q1 = unit(endQuat);
@@ -781,12 +781,12 @@ namespace MathX
         if (t < 0.0){return q0;}
         if (t > 1.0){return q1;}
 
-        double a = (1.0 - t);
-        double b = t;
+        Real a = (1.0 - t);
+        Real b = t;
         Quaternion qi = unit(a*q0 + b*q1);
         return qi;
     }
-    Quaternion slerpInterpolate(const Quaternion& startQuat, const Quaternion& endQuat, double t)
+    Quaternion slerpInterpolate(const Quaternion& startQuat, const Quaternion& endQuat, Real t)
     {
         Quaternion q0 = unit(startQuat);
         Quaternion q1 = unit(endQuat);
@@ -794,7 +794,7 @@ namespace MathX
         if (t < 0.0){return q0;}
         if (t > 1.0){return q1;}
 
-        double quatDot = dot(q0,q1);
+        Real quatDot = dot(q0,q1);
 
         // Check for Negative Dot Product
         if(quatDot < 0)
@@ -803,7 +803,7 @@ namespace MathX
             quatDot = -quatDot;
         }
 
-        double theta = acos(quatDot);
+        Real theta = acos(quatDot);
 
         // Check for Small Angles
         if (theta < 0.0001)
@@ -812,8 +812,8 @@ namespace MathX
         }
 
         // SLERP
-        double a = sin((1.0-t)*theta) / sin(theta);
-        double b = sin(t*theta) / sin(theta);
+        Real a = sin((1.0-t)*theta) / sin(theta);
+        Real b = sin(t*theta) / sin(theta);
         Quaternion qt = unit(a*q0 + b*q1);
         return qt;
     }

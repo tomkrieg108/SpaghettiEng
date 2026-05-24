@@ -7,8 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-
-
+//#include <glm/gtx/quaternion.hpp> 
 
 namespace MathX
 {
@@ -19,6 +18,8 @@ namespace MathX
   using Mat3 = glm::mat<3,3,Real,glm::packed_highp>; // glm::dmat3
   using Mat4 = glm::mat<4,4,Real,glm::packed_highp>; // glm::dmat4
 
+  using Quat = glm::qua<Real,glm::packed_highp>; // glm::dquat
+  
   using Point2 = Vec2;
   using Point3 = Vec3;
 

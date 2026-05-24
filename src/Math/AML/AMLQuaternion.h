@@ -17,16 +17,16 @@ namespace MathX
 
             union
             {
-                double data[4];
-                struct{double q0, q1, q2, q3;};
+                Real data[4];
+                struct{Real q0, q1, q2, q3;};
             };
             
             // Constructors
             Quaternion();
-            explicit Quaternion(double q0_, double q1_, double q2_, double q3_);
-            explicit Quaternion(double val);
-            explicit Quaternion(const double data[4]);
-            explicit Quaternion(double scalar, const Vector3& vec);
+            explicit Quaternion(Real q0_, Real q1_, Real q2_, Real q3_);
+            explicit Quaternion(Real val);
+            explicit Quaternion(const Real data[4]);
+            explicit Quaternion(Real scalar, const Vector3& vec);
             explicit Quaternion(const Vector3& rhs);
 
             // Operator Assignments
@@ -34,10 +34,10 @@ namespace MathX
             Quaternion& operator-=(const Quaternion& rhs);
             Quaternion& operator*=(const Quaternion& rhs);
 
-            Quaternion& operator+=(double rhs);
-            Quaternion& operator-=(double rhs);
-            Quaternion& operator*=(double rhs);
-            Quaternion& operator/=(double rhs);
+            Quaternion& operator+=(Real rhs);
+            Quaternion& operator-=(Real rhs);
+            Quaternion& operator*=(Real rhs);
+            Quaternion& operator/=(Real rhs);
 
             // Special Object Creators
             static const Quaternion identity();
@@ -50,26 +50,26 @@ namespace MathX
     Quaternion operator*(const Quaternion& lhs, const Quaternion& rhs);
 
     // Quaternion / Scalar Operations
-    Quaternion operator+(const Quaternion& lhs, double s);
-    Quaternion operator-(const Quaternion& lhs, double s);
-    Quaternion operator*(const Quaternion& lhs, double s);
-    Quaternion operator/(const Quaternion& lhs, double s);
-    Quaternion operator+(double s, const Quaternion& rhs);
-    Quaternion operator-(double s, const Quaternion& rhs);
-    Quaternion operator*(double s, const Quaternion& rhs);
-    Quaternion operator/(double s, const Quaternion& rhs);
+    Quaternion operator+(const Quaternion& lhs, Real s);
+    Quaternion operator-(const Quaternion& lhs, Real s);
+    Quaternion operator*(const Quaternion& lhs, Real s);
+    Quaternion operator/(const Quaternion& lhs, Real s);
+    Quaternion operator+(Real s, const Quaternion& rhs);
+    Quaternion operator-(Real s, const Quaternion& rhs);
+    Quaternion operator*(Real s, const Quaternion& rhs);
+    Quaternion operator/(Real s, const Quaternion& rhs);
 
     // Quaternion / Vector Operations
     Vector3 operator*(const Quaternion& lhs, const Vector3& rhs);
 
     // Quaternion Operations
     Quaternion conjugate(const Quaternion& rhs);
-    double norm(const Quaternion& rhs);
+    Real norm(const Quaternion& rhs);
     void normalise(Quaternion& rhs);
     Quaternion inverse(const Quaternion& rhs);
     Quaternion unit(const Quaternion& rhs);
-    bool isUnitQuat(const Quaternion& rhs, double tol = std::numeric_limits<double>::epsilon());
-    double dot(const Quaternion& lhs, const Quaternion& rhs);
+    bool isUnitQuat(const Quaternion& rhs, Real tol = std::numeric_limits<Real>::epsilon());
+    Real dot(const Quaternion& lhs, const Quaternion& rhs);
 
     // Attitude Conversion Functions
     Matrix33 quat2DCM(const Quaternion& quat);
@@ -78,18 +78,18 @@ namespace MathX
     Quaternion eulerAngles2Quat(const EulerAngles& angles);
 
     // Euler Angles to Quaternion Conversions
-    Quaternion eulerAngles2Quat_ZXZ(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_XYX(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_YZY(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_ZYZ(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_XZX(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_YXY(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_XYZ(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_YZX(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_ZXY(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_XZY(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_ZYX(double phi, double theta, double psi);
-    Quaternion eulerAngles2Quat_YXZ(double phi, double theta, double psi);
+    Quaternion eulerAngles2Quat_ZXZ(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_XYX(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_YZY(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_ZYZ(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_XZX(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_YXY(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_XYZ(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_YZX(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_ZXY(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_XZY(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_ZYX(Real phi, Real theta, Real psi);
+    Quaternion eulerAngles2Quat_YXZ(Real phi, Real theta, Real psi);
 
     // Quaternion to Euler Angle Conversions
     EulerAngles quat2EulerAngles_ZXZ(const Quaternion& quat);
@@ -106,13 +106,13 @@ namespace MathX
     EulerAngles quat2EulerAngles_YXZ(const Quaternion& quat);
 
     // Quaternion Kinematic Functions
-    Quaternion integrateQuat(const Quaternion& quat, const Quaternion& quatRates, double dt);
+    Quaternion integrateQuat(const Quaternion& quat, const Quaternion& quatRates, Real dt);
     Quaternion quatKinematicRates_BodyRates(const Quaternion& quat, const Vector3& bodyRates);
     Quaternion quatKinematicRates_WorldRates(const Quaternion& quat, const Vector3& worldRates);
 
     // Quaternion Interpolation Functions
-    Quaternion linearInterpolate(const Quaternion& startAngles, const Quaternion& endAngles, double t);
-    Quaternion slerpInterpolate(const Quaternion& startAngles, const Quaternion& endAngles, double t);
+    Quaternion linearInterpolate(const Quaternion& startAngles, const Quaternion& endAngles, Real t);
+    Quaternion slerpInterpolate(const Quaternion& startAngles, const Quaternion& endAngles, Real t);
 
     // Stream Functions
     std::ostream& operator<<(std::ostream& os, const Quaternion& obj);
