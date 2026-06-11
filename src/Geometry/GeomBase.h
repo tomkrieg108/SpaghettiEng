@@ -34,7 +34,7 @@ namespace Geom
   inline bool Equal(float v1, float v2, const float scale_factor = 100.0f) //link error if not inline
   {
     constexpr auto eps = std::numeric_limits<float>::epsilon();
-    return fabs(v1 - v2) <= 32.0* eps * std::max(1.0f, std::max(fabs(v1), fabs(v2)));
+    return fabs(v1 - v2) <= 32.0f * eps * std::max(1.0f, std::max(fabs(v1), fabs(v2)));
   }
 
   inline bool Equal(double v1, double v2)
