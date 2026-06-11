@@ -34,13 +34,13 @@ namespace Geom
   inline bool Equal(float v1, float v2, const float scale_factor = 100.0f) //link error if not inline
   {
     constexpr auto eps = std::numeric_limits<float>::epsilon();
-    return fabs(v1 - v2) <= 32.0f * eps * std::max(1.0f, std::max(fabs(v1), fabs(v2)));
+    return std::abs(v1 - v2) <= 32.0f * eps * std::max(1.0f, std::max(std::abs(v1), std::abs(v2)));
   }
 
   inline bool Equal(double v1, double v2)
   {
     constexpr auto eps = std::numeric_limits<double>::epsilon();
-    return std::fabs(v1 - v2) <= 1000.0 * eps * std::max(1.0, std::max(fabs(v1), fabs(v2)));
+    return std::abs(v1 - v2) <= 1000.0 * eps * std::max(1.0, std::max(std::abs(v1), std::abs(v2)));
   }
 
    //ULP: Unit in last place.  Distance between current and next possible number
@@ -49,7 +49,7 @@ namespace Geom
   inline bool EqualULP_1Sided(float a, float b, const float, int max_ulps = 8) 
   {
     float spacing = std::nextafter(a, INFINITY) - a;
-    return std::fabs(a - b) <= max_ulps * spacing;
+    return std::abs(a - b) <= max_ulps * spacing;
   }
 
   inline bool EqualULP(float a, float b, const float, int max_ulps = 4) 
@@ -57,11 +57,11 @@ namespace Geom
     float spacing_a = std::nextafter(a, INFINITY) - a;
     float spacing_b = std::nextafter(b, INFINITY) - b;
     float tol = max_ulps * std::max(spacing_a, spacing_b);
-    return std::fabs(a - b) <= tol;
+    return std::abs(a - b) <= tol;
   }
 
   inline bool EqualRel(float v1, float v2, float relTol = 1e-4f) {
-    return std::fabs(v1 - v2) <= relTol * std::max(std::fabs(v1), std::fabs(v2));
+    return std::abs(v1 - v2) <= relTol * std::max(std::abs(v1), std::abs(v2));
   }
 
   /*
