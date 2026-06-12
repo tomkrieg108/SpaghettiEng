@@ -1,3 +1,13 @@
+
+/*
+  Need to be mindful of header-only bloat in Common - since it will be used throughout the project. 
+  Template heavy header files here will increase build time a lot
+
+  Keep headers here as lean as possible, use forward dec where possible
+
+*/
+
+
 #pragma once
 #include "Logger.h"
 #include "SmartPointerUtils.h"

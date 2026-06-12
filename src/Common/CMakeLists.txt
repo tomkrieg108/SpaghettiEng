@@ -6,8 +6,6 @@ target_sources(${LIB_COMMON} PRIVATE
   "./Logger.h"
   "./Logger.cpp"
   "./Common.h"
-  "./UUID.cpp"
-  "./UUID.h"
   "./LibCheck.cpp"
   "./LibCheck.h"
 )
