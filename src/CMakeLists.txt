@@ -1,11 +1,11 @@
-add_subdirectory(Common)
+add_subdirectory(Core)
 add_subdirectory(Math)
 add_subdirectory(Geometry)
 add_subdirectory(Physics)
 add_subdirectory(SpaghettiEng)
 add_subdirectory(GeomApp)
 
-target_include_directories(${LIB_COMMON}  PUBLIC 
+target_include_directories(${LIB_CORE}  PUBLIC 
   "${CMAKE_CURRENT_SOURCE_DIR}"
 ) 
 

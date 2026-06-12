@@ -1,6 +1,6 @@
 
 /*
-  Need to be mindful of header-only bloat in Common - since it will be used throughout the project. 
+  Need to be mindful of header-only bloat in Core - since it will be used throughout the project. 
   Template heavy header files here will increase build time a lot
 
   Keep headers here as lean as possible, use forward dec where possible

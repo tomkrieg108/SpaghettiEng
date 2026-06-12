@@ -1,7 +1,7 @@
 #include <glm/glm.hpp>
 #include "GL32Shader.h"
 #include <SpaghettiEng/Camera/Camera2D.h>
-#include <Common/Common.h>
+#include <Core/Common.h>
 #include <map>
 
 namespace Spg

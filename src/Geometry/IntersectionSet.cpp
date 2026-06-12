@@ -1,6 +1,6 @@
 #include "IntersectionSet.h"
 #include "GeomUtils.h"
-#include <Common/Common.h>
+#include <Core/Common.h>
 #include <string>
 #include <algorithm>
 

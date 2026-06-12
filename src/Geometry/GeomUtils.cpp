@@ -1,6 +1,6 @@
 #include "GeomUtils.h"
 #define GLM_ENABLE_EXPERIMENTAL
-#include <Common/Common.h>
+#include <Core/Common.h>
 #include <glm/gtx/norm.hpp> //for length2() (length squared)
 #include <numbers> //for PI
 #include <numeric> //iota

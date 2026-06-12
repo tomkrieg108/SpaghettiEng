@@ -1,7 +1,7 @@
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h> 
-#include <Common/Common.h>      
+#include <Core/Common.h>      
 #include "GL32Context.h"
 
 namespace Spg

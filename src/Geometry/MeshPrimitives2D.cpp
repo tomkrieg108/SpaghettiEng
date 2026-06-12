@@ -2,7 +2,7 @@
 #include "MeshPrimitives2D.h"
 #include "GeomUtils.h"
 #include "ConvexHull.h"
-#include <Common.h>
+#include <Core/Common.h>
 #include <random>
 #include <numbers>
 #include <cmath>

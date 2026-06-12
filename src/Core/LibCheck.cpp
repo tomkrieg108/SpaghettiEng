@@ -19,7 +19,7 @@ namespace Utils
   void HelloUtilsLib()
   {
     
-    SPG_WARN("Hello from Common Utils Lib!");
+    SPG_WARN("Hello from Core Lib!");
 
     #ifdef SPG_DEBUG
       SPG_TRACE("APP: SPG_DEBUG defined");

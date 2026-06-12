@@ -24,6 +24,6 @@ target_include_directories(${LIB_CYCLONE} PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-target_link_libraries(${LIB_CYCLONE} PUBLIC ${LIB_COMMON} )
+target_link_libraries(${LIB_CYCLONE} PUBLIC ${LIB_CORE} )
 target_link_libraries(${LIB_CYCLONE} PUBLIC glm::glm-header-only) 
 target_link_libraries(${LIB_CYCLONE} PUBLIC ${LIB_MATH} )

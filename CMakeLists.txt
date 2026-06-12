@@ -111,7 +111,7 @@ find_package(OpenGL REQUIRED) # Add OpenGL (usually available system-wide)
 set(EXT_GLAD "lib_glad")
 set(EXT_STB_IMG "lib_stb_image")
 set(EXT_IMGUI "lib_imgui_docking")
-set(LIB_COMMON "lib_common")
+set(LIB_CORE "lib_core")
 set(LIB_MATH "lib_math")
 set(LIB_GEOM "lib_geom")
 set(LIB_CYCLONE "lib_cyclone")
@@ -130,7 +130,7 @@ add_subdirectory(src)
 
 # Build type (Debug, Release etc) - preprocessor macro is compiler dependent, so set here 
 # Need to use generator expression for multi-config generators (MSVC)
-target_compile_definitions(${LIB_COMMON} PRIVATE 
+target_compile_definitions(${LIB_CORE} PRIVATE 
   $<$<CONFIG:Debug>:SPG_DEBUG>
   $<$<CONFIG:Release>:SPG_RELEASE>
 )
@@ -151,7 +151,7 @@ target_compile_definitions(${APP_GEOM} PRIVATE
 if(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(STATUS "Cmake Msg: Platform is Windows 64-bit")
-    target_compile_definitions(${LIB_COMMON} PRIVATE SPG_WIN64)
+    target_compile_definitions(${LIB_CORE} PRIVATE SPG_WIN64)
     target_compile_definitions(${LIB_GEOM} PRIVATE SPG_WIN64)
     target_compile_definitions(${LIB_ENG} PRIVATE SPG_WIN64)
     target_compile_definitions(${APP_GEOM} PRIVATE SPG_WIN64)
@@ -160,7 +160,7 @@ if(WIN32)
   endif()
 elseif((UNIX AND NOT APPLE))
   message(STATUS "Cmake Msg: Platform is Linux")
-  target_compile_definitions(${LIB_COMMON} PRIVATE SPG_LINUX)
+  target_compile_definitions(${LIB_CORE} PRIVATE SPG_LINUX)
   target_compile_definitions(${LIB_GEOM} PRIVATE SPG_LINUX)
   target_compile_definitions(${LIB_ENG} PRIVATE SPG_LINUX)
   target_compile_definitions(${APP_GEOM} PRIVATE SPG_LINUX)
@@ -200,7 +200,7 @@ endif()
 
 
 
-target_precompile_headers(${LIB_COMMON} PRIVATE 
+target_precompile_headers(${LIB_CORE} PRIVATE 
   <cstdint>
   <cmath>
   <string>
