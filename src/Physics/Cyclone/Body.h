@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/MathX.h"
-#include "Core/Common.h"
+#include "Core/Core.h"
 
 namespace Cyc
 {

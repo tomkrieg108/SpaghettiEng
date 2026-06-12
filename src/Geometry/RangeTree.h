@@ -2,7 +2,7 @@
 #include "RBTree.h"
 #include "RBTreeTraversable.h"
 #include "GeomUtils.h"
-#include <Core/Common.h>
+#include <Core/Core.h>
 
 namespace Geom
 {

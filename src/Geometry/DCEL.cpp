@@ -1,5 +1,5 @@
 #include "DCEL.h"
-#include <Core/Common.h>
+#include <Core/Core.h>
 
 namespace Geom
 {

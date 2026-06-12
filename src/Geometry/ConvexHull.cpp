@@ -3,7 +3,7 @@
 #include "GeomUtils.h"
 #include "MeshPrimitives2D.h"
 #include "Line.h"
-#include <Core/Common.h>
+#include <Core/Core.h>
 
 namespace Geom
 {

@@ -5,7 +5,7 @@ target_sources(${LIB_CORE} PRIVATE
   "./SmartPointerUtils.h"
   "./Logger.h"
   "./Logger.cpp"
-  "./Common.h"
+  "./Core.h"
   "./LibCheck.cpp"
   "./LibCheck.h"
 )

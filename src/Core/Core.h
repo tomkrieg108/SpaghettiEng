@@ -16,7 +16,7 @@
 #define SPG_LIB_LINK_CHECK
 //#define SPG_CALLBACK_CHECK
 
-//Todo - do this in cmake if possible.  Is this even needed?  See ChatGPT "Cross-platform OpenGL CMake setup"
+//Todo - do this in cmake if possible.  Is this even needed?  See ChatGPT "Cross-platform OpenGL CMake setup, architecure macros"
 #if defined(__x86_64__) || defined(_M_X64)
   #define SPG_ARCH_X64
 #elif defined(__i386__) || defined(_M_IX86)

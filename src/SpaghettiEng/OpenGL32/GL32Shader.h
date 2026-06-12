@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
-#include <Core/Common.h>
+#include <Core/Core.h>
 #include "GL32ShaderUtils.h"
 
 namespace Spg
