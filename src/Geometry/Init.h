@@ -18,5 +18,5 @@
 
 namespace Geom
 {
-  void HelloGeomLib();
+  void Init();
 }

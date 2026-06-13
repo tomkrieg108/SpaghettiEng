@@ -1,4 +1,4 @@
-#include "Geometry.h"
+#include "Geometry/Init.h"
 #include <Core/Core.h>
 //external libs check only
 #include <cxxopts.hpp>
@@ -12,9 +12,9 @@
 
 namespace Geom
 {
-  void HelloGeomLib()
+  void Init()
   {
-    SPG_WARN("Hello from Geom Lib!");
+    SPG_WARN("Geom Lib Init");
 
     #ifdef SPG_DEBUG
       SPG_TRACE("APP: SPG_DEBUG defined");
@@ -38,13 +38,13 @@ namespace Geom
     SPG_TRACE("CXXOPTS: {}.{}.{}",CXXOPTS__VERSION_MAJOR,CXXOPTS__VERSION_MAJOR, CXXOPTS__VERSION_PATCH);
     SPG_TRACE("SPDLOG: {},{}.{}",SPDLOG_VER_MAJOR,SPDLOG_VER_MINOR,SPDLOG_VER_PATCH);
   
-    auto logger = Utils::Logger::Create("GEOM");
-    LOG_TRACE(logger, "SPDLOG: {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
-    
+    auto logger = Core::Logger::Create("GEOM");
+    SPG_TRACE("SPDLOG: {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
+  
     glm::vec3 v{42,42,42};
     std::cout << "vec3 value is: " << v.x << "," << v.y << "," << v.z << "\n";
     std::cout << "\n";
-    LOG_TRACE(logger, "That's all the external libs!");
+    SPG_TRACE("That's all the external libs!");
     SPG_WARN( "####################################################");
   }
 }

@@ -1,6 +1,6 @@
 add_library(${LIB_GEOM} STATIC 
-  "./Geometry.cpp"
-  "./Geometry.h"
+  "./Init.cpp"
+  "./Init.h"
   "./GeomBase.h"
   "./GeomUtils.h"
   "./GeomUtils.cpp"

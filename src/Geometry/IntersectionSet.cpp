@@ -365,7 +365,7 @@ namespace Geom
       bool s2_includes_p = Geom::SegIncludesPoint(seg2,event_point);
       bool s1_horiz = Geom::IsHorizontal(seg1);
       bool s2_horiz = Geom::IsHorizontal(seg2);
-#if 1
+#if 0
       if(s1_includes_p && s2_includes_p) {
         if(s2_horiz && !s1_horiz) {
           LOG_COMP_RES_THEN_RETURN(seg1,seg2,event_point, true, 2); //seg1 (non horizontal) comes before seg2 (horizontal)
