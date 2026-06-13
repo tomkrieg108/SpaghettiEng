@@ -1,6 +1,6 @@
 #pragma once
 #include <SpaghettiEng/SpaghettiEng.h>
-#include <Geometry/Geometry.h>
+#include <Geometry/Init.h>
 
 namespace Spg
 {
@@ -93,7 +93,7 @@ namespace Spg
   #endif  
     Camera2D& m_camera;
     CameraController2D& m_camera_controller;
-    Utils::SpdLogger m_logger;
+    Core::SpdLogger m_logger;
     bool m_pan_enabled = false;
     float m_canvas_size = 500.0f;
 

@@ -1,13 +1,11 @@
-add_library(${LIB_CORE} STATIC
-)
+add_library(${LIB_CORE} STATIC)
 
 target_sources(${LIB_CORE} PRIVATE 
-  "./SmartPointerUtils.h"
   "./Logger.h"
   "./Logger.cpp"
   "./Core.h"
-  "./LibCheck.cpp"
-  "./LibCheck.h"
+  "./Init.cpp"
+  "./Init.h"
 )
 
 target_include_directories(${LIB_CORE}  PUBLIC

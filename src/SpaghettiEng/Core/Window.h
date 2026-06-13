@@ -47,8 +47,8 @@ namespace Spg
   private:  
     Params m_params = Params();
     GLFWwindow* m_window_handle = nullptr;
-    GLContext* m_graphics_context = nullptr; //Todo. Scope<GLContext> ?
-    Input* m_input = nullptr; //Todo. Scope<GLContext> ?
+    GLContext* m_graphics_context = nullptr; 
+    Input* m_input = nullptr; 
 
     static uint32_t s_window_count;
   };

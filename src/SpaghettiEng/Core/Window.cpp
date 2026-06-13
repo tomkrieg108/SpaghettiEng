@@ -2,6 +2,9 @@
 
 #include <glad/gl.h>  
 #include <GLFW/glfw3.h>
+
+#include "Core/Logger.h"
+
 #include "ImGuiUtils/ImGuiUtils.h"
 #include "Events/EventManager.h"
 #include "OpenGL32/GL32Context.h"

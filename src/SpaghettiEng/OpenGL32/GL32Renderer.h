@@ -74,15 +74,8 @@ namespace Spg
    
   private:
 
-    //Only this shader will be used
-    Scope<GLShader> m_basic_shader = nullptr; //Todo - should be loaded in asset manager and accessed from there
-
-    //Camera2D& m_camera; 
-    
-
+    std::unique_ptr<GLShader> m_basic_shader = nullptr; 
     std::unordered_map<uint32_t, Drawable> m_vao_map;
-
-    // Todo - render stats - number of draw calls, uniform uploads, total vertices
     uint32_t m_draw_calls = 0;
     uint32_t m_vertices_rendered = 0;
   };

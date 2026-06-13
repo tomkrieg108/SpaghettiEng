@@ -2,7 +2,7 @@
 #include <SpaghettiEng/SpaghettiEng.h>
 #include <Math/MathX.h>
 #include <Physics/Cyclone/Core.h>
-#include <Geometry/Geometry.h>
+#include <Geometry/Init.h>
 #include <cstdint>
 #include <limits>
 using namespace std::string_literals;
@@ -17,5 +17,5 @@ namespace Spg
   private:
   };
 
-  void HelloGeomApp();
+  void Init();
 }

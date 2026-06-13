@@ -57,7 +57,7 @@ namespace Spg
   void Application::SystemInit()
   {
     //Static method - called in main() before app is created
-    Utils::Logger::Initialise();
+    Core::Logger::Initialise();
     EventManager::Initialise(); //todo - does nothing!
   }
 
@@ -69,8 +69,8 @@ namespace Spg
     SetEventHandlers();
     SetAssetsPath();
   
-    m_app_context.Set("Window", CreateRef<Window>(app_name) );
-    m_app_context.Set("GLRenderer", CreateRef<GLRenderer>() );
+    m_app_context.Set("Window", std::make_shared<Window>(app_name) );
+    m_app_context.Set("GLRenderer", std::make_shared<GLRenderer>() );
 
     const Window& win = m_app_context.Get<Window>("Window");
     ImGuiUtils::Initialise(win);

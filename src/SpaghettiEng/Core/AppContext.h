@@ -25,7 +25,7 @@ namespace Spg
        using DeleterType = void(*)(void*);
     public:
       template <typename T>
-      void Set(const std::string& name, Scope<T> value)
+      void Set(const std::string& name, std::unique_ptr<T> value)
       {
         static_assert(!std::is_pointer_v<T>, "Do not pass raw pointers to AppComponent. Use std::unique_ptr instead.");
         auto it = m_data.find(name);
@@ -72,9 +72,8 @@ namespace Spg
        
     public:
       template <typename T>
-      void Set(const std::string& name, Ref<T> value)
+      void Set(const std::string& name, std::shared_ptr<T> value)
       {
-        //For'Ref<T> value' lvalues passed by value, rvalues passed by move
         static_assert(!std::is_pointer_v<T>, "Do not pass raw pointers to AppComponent. Use std::unique_ptr instead.");
         auto it = m_data.find(name);
         SPG_ASSERT(it == m_data.end());
@@ -96,7 +95,7 @@ namespace Spg
       }
 
     private:   
-      std::unordered_map<std::string, Ref<void>> m_data;
+      std::unordered_map<std::string, std::shared_ptr<void>> m_data;
     };
   }
 

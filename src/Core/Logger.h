@@ -6,18 +6,26 @@
 
 #define SPG_LOGGING_ENABLED_RELEASE	
 
-namespace Utils
+namespace Core
 {
 	using SpdLogger = std::shared_ptr<spdlog::logger>;
 
 	class Logger
 	{
 	public:
+     // Initializes the core application logger and shared sinks
+     // Currently called in void Application::SystemInit() Application.cppp (EngLib)
 		static void Initialise();
+
+    // Only for the main executable/core messages
 		static auto& GetDefault() { return s_default_logger; }
+
+    // Dynamically creates a new domain logger sharing the same destination sinks
 		static SpdLogger Create(const std::string& name);
+
 	private:
 		static SpdLogger s_default_logger;
+    static std::vector<spdlog::sink_ptr> s_shared_sinks; // Keeps destinations unified
 		static bool s_initialised;
 	};
 }
@@ -60,28 +68,14 @@ struct fmt::formatter<glm::qua<T, Q>> {
 
 
 #if defined SPG_DEBUG || defined(SPG_LOGGING_ENABLED_RELEASE)
-	#define SPG_TRACE(...) {Utils::Logger::Initialise();  Utils::Logger::GetDefault()->trace(__VA_ARGS__);}
-	#define SPG_INFO(...)  {Utils::Logger::Initialise();  Utils::Logger::GetDefault()->info(__VA_ARGS__);}
-	#define SPG_WARN(...)  {Utils::Logger::Initialise();   Utils::Logger::GetDefault()->warn(__VA_ARGS__);}
-	#define SPG_ERROR(...)  {Utils::Logger::Initialise();  Utils::Logger::GetDefault()->error(__VA_ARGS__);}
-	#define SPG_CRITICAL(...) {Utils::Logger::Initialise(); Utils::Logger::GetDefault()->critical(__VA_ARGS__);}
-	#define SPG_LOG_FLUSH {Utils::Logger::GetDefault()->flush();}
+	#define SPG_TRACE(...) Core::Logger::GetDefault()->trace(__VA_ARGS__);
+	#define SPG_INFO(...)  Core::Logger::GetDefault()->info(__VA_ARGS__);
+	#define SPG_WARN(...)  Core::Logger::GetDefault()->warn(__VA_ARGS__);
+	#define SPG_ERROR(...) Core::Logger::GetDefault()->error(__VA_ARGS__);
+	#define SPG_CRITICAL(...) Core::Logger::GetDefault()->critical(__VA_ARGS__);
+	#define SPG_LOG_FLUSH Core::Logger::GetDefault()->flush();
 
-	#define LOG_TRACE(logger, ...) \
-		{static_assert(std::is_same_v<decltype(logger), Utils::SpdLogger>); logger->trace(__VA_ARGS__);}
-
-	#define LOG_INFO(logger, ...) \
-		{static_assert(std::is_same_v<decltype(logger), Utils::SpdLogger>); logger->info(__VA_ARGS__);}
-
-	#define LOG_WARN(logger, ...) \
-		{static_assert(std::is_same_v<decltype(logger), Utils::SpdLogger>); logger->warn(__VA_ARGS__);}
-
-	#define LOG_ERROR(logger, ...) \
-		{static_assert(std::is_same_v<decltype(logger), Utils::SpdLogger>); logger->error(__VA_ARGS__);}
-
-	#define LOG_CRITICAL(logger, ...) \
-		{static_assert(std::is_same_v<decltype(logger), Utils::SpdLogger>); logger->info(__VA_ARGS__);}	
-
+	
 #else
 	#define SPG_TRACE(...)    
 	#define SPG_INFO(...)     

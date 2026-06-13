@@ -124,7 +124,7 @@ if(ENABLE_TESTING)
   # enable_testing()
 endif()
 
-#processe depth-first
+#process depth-first
 add_subdirectory(external)  
 add_subdirectory(src) 
 

@@ -5,8 +5,7 @@
 
 namespace Cyc
 {
-  void HelloCycloneLib() {
-    SPG_WARN("Hello from Cyclone Physics Lib!");
-    MathX::HelloMathLib();
+  void Init() {
+    SPG_WARN("Cyclone Physics Lib Init");
   }
 }

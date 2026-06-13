@@ -22,7 +22,7 @@ namespace Spg
     m_camera(app_context.Get<Camera2D>("Camera2D")),
     m_camera_controller(app_context.Get<CameraController2D>("CameraController2D"))
   {
-    m_logger = Utils::Logger::Create("Bubble Layer");
+    m_logger = Core::Logger::Create("Bubble Layer");
     Create2DGrid();
     SetCanvasSize(500.0f);
     GeomTest();
@@ -196,9 +196,9 @@ namespace Spg
   void DefaultLayer::OnMouseButtonPressed(EventMouseButtonPressed& e)
   {
     if(e.btn == Mouse::ButtonLeft)
-      LOG_INFO(m_logger,"Left mouse btn presssed: ({},{})",e.x,e.y);
+      SPG_INFO("Left mouse btn presssed: ({},{})",e.x,e.y);
     if(e.btn == Mouse::ButtonRight)
-      LOG_INFO(m_logger,"Right mouse btn presssed");  
+      SPG_INFO("Right mouse btn presssed");  
     if(e.btn == Mouse::ButtonMiddle)
     {
       m_pan_enabled = true;
@@ -210,9 +210,9 @@ namespace Spg
   void DefaultLayer::OnMouseButtonReleased(EventMouseButtonReleased& e)
   {
     if(e.btn == Mouse::ButtonLeft)
-      LOG_INFO(m_logger,"Left mouse btn released");
+      SPG_INFO("Left mouse btn released");
     if(e.btn == Mouse::ButtonRight)
-      LOG_INFO(m_logger,"Right mouse btn released");  
+      SPG_INFO("Right mouse btn released");  
     if(e.btn == Mouse::ButtonMiddle)
     {
       m_pan_enabled = false;

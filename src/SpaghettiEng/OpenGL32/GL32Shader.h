@@ -27,7 +27,7 @@ namespace Spg
     GLShaderBuilder();
     ~GLShaderBuilder() = default;
     GLShaderBuilder& Add(ShaderType type, const std::string& file_name);
-    Scope<GLShader> Build(const std::string& shader_name);
+    std::unique_ptr<GLShader> Build(const std::string& shader_name);
 
   private:
     void PrintBuildLog();

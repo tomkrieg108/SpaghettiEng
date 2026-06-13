@@ -3,8 +3,8 @@
 
 namespace MathX
 {
-  void HelloMathLib() {
-    SPG_WARN("Hello from Maths Lib!");
+  void Init() {
+    SPG_WARN("Maths Lib Init:");
   }
 
   Circle ComputeCircumCircle(Point2& a, Point2& b, Point2& c) {

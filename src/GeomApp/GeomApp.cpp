@@ -14,6 +14,8 @@
 #endif
 #include <entt/entity/registry.hpp>
 
+#include "Core/Init.h"
+
 namespace Spg
 {
   
@@ -30,12 +32,12 @@ namespace Spg
     Window& window = m_app_context.Get<Window>("Window");
     glm::vec3 cam_pos = glm::vec3(0.0f,0.0f,1.0f);
     glm::vec3 look_pos = glm::vec3(0.0f,0.0f,0.0f);
-    auto camera = CreateRef<Camera2D>();
+    auto camera = std::make_shared<Camera2D>();
     camera->SetPosition(cam_pos);
     camera->LookAt(look_pos);
-    auto controller = CreateRef<CameraController2D>(*camera);
+    auto controller = std::make_shared<CameraController2D>(*camera);
     #ifdef _WIN32
-      auto text_renderer = CreateRef<GLTextRenderer>(*camera);
+      auto text_renderer = std::make_shared<GLTextRenderer>(*camera);
     #endif
 
     m_app_context.Set("Camera2D", camera);
@@ -52,9 +54,9 @@ namespace Spg
   {
   }
 
-  void HelloGeomApp()
+  void Init()
   {
-    SPG_WARN("Hello From Geom App");
+    SPG_WARN("Geom App Init");
     
     #ifdef SPG_DEBUG
       SPG_TRACE("APP: SPG_DEBUG defined");
@@ -89,11 +91,11 @@ int main()
 {
   Spg::Application::SystemInit();
 #ifdef SPG_LIB_LINK_CHECK 
-  Utils::HelloUtilsLib();
-  MathX::HelloMathLib();
-  Cyc::HelloCycloneLib();
-  Geom::HelloGeomLib();
-  Spg::HelloGeomApp();
+  Core::Init();
+  MathX::Init();
+  Cyc::Init();
+  Geom::Init();
+  Spg::Init();
 #endif
 
   auto app = Spg::CreateApplication();

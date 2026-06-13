@@ -68,9 +68,9 @@ namespace Spg
     return *this;
   }
 
-  Scope<GLShader> GLShaderBuilder::Build(const std::string& name)
+  std::unique_ptr<GLShader> GLShaderBuilder::Build(const std::string& name)
   {
-    auto shader = CreateScope<GLShader>();
+    auto shader = std::make_unique<GLShader>();
     uint32_t program = glCreateProgram();
     shader->m_name = name;
     shader->m_program_id = program;

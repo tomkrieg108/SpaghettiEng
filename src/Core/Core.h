@@ -7,27 +7,55 @@
 
 */
 
+/*
+  header oder
+   - Paired header
+   - C system headers
+   - C++ stad lib
+   - 3rd party libs
+   - Project headers
+
+   - <> for external headers, "" for project headers
+   - treat statics libs as project headers, not external 
+   - Alphabetize
+   - Use pathing for project headers, even if in same directory
+   - Blank lines to seperate categories
+*/
+
 
 #pragma once
+
+#include "Core/PlatformDetect/ArchDetect.h"
+#include "Core/PlatformDetect/CompilerDetect.h"
+#include "Core/PlatformDetect/OSDetect.h"
+// #include "PlatformDetect/EndianDetect.h
+
+// ============================================================
+//  Helper macros
+// ============================================================
+#define STRINGIFY_IMPL(x) #x
+#define STRINGIFY(x) STRINGIFY_IMPL(x)
+
+#define CONCAT(a, b) a##b
+
+#define BIT(x) (1 << x)
+
+// #define TODO(msg) \
+//     #pragma message(__FILE__ "(" STRINGIFY(__LINE__) "): TODO: " msg)
+
+// #define SPG_STR(s) #s
+// #define SPG_MACRO_STRING_VALUE(S) SPG_STR(s)
+// #define COUNT_ARGS(...) COUNT_ARGS_IMPL(__VA_ARGS__, 5, 4, 3, 2, 1)
+// #define COUNT_ARGS_IMPL(_1, _2, _3, _4, _5, N, ...) N
+
+// =============================================================
+
 #include "Logger.h"
-#include "SmartPointerUtils.h"
-#include "LibCheck.h"
+//#include "LibCheck.h"
 
 #define SPG_LIB_LINK_CHECK
 //#define SPG_CALLBACK_CHECK
 
-//Todo - do this in cmake if possible.  Is this even needed?  See ChatGPT "Cross-platform OpenGL CMake setup, architecure macros"
-#if defined(__x86_64__) || defined(_M_X64)
-  #define SPG_ARCH_X64
-#elif defined(__i386__) || defined(_M_IX86)
-  #define SPG_ARCH_X86
-#elif defined(__arm__) || defined(_M_ARM)
-  #define SPG_ARCH_ARM32
-#elif defined(__aarch64__) || defined(_M_ARM64)
-   #define SPG_ARCH_ARM64
-#else
-  #defined SPG_ARCH_UNKNOWN
-#endif
 
 #ifdef SPG_DEBUG
   #define SPG_ENABLE_ASSERTS
@@ -42,12 +70,8 @@
   #endif
 #endif
 
-// #define SPG_STR(s) #s
-// #define SPG_MACRO_STRING_VALUE(S) SPG_STR(s)
-// #define COUNT_ARGS(...) COUNT_ARGS_IMPL(__VA_ARGS__, 5, 4, 3, 2, 1)
-// #define COUNT_ARGS_IMPL(_1, _2, _3, _4, _5, N, ...) N
 
-#define BIT(x) (1 << x)
+
 
 #ifdef SPG_ENABLE_ASSERTS
   #define SPG_ASSERT(check) \
