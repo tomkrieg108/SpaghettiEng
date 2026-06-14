@@ -34,6 +34,5 @@ namespace MathX
 
   Circle ComputeCircumCircle(Point2& a, Point2& b, Point2& c);
 
-
   void Init();
 }

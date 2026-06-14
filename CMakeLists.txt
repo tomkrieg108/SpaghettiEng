@@ -128,21 +128,13 @@ endif()
 add_subdirectory(external)  
 add_subdirectory(src) 
 
+
+## Note: Detection of architecture, OS, Compiler is also done in Core lib headers 
+
 # Build type (Debug, Release etc) - preprocessor macro is compiler dependent, so set here 
 # Need to use generator expression for multi-config generators (MSVC)
-target_compile_definitions(${LIB_CORE} PRIVATE 
-  $<$<CONFIG:Debug>:SPG_DEBUG>
-  $<$<CONFIG:Release>:SPG_RELEASE>
-)
-target_compile_definitions(${LIB_GEOM} PRIVATE 
-  $<$<CONFIG:Debug>:SPG_DEBUG>
-  $<$<CONFIG:Release>:SPG_RELEASE>
-)
-target_compile_definitions(${LIB_ENG} PRIVATE 
-  $<$<CONFIG:Debug>:SPG_DEBUG>
-  $<$<CONFIG:Release>:SPG_RELEASE>
-)
-target_compile_definitions(${APP_GEOM} PRIVATE 
+# PUBLIC => propagates to all dependencies
+target_compile_definitions(${LIB_CORE} PUBLIC
   $<$<CONFIG:Debug>:SPG_DEBUG>
   $<$<CONFIG:Release>:SPG_RELEASE>
 )
@@ -151,19 +143,13 @@ target_compile_definitions(${APP_GEOM} PRIVATE
 if(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(STATUS "Cmake Msg: Platform is Windows 64-bit")
-    target_compile_definitions(${LIB_CORE} PRIVATE SPG_WIN64)
-    target_compile_definitions(${LIB_GEOM} PRIVATE SPG_WIN64)
-    target_compile_definitions(${LIB_ENG} PRIVATE SPG_WIN64)
-    target_compile_definitions(${APP_GEOM} PRIVATE SPG_WIN64)
+    target_compile_definitions(${LIB_CORE} PUBLIC SPG_WIN64)
   else()
     message(FATAL_ERROR "Cmake Msg: Unsupported platform detected: Windows 32-bit")
   endif()
 elseif((UNIX AND NOT APPLE))
   message(STATUS "Cmake Msg: Platform is Linux")
-  target_compile_definitions(${LIB_CORE} PRIVATE SPG_LINUX)
-  target_compile_definitions(${LIB_GEOM} PRIVATE SPG_LINUX)
-  target_compile_definitions(${LIB_ENG} PRIVATE SPG_LINUX)
-  target_compile_definitions(${APP_GEOM} PRIVATE SPG_LINUX)
+  target_compile_definitions(${LIB_CORE} PUBLIC SPG_LINUX)
 elseif(APPLE)  
   message(FATAL_ERROR "Cmake Msg: Unsupported platform detected: Apple")
 else()

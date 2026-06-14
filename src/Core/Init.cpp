@@ -15,13 +15,26 @@
 #include <spdlog/spdlog.h>
 
 //Project headers
-#include "Core/Core.h"
+#include "Core/PlatformDetect/PlatformDetect.h"
 #include "Core/Logger.h"
 
 
 namespace Core
 {
   namespace fs = std::filesystem;
+
+  void PrintPlatformAndBuildInfo()
+  {
+    SPG_INFO("Platform and Build:");
+    SPG_TRACE("Architecture: {} (via ArchDetech.h) ", ARCH_NAME)
+    SPG_TRACE("Compiler: {} (via CompilerDetech.h) ", COMPILER_NAME)
+    SPG_TRACE("OS: {} (via OSDetech.h) ", OS_NAME)
+    #if defined(SPG_DEBUG)
+      SPG_TRACE("SPG_DEBUG defined (via cmake)");
+    #elif defined(SPG_RELEASE)
+        SPG_TRACE("SPG_RELEASE defined (via cmake)");
+    #endif
+  }
 
   void Init()
   {

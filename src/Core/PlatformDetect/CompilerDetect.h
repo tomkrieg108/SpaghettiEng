@@ -1,6 +1,8 @@
 #pragma once
 //Ref: chantGPT - 'Architecture macro comparison'
 
+#include "Core/HelperMacros.h"
+
 // ============================================================
 //  Compiler detection — MSVC, Clang, GCC, Intel, etc.
 // ============================================================

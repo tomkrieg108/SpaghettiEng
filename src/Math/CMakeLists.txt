@@ -23,3 +23,6 @@ target_include_directories(${LIB_MATH} PUBLIC
 
 target_link_libraries(${LIB_MATH} PUBLIC ${LIB_CORE} )
 target_link_libraries(${LIB_MATH} PUBLIC glm::glm-header-only) 
+
+get_target_property(MATH_DEFS ${LIB_MATH} COMPILE_DEFINITIONS)
+message(STATUS "LIB_MATH Compile Definitions: ${MATH_DEFS}")
