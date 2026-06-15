@@ -1,6 +1,6 @@
 
 #include <glm/glm.hpp>
-#include "Core/Window.h"
+#include "SpaghettiEng/Core/Window.h"
 #include "Camera2D.h"
 
 namespace Spg

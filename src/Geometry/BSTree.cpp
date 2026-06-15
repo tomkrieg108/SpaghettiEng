@@ -1,5 +1,5 @@
-#include "BSTree.h"
-#include "GeomUtils.h"
+#include "Geometry/BSTree.h"
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {
@@ -28,7 +28,7 @@ namespace Geom
     BSTNode* cur = m_root;   
     while(true) {
 
-      if(Geom::EqualRel(value, cur->value)) {
+      if(SpgMth::Equal(value, cur->value)) {
         return false;
       }
 
@@ -192,7 +192,7 @@ namespace Geom
 
   BSTree::BSTNode* BSTree::Find(BSTNode* node, float value)
   {
-    while( (node != nullptr) && !Geom::EqualRel(value, node->value))  {
+    while( (node != nullptr) && !SpgMth::NumUtils::Equal(value, node->value))  {
       if(value < node->value) 
         node = node->left;
       else if (value > node->value) 

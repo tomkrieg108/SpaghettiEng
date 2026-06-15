@@ -1,5 +1,6 @@
 #include "DCEL.h"
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
+
 
 namespace Geom
 {
@@ -14,7 +15,7 @@ namespace Geom
     int32_t HalfEdge::next_tag = 0;
     int32_t Face::next_tag = 0;
 
-    DCEL::DCEL(const std::vector<Point2d>& points)
+    DCEL::DCEL(const std::vector<SpgMth::Point2d>& points)
     {
       Init(points);
     }
@@ -47,7 +48,7 @@ namespace Geom
     }
 
     //Assumes that points form a closed loop ordered CCW
-    void DCEL::Init(const std::vector<Point2d>& points)
+    void DCEL::Init(const std::vector<SpgMth::Point2d>& points)
     {
       SPG_ASSERT(m_vertices.size() == 0);
       SPG_ASSERT(m_half_edges.size() == 0);
@@ -115,9 +116,9 @@ namespace Geom
     //Todo:  This is very similar to the function above!
     //Inserts into DCEL, Assumes bounding box encloses all vertices, oriented CCW.
     //Returns a vector of the HalfEdges* created
-    std::vector<HalfEdge*> DCEL::InsertBoundingBox(BoundingBox& bb)
+    std::vector<HalfEdge*> DCEL::InsertBoundingBox(SpgMth::BoundingBox& bb)
     {
-      std::vector<Point2d> points = bb.GetPoints();
+      std::vector<SpgMth::Point2d> points = bb.GetPoints();
       //SPG_ASSERT(points.size() == 4)
 
       std::vector<DCEL::Vertex*> vertices;
@@ -280,7 +281,7 @@ namespace Geom
       return std::make_pair(e1,e2);
     }
 
-    Vertex* DCEL::MakeVertex(Point2d point) 
+    Vertex* DCEL::MakeVertex(SpgMth::Point2d point) 
     {
       Vertex* v = new Vertex();
       v->tag = Vertex::next_tag++;
@@ -299,7 +300,7 @@ namespace Geom
 
     // All edges in he_list to a new newtex (Make from Point2d p).
     // Assume Half edges in he_list oriented CCW
-    void DCEL::Connect(Point2d const& p, std::vector<HalfEdge*> he_list) 
+    void DCEL::Connect(SpgMth::Point2d const& p, std::vector<HalfEdge*> he_list) 
     {
       SPG_ASSERT(he_list.size() >= 1 && he_list.size() <=3)
       Vertex* v = MakeVertex(p);
@@ -361,7 +362,7 @@ namespace Geom
     // Divides/Splits HalfEdge h and it's twin into 2 Halfedge pairs connected at new vertex ( made from p)
     // Assumes both h and it's twin are connected (have prev, next pointers)
     // Returns pointer to the new vertex than divides h
-    Vertex* DCEL::Split(Point2d const& p, HalfEdge* h) 
+    Vertex* DCEL::Split(SpgMth::Point2d const& p, HalfEdge* h) 
     {
       SPG_ASSERT(h != nullptr && h->twin != nullptr && h->prev != nullptr && h->next != nullptr);
       Vertex* v = MakeVertex(p);
@@ -612,15 +613,15 @@ namespace Geom
     
     bool DCEL::AnyIntersectionsExist(Vertex* orig, Vertex* dest, HalfEdge* orig_depart_edge)
     {
-      LineSeg2D test_seg = {orig->point,dest->point};
+      SpgMth::LineSeg2D test_seg = {orig->point,dest->point};
       HalfEdge* e = orig_depart_edge->next;
       while (e != orig_depart_edge->prev) {
         if( (e->origin == dest) || (e->twin->origin == dest) ) {
           e = e->next;  
           continue;
         }
-        LineSeg2D cur_seg = GetLineSeg2d(e);
-        if(Geom::IntersectionExists(test_seg, cur_seg)) 
+        SpgMth::LineSeg2D cur_seg = GetLineSeg2d(e);
+        if(SpgMth::IntersectionExists(test_seg, cur_seg)) 
           return true;
         e = e->next;  
       } 
@@ -633,17 +634,17 @@ namespace Geom
       Vertex* v_next = departing_edge->next->origin;
       Vertex* v_prev = departing_edge->prev->origin;
       
-      LineSeg2D seg_out = GetLineSeg2d(departing_edge);
-      LineSeg2D seg_in = GetLineSeg2d(departing_edge->prev);
+      SpgMth::LineSeg2D seg_out = GetLineSeg2d(departing_edge);
+      SpgMth::LineSeg2D seg_in = GetLineSeg2d(departing_edge->prev);
 
-      return LeftOrBeyond(seg_in, seg_out.end);
+      return SpgMth::LeftOrBeyond(seg_in, seg_out.end);
     }
 
     bool DCEL::MakesInteriorConnection(Vertex* orig, Vertex* dest, HalfEdge* orig_depart_edge)
     {
-      Point2d v_next = GetDestinationPoint(orig_depart_edge);
-      Point2d v_prev = GetOriginPoint(orig_depart_edge->prev);
-      LineSeg2D candidate_seg = GetLineSeg2d(orig,dest);
+      SpgMth::Point2d v_next = GetDestinationPoint(orig_depart_edge);
+      SpgMth::Point2d v_prev = GetOriginPoint(orig_depart_edge->prev);
+      SpgMth::LineSeg2D candidate_seg = GetLineSeg2d(orig,dest);
 
       //interior/exterior check based on CCW orientation
       if(IsConvex(orig, orig_depart_edge)) { //The 2 neighbours must be on different sides of candidate line
@@ -763,7 +764,8 @@ namespace Geom
       SPG_WARN("VERTICES ---------");
       SPG_WARN("Idx, Point,  PtVal,  IncEdge");
       for( Vertex*  v  : m_vertices) {
-        SPG_TRACE("V{}: ({},{}) E.i{}", v->tag, v->point.x, v->point.y, v->incident_edge->tag);
+        //Todo - compiler error
+        //SPG_TRACE("V{}: ({},{}) E.i{}", v->tag, v->point.x, v->point.y, v->incident_edge->tag);
       }
     }
 
@@ -807,7 +809,7 @@ namespace Geom
 
     void DCEL::Test()
     {
-      std::vector<Geom::Point2d> mt_poly_points =
+      std::vector<SpgMth::Point2d> mt_poly_points =
       {
         {16.42f,12.51f},  //A 1
         {13.95,10.36},    //B 2
@@ -839,16 +841,16 @@ namespace Geom
     int32_t HalfEdge::next_tag = 0;
     int32_t Face::next_tag = 0;
 
-    DCEL::DCEL(const std::vector<Point2d>& points)
+    DCEL::DCEL(const std::vector<SpgMth::Point2d>& points)
     {
       Init(points);
     }
 
-    Vertex* DCEL::MakeVertex(Point2d const& point) 
+    Vertex* DCEL::MakeVertex(SpgMth::Point2d const& point) 
     {
-      m_points.push_back(std::make_unique<Point2d>(point));
+      m_points.push_back(std::make_unique<SpgMth::Point2d>(point));
       m_vertices.push_back(std::make_unique<Vertex>());
-      Point2d* p = m_points.back().get();
+      SpgMth::Point2d* p = m_points.back().get();
       Vertex* v = m_vertices.back().get();
       v->point = p;
       v->tag = Vertex::next_tag++;
@@ -877,7 +879,7 @@ namespace Geom
     }
 
     //Assumes that points form a closed loop ordered CCW
-    void DCEL::Init(const std::vector<Point2d>& points)
+    void DCEL::Init(const std::vector<SpgMth::Point2d>& points)
     {
       SPG_ASSERT(m_vertices.size() == 0);
       SPG_ASSERT(m_half_edges.size() == 0);

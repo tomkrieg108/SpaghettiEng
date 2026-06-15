@@ -14,7 +14,7 @@
 #endif
 #include <entt/entity/registry.hpp>
 
-#include "Core/Init.h"
+#include "CoreLib/Init.h"
 
 namespace Spg
 {
@@ -92,7 +92,7 @@ int main()
   Spg::Application::SystemInit();
 #ifdef SPG_LIB_LINK_CHECK 
   Core::Init();
-  MathX::Init();
+  SpgMth::Init();
   Cyc::Init();
   Geom::Init();
   Spg::Init();

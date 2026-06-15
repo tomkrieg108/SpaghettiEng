@@ -2,7 +2,8 @@
 #include "Geometry/RBTree.h"
 #include "Geometry/RBTreeTraversable.h"
 #include "Geometry/DCEL.h"
-#include "Geometry/GeomUtils.h"
+#include "MathLib/Geom/Geom.h"
+//#include "Geometry/GeomUtils.h"
 #include <spdlog/spdlog.h> // format string for Voronoi Node
 #include <array>
 #include <queue>
@@ -17,8 +18,8 @@ namespace Geom
     double a,b,c; //i.e. y=ax^2 + bx + c, or x=c if degenerate
 
     Parabola() = delete;
-    Parabola(Point2d focus, float directrix) {
-      is_degenerate = (Equal(focus.y, directrix)); //equality of floats rather than doubles
+    Parabola(SpgMth::Point2d focus, float directrix) {
+      is_degenerate = (SpgMth::Equal(focus.y, directrix)); //equality of floats rather than doubles
       if(is_degenerate) {  // vertical line x = focx
         a=b=0;
         c = focx;
@@ -45,7 +46,7 @@ namespace Geom
       bool is_degenerate;
   };
 
-  Point2d ComputeBreakpoint(Point2d const& left_site, Point2d const& right_site, float sweep_y);
+  SpgMth::Point2d ComputeBreakpoint(SpgMth::Point2d const& left_site, SpgMth::Point2d const& right_site, float sweep_y);
 
   namespace Voronoi_V4
   {
@@ -55,7 +56,7 @@ namespace Geom
     struct BeachElement;
     
     struct CircleData {
-      Point2d center;
+      SpgMth::Point2d center;
       float radius;
     };
 
@@ -63,7 +64,7 @@ namespace Geom
     {
       enum class Type {Site, Circle};
       Type type;
-      Point2d const* point = nullptr; //Used for both Site and Circle events
+      SpgMth::Point2d const* point = nullptr; //Used for both Site and Circle events
       //Following only used for Circle events
       Arc* diappearing_arc = nullptr; 
       CircleData circle;
@@ -74,7 +75,7 @@ namespace Geom
     {
       friend class Voronoi;
     public:
-      void Initialize(std::vector<Point2d> const& points);
+      void Initialize(std::vector<SpgMth::Point2d> const& points);
       void Push(Event* e) {
         m_queue.push(e);
       }
@@ -136,9 +137,9 @@ namespace Geom
       using ArcTriple = std::array<Arc*,3>;
       
     private:
-      BeachNode* MakeArcNode(Point2d const * site);
+      BeachNode* MakeArcNode(SpgMth::Point2d const * site);
       BeachNode* MakeBreakpointNode();
-      BeachNode* FindArcNodeAbove(Point2d const * site, float sweep_y);
+      BeachNode* FindArcNodeAbove(SpgMth::Point2d const * site, float sweep_y);
       NodeList MakeNodeList(Event* site_event, BeachNode* arc_node_above);
       void InsertNodeList(Event* site_event, NodeList& node_list, BeachNode* arc_node_above);
       ArcTriple GetArcTriple(Arc* middle_Arc);
@@ -159,7 +160,7 @@ namespace Geom
 
     struct Arc 
     {
-      Point2d const * site = nullptr;
+      SpgMth::Point2d const * site = nullptr;
       Event* circle_event = nullptr;
       //links to neighbouring breakpoints:
       Breakpoint* left_bp = nullptr;
@@ -179,7 +180,7 @@ namespace Geom
       //Link to associated tree node
       BeachTree::BeachNode* tree_node = nullptr;
       float CurrentX(float sweep_y);
-      Point2d CurrentPos(float sweep_y);
+      SpgMth::Point2d CurrentPos(float sweep_y);
       //For Validation / debugging:
       uint32_t id;
       static std::string ToString(Breakpoint* bp,float sweep_y);
@@ -190,14 +191,14 @@ namespace Geom
       friend class BeachTree;
     public:
       Voronoi() = default;
-      Voronoi(std::vector<Point2d> points);
+      Voronoi(std::vector<SpgMth::Point2d> points);
       void Construct();
       float GetSweepY() {return m_sweep;}
       BeachTree& GetBeachTree() {return m_beach;}
     
-      std::vector<Point2d> GetConnectedEdgePoints();
-      std::vector<Point2d> GetLooseEdgePoints();
-      std::vector<Point2d> GetVertexPoints();
+      std::vector<SpgMth::Point2d> GetConnectedEdgePoints();
+      std::vector<SpgMth::Point2d> GetLooseEdgePoints();
+      std::vector<SpgMth::Point2d> GetVertexPoints();
       // For testing / validation
       void PrintBeach();
       static void Test();
@@ -208,26 +209,26 @@ namespace Geom
       void TieLooseEnds(); //Currently not used
       void TryInsertCircleEvent(BeachTree::ArcTriple const& arc_triple);
     
-      Arc* MakeArc(Point2d const* site_point);
+      Arc* MakeArc(SpgMth::Point2d const* site_point);
       Breakpoint* MakeBreakpoint();
-      Event* MakeCircleEvent(Point2d const& point, CircleData const& circle,
+      Event* MakeCircleEvent(SpgMth::Point2d const& point, CircleData const& circle,
         Arc* disappearing_arc);
      
     public:
-      Point2d ComputeBreakpointCoords(Breakpoint* bp);
+      SpgMth::Point2d ComputeBreakpointCoords(Breakpoint* bp);
 
     private:
       //Filled on initialization
-      std::vector<Point2d> m_points; 
+      std::vector<SpgMth::Point2d> m_points; 
 
       // Added to during runtime
       std::vector<std::unique_ptr<Arc>> m_arcs;
       std::vector<std::unique_ptr<Breakpoint>> m_breakpoints;
       std::vector<std::unique_ptr<Event>> m_circle_events;
-      std::vector<std::unique_ptr<Point2d>> m_circle_event_points;
+      std::vector<std::unique_ptr<SpgMth::Point2d>> m_circle_event_points;
 
       // bounding box containing all vertices of Voronoi diagram
-      Geom::BoundingBox m_bounding_box;
+      SpgMth::BoundingBox m_bounding_box;
       
       EventQueue m_event_queue; //Initialized from m_points in constructor
       BeachTree m_beach = BeachTree(BeachElementComp(this));

@@ -13,8 +13,8 @@ namespace Geom
   ComputeParabolaZeros(double a, double b, double c) noexcept
   {
     // roots of ax^2 + bx + c
-    if(Equal(a, 0)) {
-      SPG_ASSERT(!Equal(b,0.0));
+    if(SpgMth::Equal(a, 0)) {
+      SPG_ASSERT(!SpgMth::Equal(b,0.0));
       auto x = -c/b;
       return std::optional(std::pair(x,x));
     }
@@ -32,18 +32,18 @@ namespace Geom
   }
 
   //return intersection points of 2 parabolas if exist
-  static std::optional<std::pair<Point2d,Point2d>> 
+  static std::optional<std::pair<SpgMth::Point2d,SpgMth::Point2d>> 
   ComputeIntersections(const Parabola& p1, const Parabola& p2) noexcept 
   {
     //Note: if p1,p2 have equal y coord, x-intercept is bisector of foucs point - handled in ComputePolynomialZeros (a = 0)
     if(p1.IsDegenerate() && p2.IsDegenerate())
       return std::nullopt; // both vertical lines - no intersection
     if(p1.IsDegenerate()) { // p1 is a vertical line
-      Point2d pt(float(p1.c), p2.GetY(p1.c));
+      SpgMth::Point2d pt(float(p1.c), p2.GetY(p1.c));
       return std::optional(std::pair(pt,pt));
     }
     if(p2.IsDegenerate()) { //p2 is a vertical line
-      Point2d pt(float(p2.c), p1.GetY(p2.c));
+      SpgMth::Point2d pt(float(p2.c), p1.GetY(p2.c));
       return std::optional(std::pair(pt,pt));
     }
 
@@ -62,16 +62,16 @@ namespace Geom
 
     auto y1_ = p2.GetY(x1);
     auto y2_ = p2.GetY(x2);
-    if(!Equal(y1, y1_)) {
+    if(!SpgMth::Equal(y1, y1_)) {
       SPG_ERROR("y1: {}, p2.GetY(x1) {}",y1, y1_)
       SPG_ASSERT(false); 
     }
-    if(!Equal(y2, y2_)) {
+    if(!SpgMth::Equal(y2, y2_)) {
       SPG_ERROR("y1: {}, p2.GetY(x1) {}",y1, y1_)
       SPG_ASSERT(false); 
     }
     //note: x1,x2 (returned by ComputeParabolaZeros()) are doubles - need to cast to floats
-    auto points = std::pair(Point2d((float)x1,y1), Point2d((float)x2,y2));
+    auto points = std::pair(SpgMth::Point2d((float)x1,y1), SpgMth::Point2d((float)x2,y2));
     return std::optional(points); 
   }
 
@@ -79,7 +79,7 @@ namespace Geom
   {
     uint32_t BeachElement::next_id = 0;
 
-    static CircleData CircumCircle(Point2d const& a, Point2d const& b, Point2d const& c) {
+    static CircleData CircumCircle(SpgMth::Point2d const& a, SpgMth::Point2d const& b, SpgMth::Point2d const& c) {
 
       CircleData out;
       out.center = {0,0};
@@ -123,7 +123,7 @@ namespace Geom
       return out;
     }
 
-    static float SignedArea(const Point2d& a, const Point2d& b, const Point2d& c)
+    static float SignedArea(const SpgMth::Point2d& a, const SpgMth::Point2d& b, const SpgMth::Point2d& c)
     {
       //returns Det(a->b, a->c)*0.5. 
       double ax = a.x, ay = a.y;
@@ -133,13 +133,13 @@ namespace Geom
       return static_cast<float>(signed_area);
     }
 
-    Point2d Voronoi::ComputeBreakpointCoords(Breakpoint* bp) {
+    SpgMth::Point2d Voronoi::ComputeBreakpointCoords(Breakpoint* bp) {
       SPG_ASSERT(bp != nullptr);
       SPG_ASSERT(bp->left_arc != nullptr);
       SPG_ASSERT(bp->right_arc != nullptr);
       
-      Point2d left_site = *(bp->left_arc->site);
-      Point2d right_site = *(bp->right_arc->site);
+      SpgMth::Point2d left_site = *(bp->left_arc->site);
+      SpgMth::Point2d right_site = *(bp->right_arc->site);
      
       Parabola left_parab(left_site, m_sweep);
       Parabola right_parab(right_site, m_sweep);
@@ -147,7 +147,7 @@ namespace Geom
       auto result = ComputeIntersections(left_parab,right_parab);
       SPG_ASSERT(result.has_value());
       auto& [point1,point2] = result.value();
-      if(Equal(point1,point2))
+      if(SpgMth::Equal(point1,point2))
         return point1;   //1 intersection only => y-coords of sites are equal.
 
       if(left_site.y > right_site.y) 
@@ -162,12 +162,12 @@ namespace Geom
       return x_val;
     }
 
-    Point2d Breakpoint::CurrentPos(float sweep_y)  {
+    SpgMth::Point2d Breakpoint::CurrentPos(float sweep_y)  {
       Voronoi* ctx = tree_node->value.ctx;
       return ctx->ComputeBreakpointCoords(this);
     }
 
-    Voronoi::Voronoi(std::vector<Point2d> points) : m_points{std::move(points)} {
+    Voronoi::Voronoi(std::vector<SpgMth::Point2d> points) : m_points{std::move(points)} {
       m_event_queue.Initialize(m_points);
       m_beach.ctx = this;
     }
@@ -306,12 +306,12 @@ namespace Geom
      
       //Higher precision than above
       CircleData circle = CircumCircle(*arc_triple[0]->site, *arc_triple[1]->site, *arc_triple[2]->site);
-      Point2d q = circle.center;
+      SpgMth::Point2d q = circle.center;
       float radius = circle.radius;
 
       //Validation!
-      SPG_ASSERT(Equal(radius, glm::length(q-*(arc_triple[1]->site))));
-      SPG_ASSERT(Equal(radius, glm::length(q-*(arc_triple[2]->site))));
+      SPG_ASSERT(SpgMth::Equal(radius, glm::length(q-*(arc_triple[1]->site))));
+      SPG_ASSERT(SpgMth::Equal(radius, glm::length(q-*(arc_triple[2]->site))));
 
       //float signed_area = ComputeSignedArea(*arc_triple[0]->site, *arc_triple[1]->site, *arc_triple[2]->site); //in Utils 
       float signed_area = SignedArea(*arc_triple[0]->site, *arc_triple[1]->site, *arc_triple[2]->site); // above - uses doubles
@@ -329,7 +329,7 @@ namespace Geom
       Arc* disappearing_arc = arc_triple[1];
       float circle_bottom = q.y - radius;
 
-      bool breakpoints_diverging = (signed_area > 0) || (circle_bottom > m_sweep) || Equal(circle_bottom,m_sweep) || (Equal(signed_area,0)); //area of zero means 3 points are colinear
+      bool breakpoints_diverging = (signed_area > 0) || (circle_bottom > m_sweep) || SpgMth::Equal(circle_bottom,m_sweep) || (SpgMth::Equal(signed_area,0)); //area of zero means 3 points are colinear
 
       //could do a direct check also. Calculate dist between bp's, nudge sweep down, re-calculate. New dist greater or less?
     
@@ -338,7 +338,7 @@ namespace Geom
         return;
       }
       
-      Event* circle_event = MakeCircleEvent(Point2d(q.x, circle_bottom),CircleData(q,radius), disappearing_arc);
+      Event* circle_event = MakeCircleEvent(SpgMth::Point2d(q.x, circle_bottom),CircleData(q,radius), disappearing_arc);
       m_event_queue.Push(circle_event);
       SPG_INFO("ADDED CIRCLE EVENT: Arc Disappearing: {}", Arc::ToString(disappearing_arc, m_sweep));
     }
@@ -350,7 +350,7 @@ namespace Geom
     void Voronoi::TieLooseEnds() {
       //* Add bounding box to m_dcel
       m_bounding_box.AddBorder(20.0f);
-      std::vector<Point2d> bb_points = m_bounding_box.GetPoints();
+      std::vector<SpgMth::Point2d> bb_points = m_bounding_box.GetPoints();
       SPG_WARN("TIE LOOSE ENDS");
       SPG_INFO("BOUNDING BOX POINTS");
       for(auto& p : bb_points) {
@@ -376,24 +376,24 @@ namespace Geom
           h_bp = h_bp->twin;
         SPG_ASSERT(h_bp->origin != nullptr);
         SPG_ASSERT(h_bp->twin->origin == nullptr);
-        Point2d origin = h_bp->origin->point;
+        SpgMth::Point2d origin = h_bp->origin->point;
 
         //Todo:  Might want to use m_sweep_prev.  m_sweep could be very big here
-        Point2d cur = bp->CurrentPos(m_sweep);
+        SpgMth::Point2d cur = bp->CurrentPos(m_sweep);
         //Point2d cur = GetBreakpointCoords(bp);
         // the half edge is connected to DCEL at origin, unconnected at cur
         // extend cur to a point beyond bounding box
         glm::vec2 dir = glm::normalize(cur - origin);
         float scale = std::max(m_bounding_box.Width(), m_bounding_box.Height())*4.0f;
         cur = origin + dir*scale;
-        LineSeg2D bp_seg(origin, cur);
+        SpgMth::LineSeg2D bp_seg(origin, cur);
 
         // Find intersection of breakpoint seg (bp_seg) with the bounding box (bb_seg)
-        Point2d intersection;
+        SpgMth::Point2d intersection;
         bool found = false;
         for(DCEL::HalfEdge* h_bb : bb_half_edges) {
-          LineSeg2D bb_seg = m_dcel.GetLineSeg2d(h_bb);
-          if(Geom::StrictIntersectionExists(bp_seg,bb_seg)) {
+          SpgMth::LineSeg2D bb_seg = m_dcel.GetLineSeg2d(h_bb);
+          if(SpgMth::StrictIntersectionExists(bp_seg,bb_seg)) {
             found = ComputeIntersection(bb_seg,bp_seg,intersection);
             if(found) {
               // split the HalfEdge h at the intersection
@@ -449,7 +449,7 @@ namespace Geom
 
     }
 
-    Arc* Voronoi::MakeArc(Point2d const * site_point) {
+    Arc* Voronoi::MakeArc(SpgMth::Point2d const * site_point) {
       m_arcs.push_back(std::make_unique<Arc>());
       Arc* arc= m_arcs.back().get();
       arc->site = site_point;
@@ -464,8 +464,8 @@ namespace Geom
       return bp;
     }
 
-    Event* Voronoi::MakeCircleEvent(Point2d const& point, CircleData const& circle, Arc* disappearing_arc) {
-      m_circle_event_points.push_back(std::make_unique<Point2d>(point));
+    Event* Voronoi::MakeCircleEvent(SpgMth::Point2d const& point, CircleData const& circle, Arc* disappearing_arc) {
+      m_circle_event_points.push_back(std::make_unique<SpgMth::Point2d>(point));
       m_circle_events.push_back(std::make_unique<Event>());
       Event* event = m_circle_events.back().get();
       event->point =  m_circle_event_points.back().get();
@@ -510,9 +510,9 @@ namespace Geom
   #endif
     }
 
-    std::vector<Point2d> Voronoi::GetConnectedEdgePoints() {
+    std::vector<SpgMth::Point2d> Voronoi::GetConnectedEdgePoints() {
       m_bounding_box.AddBorder(20.0f);
-      std::vector<Point2d> points;
+      std::vector<SpgMth::Point2d> points;
       std::unordered_set<DCEL::HalfEdge*> half_edges_processed;
       auto half_edges = m_dcel.GetHalfEdges();
       for(auto h : half_edges) {
@@ -531,8 +531,8 @@ namespace Geom
       return points;
     }
 
-    std::vector<Point2d> Voronoi::GetLooseEdgePoints() {
-      std::vector<Point2d> points;
+    std::vector<SpgMth::Point2d> Voronoi::GetLooseEdgePoints() {
+      std::vector<SpgMth::Point2d> points;
       for(auto& element : m_beach) {
         if(element.is_arc)
           continue;
@@ -545,9 +545,9 @@ namespace Geom
           h_bp = h_bp->twin;
         SPG_ASSERT(h_bp->origin != nullptr); // Todo Triggered occasionally
         SPG_ASSERT(h_bp->twin->origin == nullptr);
-        Point2d origin = h_bp->origin->point;
+        SpgMth::Point2d origin = h_bp->origin->point;
 
-        Point2d cur = bp->CurrentPos(m_sweep);
+        SpgMth::Point2d cur = bp->CurrentPos(m_sweep);
         //Point2d cur = bp->CurrentPos(m_sweep_prev + 20.0f); //Todo - this can cause a problem (adjusted sweep > site pos => no roots)
         //Point2d cur = GetBreakpointCoords(bp);
         
@@ -562,15 +562,15 @@ namespace Geom
       return points;
     }
 
-    std::vector<Point2d> Voronoi::GetVertexPoints() {
-      std::vector<Point2d> points;
+    std::vector<SpgMth::Point2d> Voronoi::GetVertexPoints() {
+      std::vector<SpgMth::Point2d> points;
       auto& verticies = m_dcel.GetVertices();
       for(auto v : verticies)
         points.push_back(v->point);
       return points;  
     }
 
-    void EventQueue::Initialize(std::vector<Point2d> const& points) {
+    void EventQueue::Initialize(std::vector<SpgMth::Point2d> const& points) {
       for(auto& p : points) {
         Event* e = new Event;
         e->type = Event::Type::Site;
@@ -584,7 +584,7 @@ namespace Geom
       return el1.x_pos_rank < el2.x_pos_rank;
     }
 
-    BeachTree::BeachNode* BeachTree::MakeArcNode(Point2d const * site) {
+    BeachTree::BeachNode* BeachTree::MakeArcNode(SpgMth::Point2d const * site) {
       SPG_ASSERT(site != nullptr);
       BeachElement el;
       el.arc = ctx->MakeArc(site);
@@ -605,7 +605,7 @@ namespace Geom
       return node;
     } 
 
-    BeachTree::BeachNode* BeachTree::FindArcNodeAbove(Point2d const * site, float sweep_y) {
+    BeachTree::BeachNode* BeachTree::FindArcNodeAbove(SpgMth::Point2d const * site, float sweep_y) {
       SPG_ASSERT(site != nullptr);
 
       auto node = m_root;
@@ -614,7 +614,7 @@ namespace Geom
         if(IsBreakpoint(node)) {
           Breakpoint* bp = GetBreakpoint(node);
           node_x = bp->CurrentX(sweep_y);
-          SPG_ASSERT(!Geom::Equal(node_x, site->x)); //Todo - Triggered once.  Edge case need to handle
+          SPG_ASSERT(!SpgMth::Equal(node_x, site->x)); //Todo - Triggered once.  Edge case need to handle
         } 
         else {
           Arc* arc = GetArc(node);
@@ -894,7 +894,7 @@ namespace Geom
         
         //add some site events
         for(int i=0; i< 10; i++) {
-          Point2d* p = new Point2d(fdist(mt),fdist(mt));
+          SpgMth::Point2d* p = new SpgMth::Point2d(fdist(mt),fdist(mt));
           Event* e = new Event;
           e->type = Event::Type::Site;
           e->point = p;
@@ -903,7 +903,7 @@ namespace Geom
 
         //add some circle events
         for(int i=0; i< 10; i++) {
-          Point2d* p = new Point2d(fdist(mt),fdist(mt));
+          SpgMth::Point2d* p = new SpgMth::Point2d(fdist(mt),fdist(mt));
           Event* e = new Event;
           e->type = Event::Type::Circle;
           e->point = p;
@@ -956,16 +956,16 @@ namespace Geom
       //Bisectors and intersections
       {
         SPG_WARN("BISECTORS");
-        auto p1 = Point2d(50,10);
-        auto p2 = Point2d(54,9);
-        auto p3 = Point2d(48,7);
-        auto p4 = Point2d(47.3,5.5);
+        auto p1 = SpgMth::Point2d(50,10);
+        auto p2 = SpgMth::Point2d(54,9);
+        auto p3 = SpgMth::Point2d(48,7);
+        auto p4 = SpgMth::Point2d(47.3,5.5);
       
-        Line2d bisector_13 = GetBisector(p1,p3);
-        Line2d bisector_12 = GetBisector(p1,p2);
-        Line2d bisector_34 = GetBisector(p3,p4);
-        Point2d q1 = ComputeIntersection(bisector_13,bisector_12);
-        Point2d q2 = ComputeIntersection(bisector_34,bisector_13);
+        SpgMth::Line2d bisector_13 = SpgMth::GetBisector(p1,p3);
+        SpgMth::Line2d bisector_12 = SpgMth::GetBisector(p1,p2);
+        SpgMth::Line2d bisector_34 = SpgMth::GetBisector(p3,p4);
+        SpgMth::Point2d q1 = SpgMth::ComputeIntersection(bisector_13,bisector_12);
+        SpgMth::Point2d q2 = SpgMth::ComputeIntersection(bisector_34,bisector_13);
         SPG_TRACE("Bisectors 13 and 12 Intersect at: {}",q1); 
         SPG_TRACE("Bisectors 34 and 13 Intersect at: {}",q2); 
 
@@ -990,7 +990,7 @@ namespace Geom
         //std::vector<Point2d> points{{50,10},{54,9},{48,7},{47.3,5.5},{53,5},{52,3},{58,-2}}; //ok
         //std::vector<Point2d> points{{50,10},{54,9},{48,7},{47.3,5.5},{53,5},{52,3},{58,-2},{56,-3.5}}; //ok
        
-        std::vector<Point2d> points{{50,10},{54,9},{48,7},{47.3,5.5}, {53,5}, {52,3}, {58,-2}, {56,-3.5},{44,0.8},{50,-7}}; 
+        std::vector<SpgMth::Point2d> points{{50,10},{54,9},{48,7},{47.3,5.5}, {53,5}, {52,3}, {58,-2}, {56,-3.5},{44,0.8},{50,-7}}; 
 
         Voronoi voronoi(std::move(points));
         voronoi.Construct();

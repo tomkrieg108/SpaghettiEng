@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
 #include <glad/gl.h>    //need to include before <GLFW/glfw3.h>
 
 #include "SpaghettiEng/Core/Application.h"

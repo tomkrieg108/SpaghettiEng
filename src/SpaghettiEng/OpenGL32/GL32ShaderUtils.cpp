@@ -1,5 +1,5 @@
 #include <glad/gl.h>
-#include <Core/Logger.h>
+#include "CoreLib/Logger.h"
 #include "GL32ShaderUtils.h"
 
 namespace Spg

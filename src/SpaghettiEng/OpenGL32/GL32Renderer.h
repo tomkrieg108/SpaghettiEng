@@ -3,7 +3,7 @@
 #include "GL32VertexArray.h"
 #include "GL32Shader.h"
 #include <SpaghettiEng/Camera/Camera2D.h>
-#include <Core/Core.h> //Scope
+#include "CoreLib/Core.h" //Scope
 #include <glm/glm.hpp>
 
 namespace Spg

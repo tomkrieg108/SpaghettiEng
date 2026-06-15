@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
 
 namespace Geom
 {

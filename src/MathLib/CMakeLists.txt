@@ -1,0 +1,33 @@
+
+add_library(${LIB_MATH} STATIC 
+  "./FloatingPoint.h"
+  "./MathLib.h"
+  "./MathLib.cpp"
+
+  "./Geom/Geom.h"
+  "./Geom/Line.h"
+  "./Geom/Plane.h"
+  "./Geom/Geom.cpp"
+
+  "./AML/AML.h"
+  "./AML/AMLVector3.h"
+  "./AML/AMLVector3.cpp"
+  "./AML/AMLMatrix33.h"
+  "./AML/AMLMatrix33.cpp"
+  "./AML/AMLDCM.h"
+  "./AML/AMLDCM.cpp"
+  "./AML/AMLEulerAngles.h"
+  "./AML/AMLEulerAngles.cpp"
+  "./AML/AMLQuaternion.h"
+  "./AML/AMLQuaternion.cpp"
+)
+
+target_include_directories(${LIB_MATH} PUBLIC 
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+target_link_libraries(${LIB_MATH} PUBLIC ${LIB_CORE} )
+target_link_libraries(${LIB_MATH} PUBLIC glm::glm-header-only) 
+
+get_target_property(MATH_DEFS ${LIB_MATH} COMPILE_DEFINITIONS)
+message(STATUS "LIB_MATH Compile Definitions: ${MATH_DEFS}")

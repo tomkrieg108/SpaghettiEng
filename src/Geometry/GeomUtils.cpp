@@ -1,6 +1,6 @@
 #include "GeomUtils.h"
 #define GLM_ENABLE_EXPERIMENTAL
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
 #include <glm/gtx/norm.hpp> //for length2() (length squared)
 #include <numbers> //for PI
 #include <numeric> //iota
@@ -8,6 +8,9 @@
 namespace Geom
 {
   constexpr float pi_reciprical = 1/std::numbers::pi;
+
+  //inline namespace v1
+  //{
 
   Line2d GetBisector(Point2d const& p1, Point2d const& p2)
   {
@@ -590,3 +593,4 @@ namespace Geom
 #endif
 
 }
+//}

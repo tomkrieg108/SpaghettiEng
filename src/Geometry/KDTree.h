@@ -1,6 +1,6 @@
 #pragma once
 #include "GeomUtils.h"
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
 
 namespace Geom
 {

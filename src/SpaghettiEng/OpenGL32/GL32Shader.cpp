@@ -1,6 +1,6 @@
 
 #include <glad/gl.h>
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
 #include "GL32ShaderUtils.h"
 #include "GL32Shader.h"
 

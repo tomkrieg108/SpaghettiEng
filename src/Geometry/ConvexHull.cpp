@@ -1,26 +1,17 @@
 
 #include "ConvexHull.h"
-#include "GeomUtils.h"
 #include "MeshPrimitives2D.h"
-#include "Line.h"
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {
-  std::vector<Point2d> ConvexHull2D_GiftWrap(const std::vector<Point2d>& points)
+  std::vector<SpgMth::Point2d> ConvexHull2D_GiftWrap(const std::vector<SpgMth::Point2d>& points)
   {
     std::vector<Point2d> hull;
     if(points.size() < 3)
       return hull;
 
-    //find start point
-    /*
-    auto itr_start = std::min_element(points.cbegin(), points.cend(), [](const Point2d& lhs, const Point2d& rhs) {
-        return lhs.y < rhs.y;
-    });
-    hull.push_back(*itr_start);  
-    */
-    
     //Get the start point (bottom most)
     float y_min = std::numeric_limits<float>::max();
     uint32_t start_idx = 0;
@@ -36,7 +27,7 @@ namespace Geom
     
     //Get second point
     Point2d ref_point{points[start_idx].x +100.0f, points[start_idx].y}; //horiz line seg to the right
-    LineSeg2D ref_seg{points[start_idx], ref_point};
+    SpgMth::LineSeg2D ref_seg{points[start_idx], ref_point};
     float min_angle = std::numeric_limits<float>::max();
     uint32_t second_idx = 0;
     for(auto i=0; i< points.size(); ++i)  
@@ -44,8 +35,8 @@ namespace Geom
       if(i == start_idx) 
         continue;
 
-      LineSeg2D test_seg{points[start_idx], points[i]};
-      float angle = ComputeAngleInDegrees(ref_seg,test_seg);
+      SpgMth::LineSeg2D test_seg{points[start_idx], points[i]};
+      float angle = SpgMth::ComputeAngleInDegrees(ref_seg,test_seg);
       if(angle < min_angle)
       {
         min_angle = angle;
@@ -58,13 +49,13 @@ namespace Geom
     uint32_t cur_idx = second_idx;
     while(true)
     {
-      LineSeg2D ref_seg{points[prev_idx], points[cur_idx]};
+      SpgMth::LineSeg2D ref_seg{points[prev_idx], points[cur_idx]};
       float min_angle = std::numeric_limits<float>::max();
       uint32_t next_idx = 0;
       for(auto i=0; i<points.size(); ++i)
       {
-        LineSeg2D test_seg{points[cur_idx], points[i]};
-        float angle = ComputeAngleInDegrees(ref_seg,test_seg);
+        SpgMth::LineSeg2D test_seg{points[cur_idx], points[i]};
+        float angle = SpgMth::ComputeAngleInDegrees(ref_seg,test_seg);
         if(angle < min_angle)
         {
           min_angle = angle;
@@ -99,7 +90,7 @@ namespace Geom
     std::vector<Point2d> upper_hull;
     for(auto itr = sorted_points.begin(); itr != sorted_points.end(); ++itr )
     {
-      while( (upper_hull.size() > 1) && Left({*(upper_hull.cend()-2), *(upper_hull.cend()-1)}, *itr))
+      while( (upper_hull.size() > 1) && SpgMth::Left({*(upper_hull.cend()-2), *(upper_hull.cend()-1)}, *itr))
         upper_hull.pop_back();
 
       upper_hull.push_back(*itr);
@@ -109,7 +100,7 @@ namespace Geom
     std::vector<Point2d> lower_hull;
     for(auto itr = sorted_points.rbegin(); itr != sorted_points.rend(); ++itr )
     {
-      while( (lower_hull.size() > 1) && Left({*(lower_hull.cend()-2), *(lower_hull.cend()-1)}, *itr))
+      while( (lower_hull.size() > 1) && SpgMth::Left({*(lower_hull.cend()-2), *(lower_hull.cend()-1)}, *itr))
         lower_hull.pop_back();
 
       lower_hull.push_back(*itr);

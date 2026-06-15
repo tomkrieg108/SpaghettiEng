@@ -1,5 +1,5 @@
 #include "Polygon.h"
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
 
 namespace Geom
 {

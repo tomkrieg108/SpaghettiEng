@@ -2,7 +2,7 @@
 #include "GeomUtils.h"
 #include "Line.h"
 #include <vector>
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
 #include <set>
 #include <map>
 #include <variant>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GeomBase.h"
-#include "Line.h"
+//#include "GeomBase.h"
+//#include "Line.h"
 #include "Polygon.h"
 #include "Triangulate.h"
 #include "MonotonePartition.h"

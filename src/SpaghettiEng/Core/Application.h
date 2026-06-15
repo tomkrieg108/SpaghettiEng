@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Core/Core.h>
+#include "CoreLib/Core.h"
 #include "Events/Events.h"
 #include "Layer.h"
 #include "AppContext.h"

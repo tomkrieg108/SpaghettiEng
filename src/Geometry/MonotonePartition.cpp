@@ -1,6 +1,6 @@
 
 #include "MonotonePartition.h"
-#include "GeomUtils.h"
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {
@@ -11,7 +11,7 @@ namespace Geom
     {
     }
 
-  MonotonePartitionAlgo::MonotonePartitionAlgo(const std::vector<Point2d>& points) : 
+  MonotonePartitionAlgo::MonotonePartitionAlgo(const std::vector<SpgMth::Point2d>& points) : 
     m_polygon(points),
     m_T(EdgeComparator(m_cur_event_point))
   {
@@ -30,7 +30,7 @@ namespace Geom
         m_cur_event_point = {FLT_MAX,FLT_MAX};
     }
 
-  void MonotonePartitionAlgo::Set(const std::vector<Point2d>& points)
+  void MonotonePartitionAlgo::Set(const std::vector<SpgMth::Point2d>& points)
   {
     Clear();
     m_polygon.Init(points);
@@ -53,16 +53,16 @@ namespace Geom
 
     if( (v_prev->point < vertex->point) && (v_next->point < vertex->point)) {
       //both neighbours are below vertex => Start or Split
-      Geom::LineSeg2D seg{v_prev->point, vertex->point};
-      if(Geom::LeftOrBeyond(seg,v_next->point)) 
+      SpgMth::LineSeg2D seg{v_prev->point, vertex->point};
+      if(SpgMth::LeftOrBeyond(seg,v_next->point)) 
         return VertexCategory::Start; //Interior angle < Pi => Start
       else  
         return VertexCategory::Split; //Interior angle > Pi => Split
     }
     else if((v_prev->point > vertex->point) && (v_next->point > vertex->point)) {
       //both neighbours are above vertex => End or Merge
-      Geom::LineSeg2D seg{v_prev->point, vertex->point};
-      if(Geom::LeftOrBeyond(seg,v_next->point))
+      SpgMth::LineSeg2D seg{v_prev->point, vertex->point};
+      if(SpgMth::LeftOrBeyond(seg,v_next->point))
         return VertexCategory::End;
       else
         return VertexCategory::Merge;  
@@ -118,9 +118,9 @@ namespace Geom
     }
   }
 
-  std::vector<Point2d> MonotonePartitionAlgo::GetDiagonalEndPoints(DiagonalList& diagonal_list)
+  std::vector<SpgMth::Point2d> MonotonePartitionAlgo::GetDiagonalEndPoints(DiagonalList& diagonal_list)
   {
-    std::vector<Point2d> points;
+    std::vector<SpgMth::Point2d> points;
     for(auto& diagonal : diagonal_list) {
       points.push_back(diagonal.first->point);
       points.push_back(diagonal.second->point);

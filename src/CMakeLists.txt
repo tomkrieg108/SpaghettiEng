@@ -1,7 +1,7 @@
-add_subdirectory(Core)
-add_subdirectory(Math)
+add_subdirectory(CoreLib)
+add_subdirectory(MathLib)
 add_subdirectory(Geometry)
-add_subdirectory(Physics)
+add_subdirectory(PhysLib)
 add_subdirectory(SpaghettiEng)
 add_subdirectory(GeomApp)
 
