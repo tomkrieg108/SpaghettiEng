@@ -1,5 +1,7 @@
-#include "RangeTree.h"
-#include "RBTree.h"
+#include "Geometry/RangeTree.h"
+#include "Geometry/RBTree.h"
+
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {
@@ -76,23 +78,23 @@ namespace Geom
 // RangeTree2D
 //-------------------------------------------------------------------------------
 
-  RangeTree2D::RangeTree2D( std::vector<Geom::Point2d>& points)
+  RangeTree2D::RangeTree2D( std::vector<SpgMth::Point2d>& points)
   {
      if(points.empty())
       return;
-    std::sort(points.begin(), points.end(), [](Point2d a, Point2d b) {return a.x < b.x;});  
+    std::sort(points.begin(), points.end(), [](SpgMth::Point2d a, SpgMth::Point2d b) {return a.x < b.x;});  
     m_root = BuildTree(points);  
   }
 
-  RangeTree2D::RangeTree2D(std::vector<Geom::Point2d>&& points) noexcept
+  RangeTree2D::RangeTree2D(std::vector<SpgMth::Point2d>&& points) noexcept
   {
      if(points.empty())
       return;
-      std::sort(points.begin(), points.end(), [](Point2d a, Point2d b) {return a.x < b.x;});  
+      std::sort(points.begin(), points.end(), [](SpgMth::Point2d a, SpgMth::Point2d b) {return a.x < b.x;});  
       m_root = BuildTree(std::move(points));  
   }
 
-  RangeTree2D::Node* RangeTree2D::BuildTree(std::vector<Point2d> points)
+  RangeTree2D::Node* RangeTree2D::BuildTree(std::vector<SpgMth::Point2d> points)
   {
     uint32_t num_points = points.size();
     SPG_ASSERT(num_points > 0);
@@ -113,8 +115,8 @@ namespace Geom
     float split_value = points[median_pos-1].x;
     //float split_value = points[median_pos].x;
 
-    std::vector<Point2d> first_half(points.begin(), points.begin() + median_pos);
-    std::vector<Point2d> second_half(points.begin() + median_pos, points.end());  
+    std::vector<SpgMth::Point2d> first_half(points.begin(), points.begin() + median_pos);
+    std::vector<SpgMth::Point2d> second_half(points.begin() + median_pos, points.end());  
 
     Node* node = new Node();
     node->is_leaf = false;
@@ -140,18 +142,18 @@ namespace Geom
     return node;
   }
 
-  std::vector<Point2d> RangeTree2D::RangeQueryY(SecondaryTree& tree, const Range& range)
+  std::vector<SpgMth::Point2d> RangeTree2D::RangeQueryY(SecondaryTree& tree, const Range& range)
   {
     //Only the y-coord in Point2d is used (secondary tree ordered on y coord), but key needs to be Point2d
-    auto itr_split = tree.FindSplitPos(Point2d{range.x_min,range.y_min},    Point2d{range.x_max,range.y_max} );
-    std::vector<Point2d> points_out;
+    auto itr_split = tree.FindSplitPos(SpgMth::Point2d{range.x_min,range.y_min}, SpgMth::Point2d{range.x_max,range.y_max} );
+    std::vector<SpgMth::Point2d> points_out;
     if(itr_split == tree.end())
       return points_out;
     SeachSubTreeSecondary(tree, itr_split, range, points_out);
     return points_out;
   }
 
-  void RangeTree2D::SeachSubTreeSecondary(SecondaryTree& tree,Iterator itr , const Range& range,std::vector<Point2d>& points_out)
+  void RangeTree2D::SeachSubTreeSecondary(SecondaryTree& tree,Iterator itr , const Range& range,std::vector<SpgMth::Point2d>& points_out)
   {
     if(itr == tree.end())
       return;
@@ -164,9 +166,9 @@ namespace Geom
       SeachSubTreeSecondary(tree, tree.RightChild(itr), range, points_out);
   }
   
-  std::vector<Point2d> RangeTree2D::RangeQuery(const Range& range)
+  std::vector<SpgMth::Point2d> RangeTree2D::RangeQuery(const Range& range)
   {
-    std::vector<Point2d> points;
+    std::vector<SpgMth::Point2d> points;
     Node* split_node = FindSplitNode(range.x_min, range.x_max);
     if(split_node == nullptr)
       return points;
@@ -208,7 +210,7 @@ namespace Geom
     return points;
   }
 
-  bool RangeTree2D::PointInRange(Point2d p, const Range& range)
+  bool RangeTree2D::PointInRange(SpgMth::Point2d p, const Range& range)
   {
     //Todo - make sure the inequalities match intended semantics (inclusive ve exclusive bounds).  x<x_max (exclusive upper bound) x >= x_min (inclusive upper bound)
     if(!(p.x < range.x_max))
@@ -227,7 +229,7 @@ namespace Geom
   // Following is used for test / validation only
   //================================================================================
 
-  void RangeTree2D::ReportSubTreeMain(Node* node, std::vector<Point2d>& out_points)
+  void RangeTree2D::ReportSubTreeMain(Node* node, std::vector<SpgMth::Point2d>& out_points)
    {
     if(node == nullptr)
       return;
@@ -240,9 +242,9 @@ namespace Geom
    }
 
   //Report points that fall in the x range - ignore y range
-  std::vector<Point2d> RangeTree2D::RangeQueryX(const Range& range)
+  std::vector<SpgMth::Point2d> RangeTree2D::RangeQueryX(const Range& range)
   {
-    std::vector<Point2d> points;
+    std::vector<SpgMth::Point2d> points;
     Node* split_node = FindSplitNode(range.x_min, range.x_max);
     if(split_node == nullptr)
       return points;
@@ -280,11 +282,11 @@ namespace Geom
     return points;
   } 
 
-  std::vector<Point2d> RangeTree2D::BruteForceRangeQuery(const Range& range) 
+  std::vector<SpgMth::Point2d> RangeTree2D::BruteForceRangeQuery(const Range& range) 
   {
-    std::vector<Point2d> all_points;
+    std::vector<SpgMth::Point2d> all_points;
     ReportSubTreeMain(m_root, all_points);
-    std::vector<Point2d> points_in_range;
+    std::vector<SpgMth::Point2d> points_in_range;
     for(auto& p : all_points) {
       if(PointInRange(p,range))
         points_in_range.push_back(p);
@@ -297,8 +299,8 @@ namespace Geom
     if(node == nullptr)
       return;
 
-    std::vector<Point2d> points_primary;
-    std::vector<Point2d> points_secondary;
+    std::vector<SpgMth::Point2d> points_primary;
+    std::vector<SpgMth::Point2d> points_secondary;
 
     ReportSubTreeMain(node, points_primary);  
 
@@ -312,7 +314,7 @@ namespace Geom
     std::sort(points_secondary.begin(), points_secondary.end(), CompX()); //initialliy sorted by y-coord 
     for(auto i=0; i<points_primary.size(); ++i ){
       SPG_TRACE("{}: P:{} S:{}",i+1, points_primary[i], points_secondary[i]);
-      SPG_ASSERT(Geom::Equal(points_primary[i], points_secondary[i]));
+      SPG_ASSERT(SpgMth::Equal(points_primary[i], points_secondary[i]));
     }
 
     if(!node->is_leaf) {
@@ -326,7 +328,7 @@ namespace Geom
     SPG_WARN("-------------------------------------------------------------------------");
     SPG_WARN("RangeTree2D - Test");
     SPG_WARN("-------------------------------------------------------------------------");
-    std::vector<Geom::Point2d> points;
+    std::vector<SpgMth::Point2d> points;
 
     //Add a bunch of random values
     const uint32_t KD_NUM_VALS = 1000;
@@ -338,7 +340,7 @@ namespace Geom
     std::uniform_real_distribution<float> fdist(KD_MIN_VAL, KD_MAX_VAL); 
     
     for(int i=0; i< KD_NUM_VALS; i++) {
-      Geom::Point2d p(fdist(mt),fdist(mt));
+      SpgMth::Point2d p(fdist(mt),fdist(mt));
       points.push_back(p);
     }
 
@@ -347,13 +349,13 @@ namespace Geom
 
     RangeTree2D::Range range{400,500,400,500};
 
-    std::vector<Geom::Point2d> points_in_range;
+    std::vector<SpgMth::Point2d> points_in_range;
     points_in_range = tree.RangeQuery(range); 
     SPG_WARN("Points in range X:[{},{}] Y:[{},{}]", range.x_min, range.x_max, range.y_min, range.y_max);
     for(auto& p: points_in_range)
       SPG_TRACE(p);
 
-    std::vector<Point2d> points_bf;
+    std::vector<SpgMth::Point2d> points_bf;
     points_bf = tree.BruteForceRangeQuery(range);
     SPG_WARN("Points in range (BF) X:[{},{}] Y:[{},{}]", range.x_min, range.x_max, range.y_min, range.y_max);
     for(auto& p: points_bf)
@@ -364,7 +366,7 @@ namespace Geom
     std::sort(points_in_range.begin(), points_in_range.end(), Comp());
     std::sort(points_bf.begin(), points_bf.end(), Comp());
     for(auto i=0; i< points_bf.size(); ++i) 
-      SPG_ASSERT(Geom::Equal(points_bf[i], points_in_range[i]));
+      SPG_ASSERT(SpgMth::Equal(points_bf[i], points_in_range[i]));
     SPG_WARN("Comparison check out!");
   }
 }

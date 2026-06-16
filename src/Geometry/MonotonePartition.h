@@ -1,7 +1,10 @@
 #pragma once
-#include "DCEL.h"
-#include "MathLib/Geom/Geom.h"
+
 #include <map>
+
+#include "Geometry/DCEL.h"
+#include "MathLib/Geom/Geom.h"
+
 
 namespace Geom
 {

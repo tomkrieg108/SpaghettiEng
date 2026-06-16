@@ -1,23 +1,23 @@
-#include "KDTree.h"
-#include "GeomUtils.h"
+#include "Geometry/KDTree.h"
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {
-  KDTree2D::KDTree2D(const std::vector<Point2d>& points)
+  KDTree2D::KDTree2D(const std::vector<SpgMth::Point2d>& points)
   {
     if(points.empty())
       return;
     m_root = BuildTree(0,points);  
   }
 
-  KDTree2D::KDTree2D(std::vector<Point2d>&& points)
+  KDTree2D::KDTree2D(std::vector<SpgMth::Point2d>&& points)
   {
     if(points.empty())
       return;
     m_root = BuildTree(0,std::move(points));
   }
 
-  KDTree2D::KDNode2D* KDTree2D::BuildTree(uint32_t depth, std::vector<Point2d> points)
+  KDTree2D::KDNode2D* KDTree2D::BuildTree(uint32_t depth, std::vector<SpgMth::Point2d> points)
   {
     //Could store multiple points in a leaf node, so use vector
     uint32_t num_points = points.size();
@@ -30,15 +30,15 @@ namespace Geom
     }
  
     if(depth%2 == 0) //split on vertical axis => sort by x coord
-      std::sort(points.begin(), points.end(), [](Point2d a, Point2d b) {return a.x < b.x;});
+      std::sort(points.begin(), points.end(), [](SpgMth::Point2d a, SpgMth::Point2d b) {return a.x < b.x;});
     else //split on horiz axis => sort by y coord
-      std::sort(points.begin(), points.end(), [](Point2d a, Point2d b) {return a.y < b.y;});    
+      std::sort(points.begin(), points.end(), [](SpgMth::Point2d a, SpgMth::Point2d b) {return a.y < b.y;});    
 
     uint32_t median_pos = (num_points%2 == 0) ? num_points/2 : num_points/2 + 1;
     float split_value = (depth%2 == 0) ? points[median_pos-1].x : points[median_pos-1].y;
 
-    std::vector<Point2d> first_half(points.begin(), points.begin() + median_pos);
-    std::vector<Point2d> second_half(points.begin() + median_pos, points.end());  
+    std::vector<SpgMth::Point2d> first_half(points.begin(), points.begin() + median_pos);
+    std::vector<SpgMth::Point2d> second_half(points.begin() + median_pos, points.end());  
 
     KDNode2D* node = new KDNode2D();
     node->is_leaf = false;
@@ -49,11 +49,11 @@ namespace Geom
     return node;
   }
 
-  std::vector<Point2d> KDTree2D::BruteForceRangeSearch(const Range& input_range)
+  std::vector<SpgMth::Point2d> KDTree2D::BruteForceRangeSearch(const Range& input_range)
   {
-    std::vector<Point2d> all_points;
+    std::vector<SpgMth::Point2d> all_points;
     AccumulateSubtreePoints(m_root, all_points);
-    std::vector<Point2d> points_in_range;
+    std::vector<SpgMth::Point2d> points_in_range;
     for(auto& p : all_points) {
       if(RangeContainsPoint(p,input_range))
         points_in_range.push_back(p);
@@ -61,24 +61,24 @@ namespace Geom
     return points_in_range;
   }
 
-  std::vector<Point2d> KDTree2D::RangeSearch(const Range& input_range)
+  std::vector<SpgMth::Point2d> KDTree2D::RangeSearch(const Range& input_range)
   {
-    std::vector<Point2d> points_found;
+    std::vector<SpgMth::Point2d> points_found;
     Range node_range;
     SearchNode(m_root, node_range, input_range, points_found);
     return points_found;
   }
 
-  std::vector<Point2d> KDTree2D::CollectAllPoints()
+  std::vector<SpgMth::Point2d> KDTree2D::CollectAllPoints()
   {
-    std::vector<Point2d> points;
+    std::vector<SpgMth::Point2d> points;
     AccumulateSubtreePoints(m_root,points);
     return points;
   }
 
   
 
-  void KDTree2D::SearchNode(KDNode2D* node, Range node_range, const Range& input_range,std::vector<Point2d>& points_found)
+  void KDTree2D::SearchNode(KDNode2D* node, Range node_range, const Range& input_range,std::vector<SpgMth::Point2d>& points_found)
   {
     SPG_ASSERT(node != nullptr);
 
@@ -120,7 +120,7 @@ namespace Geom
     }
   }
 
-  void KDTree2D::AccumulateSubtreePoints(KDNode2D* node,std::vector<Point2d>& cur_points)
+  void KDTree2D::AccumulateSubtreePoints(KDNode2D* node,std::vector<SpgMth::Point2d>& cur_points)
   {
     SPG_ASSERT(node != nullptr);
     if(node->is_leaf) {
@@ -132,7 +132,7 @@ namespace Geom
     AccumulateSubtreePoints(node->right,cur_points);
   }
 
-  bool KDTree2D::RangeContainsPoint(Point2d p, const Range& range)
+  bool KDTree2D::RangeContainsPoint(SpgMth::Point2d p, const Range& range)
   {
     if(!(p.x < range.x_max))
       return false;
@@ -180,7 +180,7 @@ void KDTree2D::ValidateSearch(const Range& input_range)
       int matches = 0; 
       for(uint32_t j=0; j<points2.size(); ++j) {
         auto p2 = points2[j];
-        if(Geom::Equal(p1,p2))
+        if(SpgMth::Equal(p1,p2))
           matches++;
       }
       SPG_ASSERT(matches == 1);
@@ -189,7 +189,7 @@ void KDTree2D::ValidateSearch(const Range& input_range)
 
   void KDTree2D::Test()
   {
-     std::vector<Geom::Point2d> kd_values;
+     std::vector<SpgMth::Point2d> kd_values;
 
     //Add a bunch of random values
     const uint32_t KD_NUM_VALS = 1000;
@@ -201,7 +201,7 @@ void KDTree2D::ValidateSearch(const Range& input_range)
     std::uniform_real_distribution<float> fdist(KD_MIN_VAL, KD_MAX_VAL); 
     
     for(int i=0; i< KD_NUM_VALS; i++) {
-      Geom::Point2d p(fdist(mt),fdist(mt));
+      SpgMth::Point2d p(fdist(mt),fdist(mt));
       kd_values.push_back(p);
     }
 

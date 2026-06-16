@@ -1,11 +1,16 @@
 
 #include "MeshPrimitives2D.h"
-#include "GeomUtils.h"
-#include "ConvexHull.h"
-#include "CoreLib/Core.h"
+
 #include <random>
 #include <numbers>
 #include <cmath>
+
+#include "Geometry/ConvexHull.h"
+#include "Geometry/Triangulate.h"
+
+#include "CoreLib/Core.h"
+#include "MathLib/Geom/Geom.h"
+
 
 namespace Geom
 {
@@ -49,9 +54,9 @@ namespace Geom
     return vertices;
   }
 
-  std::vector<Point2d> GenerateEarClipplingDiagonals(PolygonSimple* polygon)
+  std::vector<SpgMth::Point2d> GenerateEarClipplingDiagonals(PolygonSimple* polygon)
   {
-    std::vector<Point2d> points;
+    std::vector<SpgMth::Point2d> points;
     std::vector<SP::Edge> diagonals; //output arg to Triangulate_EarClipping() 
     Triangulate_EarClipping(polygon, diagonals);
     for(auto d : diagonals) {
@@ -62,10 +67,10 @@ namespace Geom
   }
  
   #if 0
-  std::vector<Point2d> GenerateMonotoneDiagonals(DCEL::Polygon* polygon)
+  std::vector<SpgMth::Point2d> GenerateMonotoneDiagonals(DCEL::Polygon* polygon)
   {
-    std::vector<Point2d> points;
-    std::vector<LineSeg2D> diagonals;
+    std::vector<SpgMth::Point2d> points;
+    std::vector<SpgMth::LineSeg2D> diagonals;
 
     auto monoton_polys = GetMonotonPolygons(polygon, diagonals);
     for(auto seg : diagonals) {
@@ -76,38 +81,38 @@ namespace Geom
   }
 #endif
 
-  std::vector<Point2d> GenerateRandomPoints_XY(float radius, uint32_t num_points)
+  std::vector<SpgMth::Point2d> GenerateRandomPoints_XY(float radius, uint32_t num_points)
   {
     std::random_device rand_device;
     std::mt19937 gen(rand_device());
     std::uniform_real_distribution<float> dist(-radius,radius);
 
-    std::vector<Point2d> points;
+    std::vector<SpgMth::Point2d> points;
     for(uint32_t i = 0; i < num_points; ++i )
     {
-      Point2d point{dist(gen), dist(gen)};
+      SpgMth::Point2d point{dist(gen), dist(gen)};
       points.push_back(point);
     }
     return points;
   }
 
-  std::vector<Point2d> GenerateCircle_XY(float radius, uint32_t num_vertices)
+  std::vector<SpgMth::Point2d> GenerateCircle_XY(float radius, uint32_t num_vertices)
   {
-    std::vector<Point2d> points;
+    std::vector<SpgMth::Point2d> points;
     constexpr auto pi = std::numbers::pi;
    
     double angle = 0;
     for(uint32_t i = 0; i< num_vertices; ++i)
     {
       angle = (i*pi*2) / num_vertices;
-      Point2d p{std::cos(angle)*radius, std::sin(angle)*radius};
+      SpgMth::Point2d p{std::cos(angle)*radius, std::sin(angle)*radius};
       points.push_back(p);
     }
     return points;
   }
 
   // Move a point towards/away from the centroid
-  static Point2d perturbPoint(const Point2d& p, const Point2d& centroid, float maxOffset) 
+  static SpgMth::Point2d perturbPoint(const SpgMth::Point2d& p, const SpgMth::Point2d& centroid, float maxOffset) 
   {
     float dx = centroid.x - p.x;
     float dy = centroid.y - p.y;
@@ -121,7 +126,7 @@ namespace Geom
   }
 
   // Move a point towards/away from the centroid dynamically
-  static Point2d perturbPoint(const Point2d& p, const Point2d& centroid, double baseOffset, double scaleFactor) {
+  static SpgMth::Point2d perturbPoint(const SpgMth::Point2d& p, const SpgMth::Point2d& centroid, double baseOffset, double scaleFactor) {
       double dx = centroid.x - p.x;
       double dy = centroid.y - p.y;
       double dist = std::sqrt(dx * dx + dy * dy);
@@ -133,11 +138,11 @@ namespace Geom
       return p;
   }
 
-  std::vector<Point2d> GenerateRandomPolygon_XY(uint32_t num_vertices, float perturb_factor)
+  std::vector<SpgMth::Point2d> GenerateRandomPolygon_XY(uint32_t num_vertices, float perturb_factor)
   {
-    std::vector<Point2d> points = Geom::GenerateRandomPoints_XY(500, num_vertices);
-    std::vector<Point2d> hull = Geom::Convexhull2D_ModifiedGrahams(points);
-    Point2d centroid = Geom::ComputeCentroid(points);
+    std::vector<SpgMth::Point2d> points = Geom::GenerateRandomPoints_XY(500, num_vertices);
+    std::vector<SpgMth::Point2d> hull = Geom::Convexhull2D_ModifiedGrahams(points);
+    SpgMth::Point2d centroid = SpgMth::ComputeCentroid(points);
 
     //perturb points
     for (auto& p : hull) {
@@ -150,26 +155,26 @@ namespace Geom
     }
 
     //sort by polar angle from centroid
-    std::sort(points.begin(), points.end(), [&](Point2d a, Point2d b) {
+    std::sort(points.begin(), points.end(), [&](SpgMth::Point2d a, SpgMth::Point2d b) {
         return atan2(a.y - centroid.y, a.x - centroid.x) < atan2(b.y - centroid.y, b.x - centroid.x);
     });
 
     return points;
   }
 
-  std::vector<Point2d> GenerateRandomPolygon_XY(const PolygonParameters& params)
+  std::vector<SpgMth::Point2d> GenerateRandomPolygon_XY(const PolygonParameters& params)
 {
     std::random_device rand_device;
     std::mt19937 gen(rand_device());
     std::uniform_real_distribution<float> dist(0,1);
 
-    std::vector<Point2d> finalPolygon;
+    std::vector<SpgMth::Point2d> finalPolygon;
 
     while(finalPolygon.size() < params.min_points) {
       finalPolygon.clear();
-      std::vector<Point2d> points = GenerateRandomPoints_XY(500, params.max_points);
-      std::vector<Point2d> hull = Convexhull2D_ModifiedGrahams(points);
-      Point2d centroid = ComputeCentroid(points);
+      std::vector<SpgMth::Point2d> points = GenerateRandomPoints_XY(500, params.max_points);
+      std::vector<SpgMth::Point2d> hull = Convexhull2D_ModifiedGrahams(points);
+      SpgMth::Point2d centroid = SpgMth::ComputeCentroid(points);
 
       // Perturb points dynamically
       for (auto& p : hull) {
@@ -183,7 +188,7 @@ namespace Geom
           }
       }
       // Sort by polar angle from centroid
-      std::sort(points.begin(), points.end(), [&](Point2d a, Point2d b) {
+      std::sort(points.begin(), points.end(), [&](SpgMth::Point2d a, SpgMth::Point2d b) {
           return atan2(a.y - centroid.y, a.x - centroid.x) < atan2(b.y - centroid.y, b.x - centroid.x);
       });
 
@@ -196,7 +201,7 @@ namespace Geom
               continue;
           }
           if (finalPolygon.size() > 1) {
-              float angle = ComputeAngleInDegrees(finalPolygon[finalPolygon.size() - 2], finalPolygon.back(), points
+              float angle = SpgMth::ComputeAngleInDegrees(finalPolygon[finalPolygon.size() - 2], finalPolygon.back(), points
               [i]);
               angle = 180 - std::abs(angle); // = interior (acute) angle subtended by the 3 consecutive points
               //SPG_TRACE("Angle: {} ", angle);
@@ -213,7 +218,7 @@ namespace Geom
     return finalPolygon;
 }
 
-  std::vector<float> GetMeshFromPoints(const std::vector<Point2d>& points, const glm::vec4& colour)
+  std::vector<float> GetMeshFromPoints(const std::vector<SpgMth::Point2d>& points, const glm::vec4& colour)
   {
     std::vector<float> vertices;
     for(auto p : points)

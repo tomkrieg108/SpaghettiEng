@@ -1,8 +1,10 @@
-#include "IntersectionSet.h"
-#include "GeomUtils.h"
-#include "CoreLib/Core.h"
+#include "Geometry/IntersectionSet.h"
+
 #include <string>
 #include <algorithm>
+
+#include "CoreLib/Core.h"
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {
@@ -12,13 +14,13 @@ namespace Geom
     #define ENABLE_PRINTING
     //#define ENABLE_PRINT_COMPARATOR_LOGGING
 
-    static void PrintComparatorResult1(const LineSeg2D& seg1, const LineSeg2D& seg2, const Point2d& event_point, bool result, int idx)
+    static void PrintComparatorResult1(const SpgMth::LineSeg2D& seg1, const SpgMth::LineSeg2D& seg2, const SpgMth::Point2d& event_point, bool result, int idx)
     {
       const char* res_str = result ? "True" : "False" ;
       SPG_INFO("  {}.SLC Comparing ({},{})->({},{}) with ({},{})->({},{}) at ({},{}) => {}",idx, seg1.start.x,seg1.start.y,seg1.end.x,seg1.end.y, seg2.start.x,seg2.start.y,seg2.end.x,seg2.end.y, event_point.x,event_point.y, res_str);
     }
 
-    static void PrintComparatorResult2(const LineSeg2D& seg1, const LineSeg2D& seg2, const Point2d& event_point, bool result, int idx)
+    static void PrintComparatorResult2(const SpgMth::LineSeg2D& seg1, const SpgMth::LineSeg2D& seg2, const SpgMth::Point2d& event_point, bool result, int idx)
     {
       std::cout << idx << ".SLC Comp: " ;
       std::cout << "(" << seg1.start.x << "," << seg1.start.y << ")->(" << seg1.end.x << "," << seg2.end.y << ") with";
@@ -44,7 +46,7 @@ namespace Geom
         return result; \
       } \
     
-    static void PrintInsertion(LineSeg2D& seg)
+    static void PrintInsertion(SpgMth::LineSeg2D& seg)
     {
       #ifndef ENABLE_PRINTING
         return;
@@ -53,7 +55,7 @@ namespace Geom
       SPG_LOG_FLUSH;
     }
 
-    static void PrintDeletion(LineSeg2D& seg)
+    static void PrintDeletion(SpgMth::LineSeg2D& seg)
     {
       #ifndef ENABLE_PRINTING
         return;
@@ -62,7 +64,7 @@ namespace Geom
       SPG_LOG_FLUSH;
     }
 
-    static void PrintInsertionResult(LineSeg2D& seg, int diff)
+    static void PrintInsertionResult(SpgMth::LineSeg2D& seg, int diff)
     {
       #ifndef ENABLE_PRINTING
         return;
@@ -75,7 +77,7 @@ namespace Geom
         SPG_LOG_FLUSH;
     }
 
-    static void PrintDeletionResult(LineSeg2D& seg, int diff)
+    static void PrintDeletionResult(SpgMth::LineSeg2D& seg, int diff)
     {
       #ifndef ENABLE_PRINTING
         return;
@@ -162,8 +164,8 @@ namespace Geom
       }
     }
 
-    void StatusStructure::PrintStatusStructureSubset(std::set<LineSeg2D, SweepLineComparator>::iterator first,
-         std::set<LineSeg2D, SweepLineComparator>::iterator last, const Point2d& p)
+    void StatusStructure::PrintStatusStructureSubset(std::set<SpgMth::LineSeg2D, SweepLineComparator>::iterator first,
+         std::set<SpgMth::LineSeg2D, SweepLineComparator>::iterator last, const SpgMth::Point2d& p)
     {
       #ifndef ENABLE_PRINTING
         return;
@@ -171,7 +173,7 @@ namespace Geom
       SPG_WARN("Status structure - Subset of segs containing ({},{}) ----------------------", p.x,p.y);
       SPG_ASSERT((first != m_T.end()) && (last != m_T.end()));
       for(auto itr = first; itr != std::next(last); ++itr) {
-        LineSeg2D seg = *itr;
+        SpgMth::LineSeg2D seg = *itr;
         if(IsHorizontal(seg)) {
           SPG_TRACE("  ({},{})->({},{}) - HOR", seg.start.x,seg.start.y,seg.end.x,seg.end.y);
         }
@@ -197,7 +199,7 @@ namespace Geom
       }
     }
 
-    void StatusStructure::PrintUnionUC(const Point2d& p)
+    void StatusStructure::PrintUnionUC(const SpgMth::Point2d& p)
     {
       #ifndef ENABLE_PRINTING
         return;
@@ -231,7 +233,7 @@ namespace Geom
     {
        SPG_WARN("-----------------------------------");  
         SPG_TRACE("iNTERSECTION TESTING");  
-        std::vector<Geom::LineSeg2D> segs 
+        std::vector<SpgMth::LineSeg2D> segs 
         {
           {{-1,4},{-2,1}}, //f
           {{-2,12},{2,-2}}, //g
@@ -268,10 +270,10 @@ namespace Geom
     void Queue::Insert(const SegList& seg_list)
     {
       for(const auto& seg : seg_list) {
-        SPG_ASSERT(!Geom::Equal(seg.start,seg.end));
+        SPG_ASSERT(!SpgMth::Equal(seg.start,seg.end));
         auto upper = seg.start;
         auto lower = seg.end;
-        if(!Geom::Equal(seg.start.y, seg.end.y)) {
+        if(!SpgMth::Equal(seg.start.y, seg.end.y)) {
           if((upper.y < lower.y)) {
             upper = seg.end;
             lower = seg.start;    
@@ -281,7 +283,7 @@ namespace Geom
           upper = seg.end;
           lower = seg.start;
         }
-        LineSeg2D new_seg{upper,lower}; //Ensure start point is segments upper point
+        SpgMth::LineSeg2D new_seg{upper,lower}; //Ensure start point is segments upper point
 
         // Insert an event for the upper endpoint.
         {
@@ -328,14 +330,14 @@ namespace Geom
       return e;
     }
 
-    float SweepLineComparator::ComputeSweepLineXIntercept(const LineSeg2D& seg) const noexcept
+    float SweepLineComparator::ComputeSweepLineXIntercept(const SpgMth::LineSeg2D& seg) const noexcept
     {
       float y_sweep = event_point.y;
-      if(Geom::Equal(seg.start.y, y_sweep))
+      if(SpgMth::Equal(seg.start.y, y_sweep))
         return seg.start.x;
-      if(Geom::Equal(seg.end.y, y_sweep))
+      if(SpgMth::Equal(seg.end.y, y_sweep))
         return seg.end.x;
-      if(Geom::IsVertical(seg))
+      if(SpgMth::IsVertical(seg))
         return seg.start.x;  
       if(IsHorizontal(seg)) { 
         if(SegIncludesPoint(seg,event_point))
@@ -355,16 +357,16 @@ namespace Geom
       return x;
     }
 
-    bool SweepLineComparator::operator ()(const LineSeg2D& seg1,  const LineSeg2D& seg2) const noexcept
+    bool SweepLineComparator::operator ()(const SpgMth::LineSeg2D& seg1,  const SpgMth::LineSeg2D& seg2) const noexcept
     {
-      if(Geom::Equal(seg1.start, seg2.start) && Geom::Equal(seg1.end, seg2.end)) {
+      if(SpgMth::Equal(seg1.start, seg2.start) && SpgMth::Equal(seg1.end, seg2.end)) {
         LOG_COMP_RES_THEN_RETURN(seg1,seg2,event_point,false,1); //segs equivalent
       }
         
-      bool s1_includes_p = Geom::SegIncludesPoint(seg1,event_point);
-      bool s2_includes_p = Geom::SegIncludesPoint(seg2,event_point);
-      bool s1_horiz = Geom::IsHorizontal(seg1);
-      bool s2_horiz = Geom::IsHorizontal(seg2);
+      bool s1_includes_p = SpgMth::SegIncludesPoint(seg1,event_point);
+      bool s2_includes_p = SpgMth::SegIncludesPoint(seg2,event_point);
+      bool s1_horiz = SpgMth::IsHorizontal(seg1);
+      bool s2_horiz = SpgMth::IsHorizontal(seg2);
 #if 0
       if(s1_includes_p && s2_includes_p) {
         if(s2_horiz && !s1_horiz) {
@@ -389,7 +391,7 @@ namespace Geom
       // if(!Equal(x1,x2)) 
       //   return x1 < x2; //if true, seg1 will come before seg 2
 
-      if (std::fabs(x1 - x2) > Epsilon()) {
+      if (std::fabs(x1 - x2) > SpgMth::Epsilon()) {
         LOG_COMP_RES_THEN_RETURN(seg1,seg2,event_point,x1<x2,5); //seg1 before seg2 if true
       }
         
@@ -401,10 +403,10 @@ namespace Geom
 
     //Todo - consider a trailing return type as per Copilot info
     //The Segs containing point p in T (status struct) should be consecutive
-    auto StatusStructure::FindSegsInTContainingPoint(const Point2d& p)
+    auto StatusStructure::FindSegsInTContainingPoint(const SpgMth::Point2d& p)
     {
       auto ret_val = std::make_pair(m_T.begin(),m_T.end());
-      while( (ret_val.first != m_T.end()) && !Geom::SegIncludesPoint(*(ret_val.first),p) ) {
+      while( (ret_val.first != m_T.end()) && !SpgMth::SegIncludesPoint(*(ret_val.first),p) ) {
         ret_val.first++;
       }
 
@@ -414,7 +416,7 @@ namespace Geom
       ret_val.second = ret_val.first;
       while( (std::next(ret_val.second) != m_T.end()) ) {
         auto seg = *(std::next(ret_val.second));
-        if(Geom::SegIncludesPoint(seg,p))
+        if(SpgMth::SegIncludesPoint(seg,p))
           ret_val.second++;
         else
           break; 
@@ -471,14 +473,14 @@ namespace Geom
       SegList u, l, c; //upper, lower, central (i.e. interior) segs
       u = e.seg_list;
       for(auto& seg : m_T) {
-        if(Geom::Equal(e.point, seg.end)) 
+        if(SpgMth::Equal(e.point, seg.end)) 
            l.insert(l.end(), seg);  
         else if(SegContainsPoint(seg, e.point)) 
           c.insert(c.end(), seg);
       }
 
       //Using SweepLineComparator as sorting predicate with sweep line adjusted down.  Should give same order as in the status structure m_T after m_union_LC deleted and m_union_UC added!
-      Point2d event_point = e.point;
+      SpgMth::Point2d event_point = e.point;
       SweepLineComparator comp = SweepLineComparator(event_point);
       std::sort(l.begin(), l.end(),comp);
       std::sort(u.begin(), u.end(),comp);
@@ -514,7 +516,7 @@ namespace Geom
     auto StatusStructure::LeftAndRightNeighbour(const Event& e)
     {
       //step 9 in Comp Geom pg 26
-      LineSeg2D dummy_seg{{e.point.x,  e.point.y},{e.point.x,  e.point.y + 0.1f}};
+      SpgMth::LineSeg2D dummy_seg{{e.point.x,  e.point.y},{e.point.x,  e.point.y + 0.1f}};
       //Returns iterator to first element in m_T that is  greater or equal to dummy_seg
       //use m_T.lower_bound(dummy_seg); if need to find the first that is strictly greater than dummy_seg
       auto itr = m_T.lower_bound(dummy_seg); 
@@ -525,7 +527,7 @@ namespace Geom
 
     auto StatusStructure::LeftMost_UC_In_T(const Event& e)
     {
-      Point2d event_point = e.point;
+      SpgMth::Point2d event_point = e.point;
       SweepLineComparator comp = SweepLineComparator(event_point);
       //get iterator to the left most element in m_union_UC
       auto uc_itr = std::min_element(m_union_UC.cbegin(), m_union_UC.cend(),comp);
@@ -539,7 +541,7 @@ namespace Geom
 
     auto StatusStructure::RightMost_UC_In_T(const Event& e)
     {
-       Point2d event_point = e.point;
+      SpgMth::Point2d event_point = e.point;
       SweepLineComparator comp = SweepLineComparator(event_point);
       //get iterator to the left most element in m_union_UC 
       auto uc_itr = std::max_element(m_union_UC.cbegin(), m_union_UC.cend(),comp);
@@ -573,12 +575,12 @@ namespace Geom
       m_status.PrintComparatorLog();
     }
 
-    void IntersectionSet::FindNewEvent(const LineSeg2D& seg1, const LineSeg2D& seg2,Point2d p)
+    void IntersectionSet::FindNewEvent(const SpgMth::LineSeg2D& seg1, const SpgMth::LineSeg2D& seg2, SpgMth::Point2d p)
     {
       if(!StrictIntersectionExists(seg1, seg2)) 
         return;
   
-      Point2d intersection_point;
+      SpgMth::Point2d intersection_point;
       bool success = ComputeIntersection(seg1, seg2, intersection_point);
       if(success) { //StrictIntersectionExists should guarantee this, but check anyway.
         //x coord check is to avoid adding events that are to the left of an already processed point

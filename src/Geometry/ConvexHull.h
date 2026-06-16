@@ -1,6 +1,7 @@
 #pragma once
-#include "MathLib/Geom/Geom.h"
+#include <vector>
 
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {

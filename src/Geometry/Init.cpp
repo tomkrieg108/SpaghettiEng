@@ -1,12 +1,13 @@
 #include "Geometry/Init.h"
 #include "CoreLib/Core.h"
+
 //external libs check only
 #include <cxxopts.hpp>
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 //------------------------
-#include <glm/glm.hpp>
+//#include <glm/glm.hpp>
 #include <iostream>
 
 
@@ -38,12 +39,12 @@ namespace Geom
     SPG_TRACE("CXXOPTS: {}.{}.{}",CXXOPTS__VERSION_MAJOR,CXXOPTS__VERSION_MAJOR, CXXOPTS__VERSION_PATCH);
     SPG_TRACE("SPDLOG: {},{}.{}",SPDLOG_VER_MAJOR,SPDLOG_VER_MINOR,SPDLOG_VER_PATCH);
   
-    auto logger = Core::Logger::Create("GEOM");
-    SPG_TRACE("SPDLOG: {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
+    // auto logger = Core::Logger::Create("GEOM");
+    // SPG_TRACE("SPDLOG: {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
   
-    glm::vec3 v{42,42,42};
-    std::cout << "vec3 value is: " << v.x << "," << v.y << "," << v.z << "\n";
-    std::cout << "\n";
+    // glm::vec3 v{42,42,42};
+    // std::cout << "vec3 value is: " << v.x << "," << v.y << "," << v.z << "\n";
+    // std::cout << "\n";
     SPG_TRACE("That's all the external libs!");
     SPG_WARN( "####################################################");
   }

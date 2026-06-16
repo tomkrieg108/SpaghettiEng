@@ -1,11 +1,13 @@
 add_library(${LIB_GEOM} STATIC 
   "./Init.cpp"
   "./Init.h"
-  "./GeomBase.h"
-  "./GeomUtils.h"
-  "./GeomUtils.cpp"
-  "./Line.h"
-  "./Plane.h"
+
+  # "./GeomBase.h"
+  # "./GeomUtils.h"
+  # "./GeomUtils.cpp"
+  # "./Line.h"
+  # "./Plane.h"
+
   "./Polygon.h"
   "./Polygon.cpp"
   "./MeshPrimitives2D.cpp"
@@ -38,4 +40,6 @@ target_include_directories(${LIB_GEOM} PUBLIC
 )
 
 target_link_libraries(${LIB_GEOM} PUBLIC ${LIB_CORE} )
-target_link_libraries(${LIB_GEOM} PUBLIC glm::glm-header-only) 
+target_link_libraries(${LIB_GEOM} PUBLIC ${LIB_MATH} )
+
+#target_link_libraries(${LIB_GEOM} PUBLIC glm::glm-header-only) 

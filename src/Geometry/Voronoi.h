@@ -3,7 +3,7 @@
 #include "Geometry/RBTreeTraversable.h"
 #include "Geometry/DCEL.h"
 #include "MathLib/Geom/Geom.h"
-//#include "Geometry/GeomUtils.h"
+
 #include <spdlog/spdlog.h> // format string for Voronoi Node
 #include <array>
 #include <queue>

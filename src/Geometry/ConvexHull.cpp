@@ -1,6 +1,9 @@
 
-#include "ConvexHull.h"
-#include "MeshPrimitives2D.h"
+#include "Geometry/ConvexHull.h"
+
+#include <vector>
+
+#include "Geometry/MeshPrimitives2D.h"
 #include "CoreLib/Core.h"
 #include "MathLib/Geom/Geom.h"
 
@@ -8,7 +11,7 @@ namespace Geom
 {
   std::vector<SpgMth::Point2d> ConvexHull2D_GiftWrap(const std::vector<SpgMth::Point2d>& points)
   {
-    std::vector<Point2d> hull;
+    std::vector<SpgMth::Point2d> hull;
     if(points.size() < 3)
       return hull;
 
@@ -26,7 +29,7 @@ namespace Geom
     hull.push_back(points[start_idx]);
     
     //Get second point
-    Point2d ref_point{points[start_idx].x +100.0f, points[start_idx].y}; //horiz line seg to the right
+    SpgMth::Point2d ref_point{points[start_idx].x +100.0f, points[start_idx].y}; //horiz line seg to the right
     SpgMth::LineSeg2D ref_seg{points[start_idx], ref_point};
     float min_angle = std::numeric_limits<float>::max();
     uint32_t second_idx = 0;
@@ -75,19 +78,19 @@ namespace Geom
     return hull;
   }
 
-  std::vector<Point2d> Convexhull2D_ModifiedGrahams(const std::vector<Point2d>& points)
+  std::vector<SpgMth::Point2d> Convexhull2D_ModifiedGrahams(const std::vector<SpgMth::Point2d>& points)
   {
     if(points.size() < 3)
       return points;
       
     //sort points left to right
-    std::vector<Point2d> sorted_points = points;
-    std::sort(std::begin(sorted_points), std::end(sorted_points), [](const Point2d& lhs, const Point2d& rhs) {
+    std::vector<SpgMth::Point2d> sorted_points = points;
+    std::sort(std::begin(sorted_points), std::end(sorted_points), [](const SpgMth::Point2d& lhs, const SpgMth::Point2d& rhs) {
         return lhs.x < rhs.x;
     });
     
     //generate upper hull
-    std::vector<Point2d> upper_hull;
+    std::vector<SpgMth::Point2d> upper_hull;
     for(auto itr = sorted_points.begin(); itr != sorted_points.end(); ++itr )
     {
       while( (upper_hull.size() > 1) && SpgMth::Left({*(upper_hull.cend()-2), *(upper_hull.cend()-1)}, *itr))
@@ -97,7 +100,7 @@ namespace Geom
     }
 
     //generate lower hull
-    std::vector<Point2d> lower_hull;
+    std::vector<SpgMth::Point2d> lower_hull;
     for(auto itr = sorted_points.rbegin(); itr != sorted_points.rend(); ++itr )
     {
       while( (lower_hull.size() > 1) && SpgMth::Left({*(lower_hull.cend()-2), *(lower_hull.cend()-1)}, *itr))

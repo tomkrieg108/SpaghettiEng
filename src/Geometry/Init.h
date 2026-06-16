@@ -1,20 +1,22 @@
 #pragma once
 
-#include "GeomUtils.h"
-#include "Line.h"
-#include "MeshPrimitives2D.h"
-#include "DCEL.h"
-#include "ConvexHull.h"
-#include "Polygon.h"
-#include "Triangulate.h"
-#include "BSTree.h"
-#include "RBTree.h"
-#include "RBTreeTraversable.h"
-#include "KDTree.h"
-#include "RangeTree.h"
-#include "IntersectionSet.h"
-#include "MonotonePartition.h"
-#include "Voronoi.h"
+//#include "GeomUtils.h"
+//#include "Line.h"
+#include "MathLib/Geom/Geom.h"
+
+#include "Geometry/MeshPrimitives2D.h"
+#include "Geometry/DCEL.h"
+#include "Geometry/ConvexHull.h"
+#include "Geometry/Polygon.h"
+#include "Geometry/Triangulate.h"
+#include "Geometry/BSTree.h"
+#include "Geometry/RBTree.h"
+#include "Geometry/RBTreeTraversable.h"
+#include "Geometry/KDTree.h"
+#include "Geometry/RangeTree.h"
+#include "Geometry/IntersectionSet.h"
+#include "Geometry/MonotonePartition.h"
+#include "Geometry/Voronoi.h"
 
 namespace Geom
 {

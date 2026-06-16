@@ -1,7 +1,9 @@
 #pragma once
-#include "GeomBase.h"
-#include "CoreLib/Core.h"
+
 #include <iostream>
+
+#include "CoreLib/Core.h"
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {
@@ -9,8 +11,8 @@ namespace Geom
   {
     struct Vertex
     {
-      explicit Vertex(const Point2d& point) : point{point} {}
-      Point2d point;
+      explicit Vertex(const SpgMth::Point2d& point) : point{point} {}
+      SpgMth::Point2d point;
       Vertex* next = nullptr;
       Vertex* prev = nullptr;
 
@@ -28,12 +30,11 @@ namespace Geom
 
     struct Polygon
     {
-      Polygon(const std::vector<Point2d>& points);
-      std::vector<Point2d> GetEars();
+      Polygon(const std::vector<SpgMth::Point2d>& points);
+      std::vector<SpgMth::Point2d> GetEars();
       std::vector<Vertex*> vertices;
     };
   }
 
-
-using PolygonSimple = SP::Polygon;
+  using PolygonSimple = SP::Polygon;
 }

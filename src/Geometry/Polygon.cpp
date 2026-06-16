@@ -1,11 +1,13 @@
-#include "Polygon.h"
+#include "Geometry/Polygon.h"
+
 #include "CoreLib/Core.h"
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {
   namespace SP
   {
-    Polygon::Polygon(const std::vector<Point2d>& points)
+    Polygon::Polygon(const std::vector<SpgMth::Point2d>& points)
     {
       const auto size = points.size();
       SPG_ASSERT(size >= 3);
@@ -22,9 +24,9 @@ namespace Geom
       }
     }
 
-    std::vector<Point2d> Polygon::GetEars()
+    std::vector<SpgMth::Point2d> Polygon::GetEars()
     {
-      std::vector<Point2d> ears;
+      std::vector<SpgMth::Point2d> ears;
       for(auto v : vertices) {
         if(v->is_ear)
           ears.push_back(v->point);    

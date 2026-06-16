@@ -1,5 +1,7 @@
-#include "Triangulate.h"
-#include "GeomUtils.h"
+#include "Geometry/Triangulate.h"
+//#include "GeomUtils.h"
+
+#include "MathLib/Geom/Geom.h"
 
 namespace Geom
 {
@@ -27,14 +29,14 @@ namespace Geom
  // Vid 26 (diagonal test)
   static bool InteriorCheck(const SP::Vertex* v1, const SP::Vertex* v2) 
   {
-    if(LeftOrBeyond({v1->point, v1->next->point}, v1->prev->point)) {
+    if(SpgMth::LeftOrBeyond({v1->point, v1->next->point}, v1->prev->point)) {
           //v1 has convex interior angle
-          return Left({v1->point, v2->point}, v1->prev->point) &&
-                Left({v2->point, v1->point}, v1->next->point);
+          return SpgMth::Left({v1->point, v2->point}, v1->prev->point) &&
+                SpgMth::Left({v2->point, v1->point}, v1->next->point);
     }
     //v1 has reflex interior angle. Check it is not exterior - like this:
-    return !(LeftOrBeyond({v1->point, v2->point}, v1->next->point) &&
-            LeftOrBeyond({v2->point, v1->point}, v1->prev->point));
+    return !(SpgMth::LeftOrBeyond({v1->point, v2->point}, v1->next->point) &&
+            SpgMth::LeftOrBeyond({v2->point, v1->point}, v1->prev->point));
   }
 
   bool IsDiagonal(const SP::Vertex* v1, const SP::Vertex* v2, const PolygonSimple* polygon)
@@ -58,7 +60,7 @@ namespace Geom
     do {
       next = current->next;
       if(current != v1 && next != v1 && current != v2 && next != v2 && 
-              IntersectionExists({v1->point, v2->point},{current->point, next->point}))  {
+              SpgMth::IntersectionExists({v1->point, v2->point},{current->point, next->point}))  {
         prospect = false;
         break;     
       }
@@ -77,7 +79,7 @@ namespace Geom
     do {
       v0 = v1->prev;
       v2 = v1->next;
-      if(IsConvex(v0->point,v1->point,v2->point))
+      if(SpgMth::IsConvex(v0->point,v1->point,v2->point))
         v1->is_ear = IsDiagonal(v0,v2);
       v1 = v1->next;  
     } while (v1 != vertices[0]);
@@ -114,10 +116,10 @@ namespace Geom
           v3->prev = v1;
 
           //update ear status of v1 and v3
-          if(IsConvex(v1->prev->point,v1->point,v2->next->point))
+          if(SpgMth::IsConvex(v1->prev->point,v1->point,v2->next->point))
             v1->is_ear = IsDiagonal(v0,v3);
 
-          if(IsConvex(v3->prev->point,v3->point,v3->next->point))
+          if(SpgMth::IsConvex(v3->prev->point,v3->point,v3->next->point))
             v3->is_ear = IsDiagonal(v1,v4);  
 
           vertices_to_process--;
