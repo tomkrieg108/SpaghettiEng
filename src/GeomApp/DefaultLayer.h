@@ -1,6 +1,7 @@
 #pragma once
-#include <SpaghettiEng/SpaghettiEng.h>
-#include <Geometry/Init.h>
+#include "SpaghettiEng/SpaghettiEng.h"
+#include "MathLib/MathLib.h"
+#include "Geometry/Init.h"
 
 namespace Spg
 {
@@ -18,7 +19,7 @@ namespace Spg
     struct Label
     {
       std::string text;
-      Geom::Point2d pos;
+      SpgMth::Point2d pos;
     };
     
     struct Mesh
@@ -44,7 +45,7 @@ namespace Spg
 
       Mesh& operator=(Mesh&&) = default;
 
-      std::vector<Geom::Point2d> vertices;
+      std::vector<SpgMth::Point2d> vertices;
       std::vector<Label> labels;
       MeshType type;
       bool active = true;

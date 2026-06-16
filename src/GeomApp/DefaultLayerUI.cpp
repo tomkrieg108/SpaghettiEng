@@ -1,4 +1,9 @@
-#include "DefaultLayer.h"
+
+#include <vector>
+
+#include "GeomApp/DefaultLayer.h"
+
+#include "MathLib/Geom/Geom.h"
 
 namespace Spg
 {
@@ -43,7 +48,7 @@ namespace Spg
         create_clicked = true;
       }
       ImGui::SetItemTooltip("Create random simple polygon based on parameters set");
-      std::vector<Geom::Point2d> poly_points;
+      std::vector<SpgMth::Point2d> poly_points;
       if(create_clicked) {
         Geom::PolygonParameters poly_params{uint32_t(max_vertices*0.7),uint32_t(max_vertices*1.0),min_edge,max_edge,min_angle,perturb_factor};
         Mesh mesh;

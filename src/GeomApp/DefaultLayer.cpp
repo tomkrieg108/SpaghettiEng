@@ -1,11 +1,16 @@
-#include "DefaultLayer.h"
+#include "GeomApp/DefaultLayer.h"
+
+#include <vector>
+#include <set>
 #include <random>
+
+#include "CoreLib/Logger.h"
 
 namespace Spg
 {
   using VertexCategory = Geom::MonotonePartitionAlgo::VertexCategory;
 
-  static void PrintDiagPoints(const std::vector<Geom::Point2d> points)
+  static void PrintDiagPoints(const std::vector<SpgMth::Point2d> points)
   {
     for(auto& p : points) {
       SPG_TRACE("({},{})", p.x,p.y);
@@ -38,7 +43,7 @@ namespace Spg
   { // render_id is the id of the sweep line
     auto& first_event_point = m_monotone_spawner.GetEventQueue().back();
     float sweep_y = first_event_point.vertex->point.y;
-    const std::vector<Geom::Point2d> sweep_line_mesh = {glm::vec2(-500.0f, sweep_y),glm::vec2(500.0f, sweep_y) };
+    const std::vector<SpgMth::Point2d> sweep_line_mesh = {glm::vec2(-500.0f, sweep_y),glm::vec2(500.0f, sweep_y) };
     m_renderer.UpdatePosition(render_id, sweep_line_mesh);
   }
 

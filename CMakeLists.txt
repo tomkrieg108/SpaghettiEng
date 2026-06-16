@@ -185,7 +185,8 @@ else()
 endif()
 
 
-
+# Note:  Use 'private' not 'public'
+# Alway include dependent includes in source file too (even though will still compile without)
 target_precompile_headers(${LIB_CORE} PRIVATE 
   <cstdint>
   <cmath>
