@@ -2,6 +2,8 @@
 add_library(${LIB_ENG} STATIC)
 
 target_sources(${LIB_ENG} PRIVATE 
+  "./Camera/Camera2D.cpp"
+  "./Camera/CameraController2D.cpp"
   "./Core/Application.cpp"
   "./Core/AppLayer.cpp"
   "./Core/Window.cpp"
@@ -15,8 +17,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./OpenGL32/GL32Buffer.cpp"
   "./OpenGL32/GL32VertexArray.cpp"
   "./OpenGL32/GL32Renderer.cpp"
-  "./Camera/Camera2D.cpp"
-  "./Camera/CameraController2D.cpp"
+  "./Scene/Scene.cpp"
   )
 
 if(WIN32)
@@ -26,6 +27,8 @@ if(WIN32)
 endif()
 
 target_sources(${LIB_ENG} PRIVATE
+  "./Camera/Camera2D.h"
+  "./Camera/CameraController2D.h"
   "./Core/Application.h"
   "./Core/AppLayer.h"
   "./Core/AppContext.h"
@@ -44,8 +47,8 @@ target_sources(${LIB_ENG} PRIVATE
   "./OpenGL32/GL32VertexArray.h"
   "./OpenGL32/GL32BufferLayout.h"
   "./OpenGL32/GL32Renderer.h"
-  "./Camera/Camera2D.h"
-  "./Camera/CameraController2D.h"
+  "./Scene/Registry.h"
+  "./Scene/Scene.h"
 )
 
 if(WIN32)
@@ -73,9 +76,9 @@ target_link_libraries(${LIB_ENG} PUBLIC glfw)
 target_link_libraries(${LIB_ENG} PUBLIC glm::glm-header-only)
 target_link_libraries(${LIB_ENG} PUBLIC EnTT::EnTT)
 target_link_libraries(${LIB_ENG} PUBLIC freetype)
-target_link_libraries(${LIB_ENG} PUBLIC ${LIB_CORE} )   #links to spdlog, GLM, json, fmt, cxxopts
-target_link_libraries(${LIB_ENG} PUBLIC ${LIB_MATH} )     #Also links to GLM & Common
-target_link_libraries(${LIB_ENG} PUBLIC ${LIB_GEOM} )     #Also links to GLM & Common
-target_link_libraries(${LIB_ENG} PUBLIC ${LIB_CYCLONE} )  #Also links to GLM & Common
+target_link_libraries(${LIB_ENG} PUBLIC ${LIB_CORE} )   
+target_link_libraries(${LIB_ENG} PUBLIC ${LIB_MATH} )    
+target_link_libraries(${LIB_ENG} PUBLIC ${LIB_GEOM} )     
+target_link_libraries(${LIB_ENG} PUBLIC ${LIB_CYCLONE} )  
 target_link_libraries(${LIB_ENG} PUBLIC ${EXT_STB_IMG} )
-target_link_libraries(${LIB_ENG} PUBLIC ${EXT_IMGUI} )    #Also links to glfw
+target_link_libraries(${LIB_ENG} PUBLIC ${EXT_IMGUI} )

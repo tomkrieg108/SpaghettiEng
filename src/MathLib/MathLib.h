@@ -16,7 +16,7 @@ namespace SpgMth
   //{
     using Vec2 = glm::vec2;
     using Vec3 = glm::vec3;
-    using Vec4 = glm::vec3;
+    using Vec4 = glm::vec4;
 
     using Point2d = glm::vec2;
     using Point3d = glm::vec3;
@@ -37,7 +37,42 @@ namespace SpgMth
     using Quat = glm::quat;
 
     template <typename T>
-    inline auto Dot(T v1, T v2) {return glm::dot(v1,v2);}
+    inline auto Dot(const T& v1, const T& v2) {return glm::dot(v1,v2);}
+
+    template <typename T>
+    inline auto Length(const T& v) {return glm::length(v);}
+
+    template <typename T>
+    inline auto Distance(const T& v1, const T& v2) {return glm::distance(v1,v2);}
+
+    template <typename T>
+    inline auto Normalize(const T& v) {return glm::normalize(v);}
+
+    template <typename T>
+    inline auto Abs(const T& v) {return glm::abs(v);}
+
+    template <typename T>
+    inline auto Sqrt(const T& v) {return glm::sqrt(v);}
+
+    template <typename T>
+    inline auto Sin(const T& v) {return glm::sin(v);}
+
+    template <typename T>
+    inline auto Cos(const T& v) {return glm::cos(v);}
+
+    template <typename T>
+    inline auto Exp(const T& v) {return glm::exp(v);}
+
+    inline Mat4 Transpose(const Mat4& m) { return glm::transpose(m); }
+
+    inline Mat4 Inverse(const Mat4& m)   { return glm::inverse(m); }
+
+    inline const float* GetPtr(const Mat4& m) { 
+        return &m[0].x; // Works perfectly for GLM
+    }
+    inline const float* GetPtr(const Vec3& v) { 
+        return &v.x; 
+    }
     //using Vec4a = glm::aligned_highp_vec4;
   //}
 
@@ -57,3 +92,43 @@ namespace SpgMth
   aligned vec3 - might add padding to make it 16 bytes so that it aligns with SIMD regs
 */
 
+// Logging =================================================================
+
+#include <spdlog/spdlog.h>
+#include <glm/gtx/string_cast.hpp>
+
+template<glm::length_t L, typename T, glm::qualifier Q>
+struct fmt::formatter<glm::vec<L,T,Q>> {
+	constexpr auto parse(format_parse_context& ctx) {
+		return ctx.begin();
+	}
+
+	template <typename FormatContext>
+	auto format(const glm::vec<L,T,Q>& v, FormatContext& ctx) const  {
+		return fmt::format_to(ctx.out(), "{}", glm::to_string(v));
+	}
+};
+
+template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
+struct fmt::formatter<glm::mat<C,R,T,Q>> {
+	constexpr auto parse(format_parse_context& ctx) {
+		return ctx.begin();
+	}
+
+	template <typename FormatContext>
+	auto format(const glm::mat<C,R,T,Q>& m, FormatContext& ctx) const  {
+		return fmt::format_to(ctx.out(), "{}", glm::to_string(m));
+	}
+};
+
+template<typename T, glm::qualifier Q>
+struct fmt::formatter<glm::qua<T, Q>> {
+	constexpr auto parse(format_parse_context& ctx) {
+		return ctx.begin();
+	}
+
+	template <typename FormatContext>
+	auto format(const glm::qua<T, Q>& q, FormatContext& ctx) const  {
+		return fmt::format_to(ctx.out(), "{}", glm::to_string(q));
+	}
+};

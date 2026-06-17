@@ -9,6 +9,7 @@
 #include "Geometry/Triangulate.h"
 
 #include "CoreLib/Core.h"
+#include "MathLib/MathLib.h"
 #include "MathLib/Geom/Geom.h"
 
 
@@ -196,7 +197,7 @@ namespace Geom
       //SPG_TRACE("--------------------------------------------");
       finalPolygon.push_back(points[0]);
       for (size_t i = 1; i < points.size(); i++) {
-          auto dist = glm::distance(finalPolygon.back(), points[i]);
+          auto dist = SpgMth::Distance(finalPolygon.back(), points[i]);
           if (dist < params.min_edge || dist > params.max_edge) {
               continue;
           }
@@ -218,7 +219,7 @@ namespace Geom
     return finalPolygon;
 }
 
-  std::vector<float> GetMeshFromPoints(const std::vector<SpgMth::Point2d>& points, const glm::vec4& colour)
+  std::vector<float> GetMeshFromPoints(const std::vector<SpgMth::Point2d>& points, const SpgMth::Vec4& colour)
   {
     std::vector<float> vertices;
     for(auto p : points)

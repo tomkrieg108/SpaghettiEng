@@ -15,6 +15,7 @@
 #include <entt/entity/registry.hpp>
 
 #include "CoreLib/Init.h"
+#include "MathLib/MathLib.h"
 
 namespace Spg
 {
@@ -30,8 +31,8 @@ namespace Spg
     Application(title)
   {
     Window& window = m_app_context.Get<Window>("Window");
-    glm::vec3 cam_pos = glm::vec3(0.0f,0.0f,1.0f);
-    glm::vec3 look_pos = glm::vec3(0.0f,0.0f,0.0f);
+    SpgMth::Vec3 cam_pos = SpgMth::Vec3(0.0f,0.0f,1.0f);
+    SpgMth::Vec3 look_pos = SpgMth::Vec3(0.0f,0.0f,0.0f);
     auto camera = std::make_shared<Camera2D>();
     camera->SetPosition(cam_pos);
     camera->LookAt(look_pos);

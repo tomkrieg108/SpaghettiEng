@@ -22,8 +22,6 @@ target_link_libraries(${LIB_CORE} PUBLIC
   spdlog::spdlog
 )
 
-target_link_libraries(${LIB_CORE} PUBLIC glm::glm-header-only) 
-
 #For testing libs only
 target_link_libraries(${LIB_CORE} PUBLIC
   nlohmann_json::nlohmann_json  

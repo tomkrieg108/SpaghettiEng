@@ -1,12 +1,14 @@
 #include "PhysLib/Cyclone/ParticleLinks.h"
 #include "PhysLib/Cyclone/Particle.h"
 
+#include "MathLib/MathLib.h"
+
 namespace Cyc
 {
   SpgMth::Real ParticleLink::CurrentLength() const {
     SpgMth::Vec3 relative_pos = m_particle[0]->GetPosition() - 
         m_particle[1]->GetPosition();
-    return glm::length(relative_pos);
+    return SpgMth::Length(relative_pos);
   }
 
   uint32_t ParticleCable::AddContact(ParticleContact *contact, uint32_t limit) const {
@@ -23,7 +25,7 @@ namespace Cyc
 
     // Calculate the normal
     SpgMth::Vec3 normal = m_particle[1]->GetPosition() - m_particle[0]->GetPosition();
-    normal = glm::normalize(normal);
+    normal = SpgMth::Normalize(normal);
   
     contact->contact_normal = normal;
 
@@ -47,7 +49,7 @@ namespace Cyc
 
     // Calculate the normal
     SpgMth::Vec3 normal = m_particle[1]->GetPosition() - m_particle[0]->GetPosition();
-    normal = glm::normalize(normal);
+    normal = SpgMth::Normalize(normal);
 
     // The contact normal depends on whether we're extending or compressing
     if(length > m_length) {
@@ -67,7 +69,7 @@ namespace Cyc
 
   SpgMth::Real ParticleConstraint::CurrentLength() const {
     SpgMth::Vec3 relative_pos = m_particle->GetPosition() - m_anchor;
-    return glm::length(relative_pos);
+    return SpgMth::Length(relative_pos);
   }
 
   uint32_t ParticleCableConstraint::AddContact(ParticleContact *contact, uint32_t limit) const {
@@ -84,7 +86,7 @@ namespace Cyc
 
     // Calculate the normal
     SpgMth::Vec3 normal = m_particle->GetPosition();
-    normal = glm::normalize(normal);
+    normal = SpgMth::Normalize(normal);
     contact->contact_normal = normal;
 
     contact->penetration = length - m_max_length;
@@ -107,7 +109,7 @@ namespace Cyc
 
     // Calculate the normal
     SpgMth::Vec3 normal = m_anchor - m_particle->GetPosition();
-    normal = glm::normalize(normal);
+    normal = SpgMth::Normalize(normal);
 
     // The contact normal depends on whether we're extending or compressing
     if(length > m_length) {

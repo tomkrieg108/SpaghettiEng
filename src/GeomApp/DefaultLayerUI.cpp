@@ -3,6 +3,7 @@
 
 #include "GeomApp/DefaultLayer.h"
 
+#include "MathLib/MathLib.h"
 #include "MathLib/Geom/Geom.h"
 
 namespace Spg
@@ -90,13 +91,13 @@ namespace Spg
         Mesh& mesh = m_mesh_list[s_active_mesh];
         if(mesh.render_id == std::numeric_limits<uint32_t>::max())
         {
-            mesh.render_id = m_renderer.Submit( mesh.vertices, glm::vec4(0,0,1,1), GLRenderer::PrimitiveType::LineLoop);
+            mesh.render_id = m_renderer.Submit( mesh.vertices, SpgMth::Vec4(0,0,1,1), GLRenderer::PrimitiveType::LineLoop);
         }
         else {
           //Control for the change the colour of the active mesh
           static ImVec4 seg_color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
           if(ImGui::ColorEdit3("Seg Color##1", (float*)&seg_color, ImGuiColorEditFlags_Float)) {
-            glm::vec4 col{seg_color.x,seg_color.y, seg_color.z, seg_color.w};
+            SpgMth::Vec4 col{seg_color.x,seg_color.y, seg_color.z, seg_color.w};
             SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
             auto render_id = m_mesh_list[s_active_mesh].render_id;
             for(auto i=0; i<m_mesh_list[s_active_mesh].vertices.size(); ++i) //Todo - not super efficient!!
@@ -167,7 +168,7 @@ namespace Spg
         mesh.vertices = Geom::GenerateRandomPoints_XY(radius, num_points);
         mesh.type= MeshType::PointSet;
         mesh.active = true;
-        mesh.render_id = m_renderer.Submit(mesh.vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::Point);
+        mesh.render_id = m_renderer.Submit(mesh.vertices, SpgMth::Vec4(1,1,0,1), GLRenderer::PrimitiveType::Point);
         std::string mesh_name = std::string("PointSet ") + std::to_string(m_mesh_list.size() + 1);
         m_mesh_list[mesh_name] = mesh;
 
@@ -267,7 +268,7 @@ namespace Spg
           hull_mesh->vertices =  Geom::Convexhull2D_ModifiedGrahams(mesh.vertices);
           hull_mesh->type = MeshType::LineSet;
           hull_mesh->active = true;
-          hull_mesh->render_id = m_renderer.Submit( hull_mesh->vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::LineLoop);
+          hull_mesh->render_id = m_renderer.Submit( hull_mesh->vertices, SpgMth::Vec4(1,1,0,1), GLRenderer::PrimitiveType::LineLoop);
           mesh.children["Hull"] = hull_mesh;
         }
       }
@@ -310,21 +311,21 @@ namespace Spg
           verts_mesh->vertices =  voronoi.GetVertexPoints();
           verts_mesh->type = MeshType::PointSet;
           verts_mesh->active = true;
-          verts_mesh->render_id = m_renderer.Submit( verts_mesh->vertices, glm::vec4(1,0,0,1), GLRenderer::PrimitiveType::Point);
+          verts_mesh->render_id = m_renderer.Submit( verts_mesh->vertices, SpgMth::Vec4(1,0,0,1), GLRenderer::PrimitiveType::Point);
           mesh.children["VoronoiVerts"] = verts_mesh;
 
           Mesh* edges_mesh = new Mesh;
           edges_mesh->vertices = voronoi.GetConnectedEdgePoints();
           edges_mesh->type = MeshType::LineSet;
           edges_mesh->active = true;
-          edges_mesh->render_id = m_renderer.Submit( edges_mesh->vertices, glm::vec4(0,0,1,1), GLRenderer::PrimitiveType::Line);
+          edges_mesh->render_id = m_renderer.Submit( edges_mesh->vertices, SpgMth::Vec4(0,0,1,1), GLRenderer::PrimitiveType::Line);
           mesh.children["VoronoiEdges"] = edges_mesh;
 
           Mesh* loose_edges_mesh = new Mesh;
           loose_edges_mesh->vertices = voronoi.GetLooseEdgePoints();
           loose_edges_mesh->type = MeshType::LineSet;
           loose_edges_mesh->active = true;
-          loose_edges_mesh->render_id = m_renderer.Submit( loose_edges_mesh->vertices, glm::vec4(0,1,1,1), GLRenderer::PrimitiveType::Line);
+          loose_edges_mesh->render_id = m_renderer.Submit( loose_edges_mesh->vertices, SpgMth::Vec4(0,1,1,1), GLRenderer::PrimitiveType::Line);
           mesh.children["VoronoiLooseEdges"] = loose_edges_mesh;
         }
       }
@@ -365,7 +366,7 @@ namespace Spg
           diagonal_mesh->vertices =  Geom::GenerateEarClipplingDiagonals(&polygon);
           diagonal_mesh->type = MeshType::LineSet;
           diagonal_mesh->active = true;
-          diagonal_mesh->render_id = m_renderer.Submit( diagonal_mesh->vertices, glm::vec4(1,1,0,1), GLRenderer::PrimitiveType::Line);
+          diagonal_mesh->render_id = m_renderer.Submit( diagonal_mesh->vertices, SpgMth::Vec4(1,1,0,1), GLRenderer::PrimitiveType::Line);
           //mesh.children["Diagonals"] = std::make_unique<Mesh>(std::move(diagonal_mesh));
           mesh.children["Diagonals"] = diagonal_mesh;
         }
@@ -448,7 +449,7 @@ namespace Spg
           diagonal_mesh->vertices = m_monotone_spawner.GetMonotonDiagonals();
           diagonal_mesh->type = MeshType::LineSet;
           diagonal_mesh->active = true;
-          diagonal_mesh->render_id = m_renderer.Submit( diagonal_mesh->vertices, glm::vec4(1,1,0,1),      GLRenderer::PrimitiveType::Line);
+          diagonal_mesh->render_id = m_renderer.Submit( diagonal_mesh->vertices, SpgMth::Vec4(1,1,0,1),      GLRenderer::PrimitiveType::Line);
           //mesh.children["Diagonals"] = std::make_unique<Mesh>(std::move(diagonal_mesh));
           mesh.children["Diagonals"] = diagonal_mesh;
           s_montotone_algo_state = 4;
@@ -476,7 +477,7 @@ namespace Spg
           trianglulation_diag_mesh->vertices = m_monotone_spawner.GetTriangulationDiagonals();
           trianglulation_diag_mesh->type = MeshType::LineSet;
           trianglulation_diag_mesh->active = true;
-          trianglulation_diag_mesh->render_id = m_renderer.Submit( trianglulation_diag_mesh->vertices, glm::vec4(1,1,1,1),GLRenderer::PrimitiveType::Line);
+          trianglulation_diag_mesh->render_id = m_renderer.Submit( trianglulation_diag_mesh->vertices, SpgMth::Vec4(1,1,1,1),GLRenderer::PrimitiveType::Line);
           //mesh.children["TriDiagonals"] = std::make_unique<Mesh>(std::move(trianglulation_diag_mesh));
           mesh.children["TriDiagonals"] = trianglulation_diag_mesh;
           s_montotone_algo_state = 4;

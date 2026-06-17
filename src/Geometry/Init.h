@@ -1,7 +1,5 @@
 #pragma once
 
-//#include "GeomUtils.h"
-//#include "Line.h"
 #include "MathLib/Geom/Geom.h"
 
 #include "Geometry/MeshPrimitives2D.h"

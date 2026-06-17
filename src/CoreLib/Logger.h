@@ -1,8 +1,5 @@
 #pragma once
 #include <spdlog/spdlog.h>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/string_cast.hpp>
-//#include <fmt/format.h>
 
 #define SPG_LOGGING_ENABLED_RELEASE	
 
@@ -29,42 +26,6 @@ namespace Core
 		static bool s_initialised;
 	};
 }
-
-template<glm::length_t L, typename T, glm::qualifier Q>
-struct fmt::formatter<glm::vec<L,T,Q>> {
-	constexpr auto parse(format_parse_context& ctx) {
-		return ctx.begin();
-	}
-
-	template <typename FormatContext>
-	auto format(const glm::vec<L,T,Q>& v, FormatContext& ctx) const  {
-		return fmt::format_to(ctx.out(), "{}", glm::to_string(v));
-	}
-};
-
-template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
-struct fmt::formatter<glm::mat<C,R,T,Q>> {
-	constexpr auto parse(format_parse_context& ctx) {
-		return ctx.begin();
-	}
-
-	template <typename FormatContext>
-	auto format(const glm::mat<C,R,T,Q>& m, FormatContext& ctx) const  {
-		return fmt::format_to(ctx.out(), "{}", glm::to_string(m));
-	}
-};
-
-template<typename T, glm::qualifier Q>
-struct fmt::formatter<glm::qua<T, Q>> {
-	constexpr auto parse(format_parse_context& ctx) {
-		return ctx.begin();
-	}
-
-	template <typename FormatContext>
-	auto format(const glm::qua<T, Q>& q, FormatContext& ctx) const  {
-		return fmt::format_to(ctx.out(), "{}", glm::to_string(q));
-	}
-};
 
 
 #if defined SPG_DEBUG || defined(SPG_LOGGING_ENABLED_RELEASE)

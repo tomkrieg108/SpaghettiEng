@@ -34,9 +34,9 @@ namespace Cyc
   void ParticleDrag::UpdateForce(Particle* particle, SpgMth::Real time_step)
   {
     SpgMth::Vec3 force = particle->GetVelocity();
-    SpgMth::Real drag_coeff = glm::length(force);
+    SpgMth::Real drag_coeff = SpgMth::Length(force);
     drag_coeff = m_k1 * drag_coeff + m_k2 * drag_coeff * drag_coeff;
-    force = glm::normalize(force);
+    force = SpgMth::Normalize(force);
     force *= - drag_coeff;
     particle->AddForce(force);
   }
@@ -45,10 +45,10 @@ namespace Cyc
   {
     SpgMth::Vec3 force = particle->GetPosition();
     force -= m_other->GetPosition();
-    SpgMth::Real magnitude = glm::length(force);
-    magnitude = glm::abs(magnitude - m_rest_length);
+    SpgMth::Real magnitude = SpgMth::Length(force);
+    magnitude = SpgMth::Abs(magnitude - m_rest_length);
     magnitude *= m_spring_const;
-    force = glm::normalize(force);
+    force = SpgMth::Normalize(force);
     force *= - magnitude;
     particle->AddForce(force);
   }
@@ -57,51 +57,49 @@ namespace Cyc
   {
     SpgMth::Vec3 force = particle->GetPosition();
     force -= *m_anchor;
-    SpgMth::Real magnitude = glm::length(force);
+    SpgMth::Real magnitude = SpgMth::Length(force);
     magnitude = (m_rest_length - magnitude) * m_spring_const;
-    force = glm::normalize(force);
+    force = SpgMth::Normalize(force);
     force *= - magnitude;
     particle->AddForce(force);
   }
 
   void ParticleFakeSpring::UpdateForce(Particle* particle, SpgMth::Real time_step)
   {
-    // if (!particle->HasFiniteMass()) 
-    //   return;
-    // auto pos = particle->GetPosition();
-    // pos -= *m_anchor;
+    if (!particle->HasFiniteMass()) 
+      return;
+    auto pos = particle->GetPosition();
+    pos -= *m_anchor;
 
-    // // Calculate the constants and check they are in bounds.
-    // SpgMth::Real gamma = 0.5f * glm::sqrt(4*m_spring_const - m_damping*m_damping);
-    // if(gamma == 0.0)
-    //   return;
+    // Calculate the constants and check they are in bounds.
+    SpgMth::Real gamma = 0.5f * SpgMth::Sqrt(4*m_spring_const - m_damping*m_damping);
+    if(gamma == 0.0)
+      return;
 
-       
-    // auto c = pos * m_damping / (2.0f * gamma) + particle->GetVelocity() * (1.0f/gamma);
+    auto c = pos * m_damping / (2.0f * gamma) + particle->GetVelocity() * (1.0f/gamma);
     
-    // auto target = pos;
-    // // Calculate the target position
-    // // auto target = pos * glm::cos(gamma * time_step) + c * glm::sin(gamma * time_step);
-    // // target *= glm::exp(-0.5 * time_step * m_damping);
+    // Calculate the target position
+    auto target = pos * SpgMth::Cos(gamma * time_step) + c * SpgMth::Sin(gamma * time_step);
+    target *= SpgMth::Exp(-0.5 * time_step * m_damping);
 
-    // // Calculate the resulting acceleration and therefore the force
-    // auto accel = (target - pos) * (1.0 / (time_step*time_step)) -
-    //     particle->GetVelocity() * (1.0/time_step);
+    // Calculate the resulting acceleration and therefore the force
+    auto accel = (target - pos) * (1.0f / (time_step*time_step)) -
+        particle->GetVelocity() * (1.0f /time_step);
 
-    // SpgMth::Vec3 force = accel * particle->GetMass();     
-    // // particle->AddForce(accel * particle->GetMass());
-    // particle->AddForce(force);
+    SpgMth::Vec3 force = accel * particle->GetMass();     
+    // particle->AddForce(accel * particle->GetMass());
+    particle->AddForce(force);
   }
 
   void ParticleBungee::UpdateForce(Particle* particle, SpgMth::Real time_step)
   {
     SpgMth::Vec3 force = particle->GetPosition();
     force -= m_other->GetPosition();
-    SpgMth::Real magnitude = glm::length(force);
+    SpgMth::Real magnitude = SpgMth::Length(force);
     if (magnitude < m_rest_length)
       return;
     magnitude = m_spring_const * (m_rest_length - magnitude);
-    force = glm::normalize(force);
+    force = SpgMth::Normalize(force);
     force *= - magnitude;
     particle->AddForce(force);
   }
@@ -110,12 +108,12 @@ namespace Cyc
   {
     SpgMth::Vec3 force = particle->GetPosition();
     force -= *m_anchor;
-    SpgMth::Real magnitude = glm::length(force);
+    SpgMth::Real magnitude = SpgMth::Length(force);
     if (magnitude < m_rest_length) 
       return;
     magnitude = magnitude - m_rest_length;
     magnitude *= m_spring_const;
-    force = glm::normalize(force);
+    force = SpgMth::Normalize(force);
     force *= - magnitude;
     particle->AddForce(force);
   }

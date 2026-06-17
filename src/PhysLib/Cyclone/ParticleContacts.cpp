@@ -1,6 +1,8 @@
 #include "PhysLib/Cyclone/ParticleContacts.h"
 #include "PhysLib/Cyclone/Particle.h"
 
+#include "MathLib/MathLib.h"
+
 namespace Cyc
 {
   void ParticleContact::Resolve(SpgMth::Real time_step) {
@@ -12,7 +14,7 @@ namespace Cyc
     SpgMth::Vec3 relative_velocity = particle[0]->GetVelocity();
     if(particle[1] != nullptr)
       relative_velocity -= particle[1]->GetVelocity();
-    return glm::dot(relative_velocity,contact_normal);  
+    return SpgMth::Dot(relative_velocity,contact_normal);
   }
 
   void ParticleContact::ResolveVelocity(SpgMth::Real time_step) {
@@ -30,7 +32,7 @@ namespace Cyc
     SpgMth::Vec3 acc_caused_velocity = particle[0]->GetAcceleration();
     if (particle[1] != nullptr) 
       acc_caused_velocity -= particle[1]->GetAcceleration();
-    SpgMth::Real acc_caused_sep_velocity = glm::dot(acc_caused_velocity,contact_normal) * time_step;
+    SpgMth::Real acc_caused_sep_velocity = SpgMth::Dot(acc_caused_velocity,contact_normal) * time_step;
 
     // If we've got a closing velocity due to acceleration build-up,
     // remove it from the new separating velocity
@@ -124,17 +126,17 @@ namespace Cyc
 
       for (auto i = 0; i < num_contacts; i++) {
         if (contact_array[i].particle[0] == contact_array[max_index].particle[0])
-          contact_array[i].penetration -= glm::dot(move[0], contact_array[i].contact_normal);
+          contact_array[i].penetration -= SpgMth::Dot(move[0], contact_array[i].contact_normal);
         
         else if (contact_array[i].particle[0] == contact_array[max_index].particle[1])
-          contact_array[i].penetration -= glm::dot(move[1], contact_array[i].contact_normal);
+          contact_array[i].penetration -= SpgMth::Dot(move[1], contact_array[i].contact_normal);
         
         if (contact_array[i].particle[1]) {
           if (contact_array[i].particle[1] == contact_array[max_index].particle[0])
-            contact_array[i].penetration += glm::dot(move[0], contact_array[i].contact_normal);
+            contact_array[i].penetration += SpgMth::Dot(move[0], contact_array[i].contact_normal);
           
           else if (contact_array[i].particle[1] == contact_array[max_index].particle[1])
-            contact_array[i].penetration += glm::dot(move[1], contact_array[i].contact_normal);
+            contact_array[i].penetration += SpgMth::Dot(move[1], contact_array[i].contact_normal);
         }
       }
 

@@ -5,6 +5,7 @@
 #include <random>
 
 #include "CoreLib/Logger.h"
+#include "MathLib/MathLib.h"
 
 namespace Spg
 {
@@ -43,7 +44,7 @@ namespace Spg
   { // render_id is the id of the sweep line
     auto& first_event_point = m_monotone_spawner.GetEventQueue().back();
     float sweep_y = first_event_point.vertex->point.y;
-    const std::vector<SpgMth::Point2d> sweep_line_mesh = {glm::vec2(-500.0f, sweep_y),glm::vec2(500.0f, sweep_y) };
+    const std::vector<SpgMth::Point2d> sweep_line_mesh = {SpgMth::Vec2(-500.0f, sweep_y),SpgMth::Vec2(500.0f, sweep_y) };
     m_renderer.UpdatePosition(render_id, sweep_line_mesh);
   }
 
@@ -70,7 +71,7 @@ namespace Spg
     point_mesh->vertices = vertices;
     point_mesh->type = MeshType::PointSet;
     point_mesh->active = true;
-    point_mesh->render_id = m_renderer.Submit(point_mesh->vertices,glm::vec4(1,1,0,1),GLRenderer::PrimitiveType::Point);
+    point_mesh->render_id = m_renderer.Submit(point_mesh->vertices,SpgMth::Vec4(1,1,0,1),GLRenderer::PrimitiveType::Point);
     //mesh.children["Points"] = std::make_unique<Mesh>(std::move(point_mesh));
     mesh.children["Points"] = point_mesh;
     
@@ -79,22 +80,22 @@ namespace Spg
     auto& monotone_event_points = m_monotone_spawner.GetEventPoints();
     for(uint32_t i=0; i< point_mesh->vertices.size(); ++i) {
       if(monotone_event_points[i].vertex_category == VertexCategory::Start) {
-        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(0,1,0,1),i); //green
+        m_renderer.UpdateColour(point_mesh->render_id,SpgMth::Vec4(0,1,0,1),i); //green
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::End) {
-        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(1,0,0,1),i); //red
+        m_renderer.UpdateColour(point_mesh->render_id,SpgMth::Vec4(1,0,0,1),i); //red
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::Merge) {
-        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(0,0,1,1),i); //blue
+        m_renderer.UpdateColour(point_mesh->render_id,SpgMth::Vec4(0,0,1,1),i); //blue
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::Split) {
-        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(1,1,1,1),i); //white
+        m_renderer.UpdateColour(point_mesh->render_id,SpgMth::Vec4(1,1,1,1),i); //white
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::Regular) {
-        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(1,1,0,1),i); //yellow
+        m_renderer.UpdateColour(point_mesh->render_id,SpgMth::Vec4(1,1,0,1),i); //yellow
       }
       if(monotone_event_points[i].vertex_category == VertexCategory::Invalid) {
-        m_renderer.UpdateColour(point_mesh->render_id,glm::vec4(0.3f,0.3f,0.3f,1),i); //grey
+        m_renderer.UpdateColour(point_mesh->render_id,SpgMth::Vec4(0.3f,0.3f,0.3f,1),i); //grey
       }
     }
 
@@ -105,10 +106,10 @@ namespace Spg
     
     //Add sweep line as a child of polygon mesh
     Mesh* sweep_line_mesh = new Mesh;
-    sweep_line_mesh->vertices = std::vector{ glm::vec2(-500.0f, sweep_y),  glm::vec2(500.0f, sweep_y)};
+    sweep_line_mesh->vertices = std::vector{ SpgMth::Vec2(-500.0f, sweep_y),  SpgMth::Vec2(500.0f, sweep_y)};
     sweep_line_mesh->active;
     sweep_line_mesh->type = MeshType::LineSet;
-    sweep_line_mesh->render_id = m_renderer.Submit(sweep_line_mesh->vertices, glm::vec4(0,1,1,1),GLRenderer::PrimitiveType::Line);
+    sweep_line_mesh->render_id = m_renderer.Submit(sweep_line_mesh->vertices, SpgMth::Vec4(0,1,1,1),GLRenderer::PrimitiveType::Line);
     //mesh.children["Sweepline"] = std::make_unique<Mesh>(std::move(sweep_line_mesh));
     mesh.children["Sweepline"] = sweep_line_mesh;
 
@@ -144,11 +145,10 @@ namespace Spg
     //Text Rendering
   #ifdef _WIN32
     if(m_mesh_list.find(s_active_mesh) == m_mesh_list.end()) {
-      m_text_renderer.Render("Hello from TexRenderer!!", -50,-50,0.5f,glm::vec3(0,1,0));
+      m_text_renderer.Render("Hello from TexRenderer!!", -50,-50,0.5f,SpgMth::Vec3(0,1,0));
       return;
     }
   
-
     Mesh& mesh = m_mesh_list[s_active_mesh];
     for(auto& label : mesh.labels) {
       m_text_renderer.Render(label.text, label.pos.x, label.pos.y, 0.35f, {1,1,1});

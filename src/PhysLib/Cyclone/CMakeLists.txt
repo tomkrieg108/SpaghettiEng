@@ -25,5 +25,4 @@ target_include_directories(${LIB_CYCLONE} PUBLIC
 )
 
 target_link_libraries(${LIB_CYCLONE} PUBLIC ${LIB_CORE} )
-target_link_libraries(${LIB_CYCLONE} PUBLIC glm::glm-header-only) 
 target_link_libraries(${LIB_CYCLONE} PUBLIC ${LIB_MATH} )

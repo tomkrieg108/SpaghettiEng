@@ -6,6 +6,8 @@
 #include <locale>
 #include <unordered_set>
 
+#include "MathLib/MathLib.h"
+
 
 namespace Geom
 {
@@ -310,8 +312,8 @@ namespace Geom
       float radius = circle.radius;
 
       //Validation!
-      SPG_ASSERT(SpgMth::Equal(radius, glm::length(q-*(arc_triple[1]->site))));
-      SPG_ASSERT(SpgMth::Equal(radius, glm::length(q-*(arc_triple[2]->site))));
+      SPG_ASSERT(SpgMth::Equal(radius, SpgMth::Length(q-*(arc_triple[1]->site))));
+      SPG_ASSERT(SpgMth::Equal(radius, SpgMth::Length(q-*(arc_triple[2]->site))));
 
       //float signed_area = ComputeSignedArea(*arc_triple[0]->site, *arc_triple[1]->site, *arc_triple[2]->site); //in Utils 
       float signed_area = SignedArea(*arc_triple[0]->site, *arc_triple[1]->site, *arc_triple[2]->site); // above - uses doubles
@@ -383,7 +385,7 @@ namespace Geom
         //Point2d cur = GetBreakpointCoords(bp);
         // the half edge is connected to DCEL at origin, unconnected at cur
         // extend cur to a point beyond bounding box
-        glm::vec2 dir = glm::normalize(cur - origin);
+        SpgMth::Vec2 dir = SpgMth::Normalize(cur - origin);
         float scale = std::max(m_bounding_box.Width(), m_bounding_box.Height())*4.0f;
         cur = origin + dir*scale;
         SpgMth::LineSeg2D bp_seg(origin, cur);
@@ -553,7 +555,7 @@ namespace Geom
         
         // the half edge is connected to DCEL at origin, unconnected at cur
         // extend cur to a point beyond bounding box
-        glm::vec2 dir = glm::normalize(cur - origin);
+        SpgMth::Vec2 dir = SpgMth::Normalize(cur - origin);
         float scale = std::max(m_bounding_box.Width(), m_bounding_box.Height());
         cur = origin + dir*scale;
         points.push_back(origin);
@@ -969,12 +971,12 @@ namespace Geom
         SPG_TRACE("Bisectors 13 and 12 Intersect at: {}",q1); 
         SPG_TRACE("Bisectors 34 and 13 Intersect at: {}",q2); 
 
-        glm::vec2 p1_q = q1-p1;
-        glm::vec2 p2_q = q1-p2;
-        glm::vec2 p3_q = q1-p3;
+        SpgMth::Vec2 p1_q = q1-p1;
+        SpgMth::Vec2 p2_q = q1-p2;
+        SpgMth::Vec2 p3_q = q1-p3;
 
-        SPG_TRACE("Dist pt to intersect: {}, {}, {} ", glm::length(p1_q), glm::length(p2_q), glm::length(p3_q));
-        SPG_TRACE("Circle y-low: {}", q1.y - glm::length(p1_q));
+        SPG_TRACE("Dist pt to intersect: {}, {}, {} ", SpgMth::Length(p1_q), SpgMth::Length(p2_q), SpgMth::Length(p3_q));
+        SPG_TRACE("Circle y-low: {}", q1.y - SpgMth::Length(p1_q));
 
         //* If sweep line is already under the bottom of the circle it means the bisectors are diverging, arc is expanding, no circle event
       
