@@ -80,12 +80,7 @@ namespace SpgMth
   using Real = float;
   inline constexpr Real REAL_MAX = std::numeric_limits<Real>::max(); 
  
-  
-
-  void Init();
 }
-
-
 
 /*
   packed vec3 is 12 bytes, not 16:  important when sending data to the GPU

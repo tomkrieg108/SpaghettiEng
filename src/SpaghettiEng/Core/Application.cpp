@@ -1,18 +1,43 @@
+//Paired header
+#include "SpaghettiEng/Core/Application.h"
 
+//C System headers
+
+//Std lib headers
 #include <filesystem>
 
+//3rd party external libs
 #include <glad/gl.h>    //need to include before <GLFW/glfw3.h>
 #include <GLFW/glfw3.h> //for glfwGetTime(), GLFW_KEY_ESCAPE
 
+//============================================================
+//external libs - for testing out only
+//should be available because they were linked as public in Geom/Spg lib and propagated here
+#include <cxxopts.hpp>
+#include <fmt/format.h>
+#include <nlohmann/json.hpp>
+
+#include <spdlog/spdlog.h>
+#ifdef _WIN32
+  #include "ft2build.h"
+  #include <freetype/freetype.h>
+#endif
+#include <entt/entity/registry.hpp>
+//============================================================
+
+//Project headers
 #include "Events/EventManager.h"
 #include "ImGuiUtils/ImGuiUtils.h"
 #include "OpenGL32/GL32Context.h"
 #include "OpenGL32/GL32Shader.h"
 #include "OpenGL32/GL32Renderer.h"
 #include "Window.h"
-#include "AppContext.h"
+#include "ServiceLocator.h"
 #include "AppLayer.h"
-#include "Application.h"
+
+#include "CoreLib/Logger.h"
+#include "CoreLib/PlatformDetect/PlatformDetect.h"
+
 
 namespace Spg
 {
@@ -69,13 +94,12 @@ namespace Spg
     SetEventHandlers();
     SetAssetsPath();
   
-    m_app_context.Set("Window", std::make_shared<Window>(app_name) );
-    m_app_context.Set("GLRenderer", std::make_shared<GLRenderer>() );
+    m_service_locator.Register<Window>(app_name);
 
-    const Window& win = m_app_context.Get<Window>("Window");
+    const Window& win = m_service_locator.Get<Window>();
     ImGuiUtils::Initialise(win);
 
-    AppLayer* app_layer = new AppLayer(m_app_context, "App Layer");
+    AppLayer* app_layer = new AppLayer(m_service_locator, "App Layer");
     m_layer_stack.PushOverlay(app_layer);
 
   #ifdef SPG_DEBUG
@@ -84,7 +108,7 @@ namespace Spg
     GLContext::PrintImplInfo();
   #endif  
     //For testing
-    SPG_ASSERT(1);
+    //SPG_ASSERT(1);
   }
 
   Application::~Application()
@@ -98,6 +122,11 @@ namespace Spg
     //Todo detatch / delete all layers
   }
 
+  Application* Application::Instance()
+  {
+    SPG_ASSERT(s_instance != nullptr);
+    return s_instance;
+  }
 
   void Application::PushLayer(Layer* layer)
   {
@@ -172,7 +201,8 @@ namespace Spg
     auto delta_time = 0.0;
     auto last_time = glfwGetTime();
 
-    Window& win = m_app_context.Get<Window>("Window");
+    //Window& win = m_service_locator.Get<Window>("Window");
+    Window& win = m_service_locator.Get<Window>();
 
     while(m_running)
     {
@@ -197,5 +227,41 @@ namespace Spg
 
       EventManager::DispatchQueuedEvents();
     }
+  }
+
+  void Application::PrintPlatformInfo()
+  {
+    SPG_INFO("Platform and Build:");
+    SPG_TRACE("Architecture: {} (via ArchDetech.h) ", ARCH_NAME)
+    SPG_TRACE("Compiler: {} (via CompilerDetech.h) ", COMPILER_NAME)
+    SPG_TRACE("OS: {} (via OSDetech.h) ", OS_NAME)
+    #if defined(SPG_DEBUG)
+      SPG_TRACE("SPG_DEBUG defined (via cmake)");
+    #elif defined(SPG_RELEASE)
+        SPG_TRACE("SPG_RELEASE defined (via cmake)");
+    #endif
+  }
+
+  void Application::PrintExternalLibInfo()
+  {
+    // #define VALUE 99
+    // std::cout << STRINGIFY(VALUE);
+    // std::cout << STRINGIFY_IMPL(VALUE);
+
+    //auto logger = Core::Logger::Create("UTILS");
+
+    SPG_WARN("External libs linked into UTILS Lib");
+    SPG_TRACE("JSON: {}.{}.{}", NLOHMANN_JSON_VERSION_MAJOR, NLOHMANN_JSON_VERSION_MINOR, NLOHMANN_JSON_VERSION_PATCH );
+    SPG_TRACE("FMT: {} ", FMT_VERSION);
+    SPG_TRACE("CXXOPTS: {}.{}.{}",CXXOPTS__VERSION_MAJOR,CXXOPTS__VERSION_MAJOR, CXXOPTS__VERSION_PATCH);
+    SPG_TRACE("SPDLOG: {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
+    SPG_TRACE("Entt {},{},{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR, ENTT_VERSION_PATCH );
+    
+    fs::path current_path = fs::current_path();
+    fs::path source_file_path(__FILE__);
+    SPG_TRACE("Current working directory is: {}", current_path.string());
+    SPG_TRACE("This file is: {}", source_file_path.string());
+
+    SPG_WARN( "####################################################");
   }
 }

@@ -117,6 +117,7 @@ set(LIB_GEOM "lib_geom")
 set(LIB_CYCLONE "lib_cyclone")
 set(LIB_ENG "lib_eng")
 set(APP_GEOM "geom_app")
+set(APP_SPG "app_spg")
 
 if(ENABLE_TESTING)
   set(TEST_GEOM "test_geom")
@@ -236,6 +237,26 @@ target_precompile_headers(${LIB_ENG} PRIVATE
 )
 
 target_precompile_headers(${APP_GEOM} PRIVATE 
+  <cstdint>
+  <cmath>
+  <iostream>
+  <fstream>
+  <string>
+  <string_view>
+  <sstream>
+  <vector>
+  <array>
+  <unordered_map>
+  <memory>
+  <random>
+  <algorithm>
+  <variant>
+  <queue>
+  <type_traits>
+  <numbers>
+)
+
+target_precompile_headers(${APP_SPG} PRIVATE 
   <cstdint>
   <cmath>
   <iostream>

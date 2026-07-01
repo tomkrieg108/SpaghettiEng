@@ -87,7 +87,7 @@ namespace Cyc
     for(auto* p : *m_particles) {
       SpgMth::Real y = p->GetPosition().y;
       if(y < 0) {
-        contact->contact_normal = SpgMth::Vec3{0,1,0}; //Up
+        contact->contact_normal = glm::vec3{0,1,0}; //Up
         contact->particle[0] = p;
         contact->particle[1] = nullptr;
         contact->penetration = -y;

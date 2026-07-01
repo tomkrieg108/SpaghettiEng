@@ -1,5 +1,5 @@
 #pragma once
-#include "AppContext.h"
+#include "ServiceLocator.h"
 
 namespace Spg
 {
@@ -8,7 +8,7 @@ namespace Spg
   class Layer
   {
   public:
-    Layer(AppContext& app_context, const std::string& name = "Default Layer");
+    Layer(ServiceLocator& app_context, const std::string& name = "Default Layer");
     virtual ~Layer() = default;
 
     virtual void OnAttach() {}
@@ -18,7 +18,7 @@ namespace Spg
     virtual void OnImGuiRender() {}
     const std::string& GetName() const { return m_name; }
   protected:
-    AppContext& m_app_conext;
+    ServiceLocator& m_app_conext;
     std::string m_name;
   };
 

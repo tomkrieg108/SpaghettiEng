@@ -1,6 +1,5 @@
 add_library(${LIB_GEOM} STATIC 
-  "./Init.cpp"
-  "./Init.h"
+  "./Geometry.h"
   "./Polygon.h"
   "./Polygon.cpp"
   "./MeshPrimitives2D.cpp"

@@ -3,7 +3,7 @@
 #include "CoreLib/Core.h"
 #include "Events/Events.h"
 #include "Layer.h"
-#include "AppContext.h"
+#include "ServiceLocator.h"
 
 namespace Spg
 {
@@ -13,12 +13,16 @@ namespace Spg
     Application(const std::string& app_name = std::string{"Spaghetti App"});
     virtual ~Application();
 
-    static void SystemInit();
-
     void Run();
     void PushLayer(Layer* layer);
     void PopLayer(Layer* layer);
-   
+
+    static void SystemInit();
+    static Application* Instance();
+
+    static void PrintPlatformInfo();
+    static void PrintExternalLibInfo();
+
   private:
     void SetEventHandlers();
     void SetAssetsPath();
@@ -27,7 +31,7 @@ namespace Spg
   
   protected:
 
-    AppContext m_app_context;
+    ServiceLocator m_service_locator;
     LayerStack m_layer_stack;
     std::string m_app_name;
     bool m_running = true;

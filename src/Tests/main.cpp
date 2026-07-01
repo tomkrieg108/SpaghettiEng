@@ -3,7 +3,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/benchmark/catch_benchmark.hpp>
 
-#include "Geometry/Init.h"
+#include "Geometry/Geometry.h"
 #include "MathLib/Geom/Geom.h"
 
 namespace GeomTest 

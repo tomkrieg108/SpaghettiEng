@@ -9,8 +9,6 @@ target_sources(${LIB_CORE} PRIVATE
   "./Logger.h"
   "./Logger.cpp"
   "./Core.h"
-  "./Init.cpp"
-  "./Init.h"
 )
 
 target_include_directories(${LIB_CORE}  PRIVATE
@@ -22,9 +20,5 @@ target_link_libraries(${LIB_CORE} PUBLIC
   spdlog::spdlog
 )
 
-#For testing libs only
-target_link_libraries(${LIB_CORE} PUBLIC
-  nlohmann_json::nlohmann_json  
-  cxxopts::cxxopts
-)
+
 

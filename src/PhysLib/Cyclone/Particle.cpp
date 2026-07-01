@@ -11,7 +11,7 @@ namespace Cyc
     
     m_position += m_velocity * time_step;
 
-    SpgMth::Vec3 new_acceleration = m_acceleration + m_force_accumulator * m_inverse_mass;
+    glm::vec3 new_acceleration = m_acceleration + m_force_accumulator * m_inverse_mass;
 
     m_velocity += new_acceleration * time_step;
     m_velocity *= m_damping;

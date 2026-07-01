@@ -42,7 +42,7 @@ namespace Cyc
   {
     public:
       Particle* m_particle;
-      SpgMth::Vec3 m_anchor;
+      glm::vec3 m_anchor;
 
       virtual uint32_t AddContact(ParticleContact *contact, uint32_t limit) const = 0;
 

@@ -8,7 +8,7 @@ namespace Spg
   class AppLayer : public Layer
   {
   public:
-    AppLayer(AppContext& app_context, const std::string& name);
+    AppLayer(ServiceLocator& app_context, const std::string& name);
     ~AppLayer() = default;
 
     void OnAttach() override {};

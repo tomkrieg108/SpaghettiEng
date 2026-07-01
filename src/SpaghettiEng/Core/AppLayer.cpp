@@ -1,11 +1,11 @@
 #include "ImGuiUtils/ImGuiUtils.h"
-#include "AppContext.h"
+#include "ServiceLocator.h"
 #include "AppLayer.h"
 
 namespace Spg
 {
-  AppLayer::AppLayer(AppContext& app_context, const std::string& name) : 
-    Layer(app_context, name), m_window(app_context.Get<Window>("Window"))
+  AppLayer::AppLayer(ServiceLocator& app_context, const std::string& name) : 
+    Layer(app_context, name), m_window(app_context.Get<Window>())
   {
   }
 

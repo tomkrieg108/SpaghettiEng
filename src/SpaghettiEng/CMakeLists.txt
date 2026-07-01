@@ -2,8 +2,10 @@
 add_library(${LIB_ENG} STATIC)
 
 target_sources(${LIB_ENG} PRIVATE 
+  "./Camera/Camera.cpp"
   "./Camera/Camera2D.cpp"
   "./Camera/CameraController2D.cpp"
+  "./Camera/Controller.cpp"
   "./Core/Application.cpp"
   "./Core/AppLayer.cpp"
   "./Core/Window.cpp"
@@ -27,11 +29,13 @@ if(WIN32)
 endif()
 
 target_sources(${LIB_ENG} PRIVATE
+  "./Camera/Camera.h"
   "./Camera/Camera2D.h"
   "./Camera/CameraController2D.h"
+  "./Camera/Controller.h"
   "./Core/Application.h"
   "./Core/AppLayer.h"
-  "./Core/AppContext.h"
+  "./Core/ServiceLocator.h"
   "./Core/Window.h"
   "./Core/Input.h"
   "./Core/Layer.h"
@@ -82,3 +86,9 @@ target_link_libraries(${LIB_ENG} PUBLIC ${LIB_GEOM} )
 target_link_libraries(${LIB_ENG} PUBLIC ${LIB_CYCLONE} )  
 target_link_libraries(${LIB_ENG} PUBLIC ${EXT_STB_IMG} )
 target_link_libraries(${LIB_ENG} PUBLIC ${EXT_IMGUI} )
+
+#For testing libs only
+target_link_libraries(${LIB_ENG} PUBLIC
+  nlohmann_json::nlohmann_json  
+  cxxopts::cxxopts
+)

@@ -1,6 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 
+#include "MathLib/MathLib.h"
+
 namespace Spg
 {
   /*
@@ -47,4 +49,6 @@ namespace Spg
 
     friend class CameraController2D;
   };  
+
+  
 }

@@ -1,11 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include <unordered_map>
 #include <memory>
 
-#include <entt/entt.hpp> // still need this
-#include <entt/fwd.hpp>
+#include <entt/entt.hpp> 
 
 
 namespace Spg

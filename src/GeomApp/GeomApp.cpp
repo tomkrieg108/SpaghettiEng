@@ -1,20 +1,6 @@
 #include "GeomApp.h"
 #include "DefaultLayer.h"
 
-//external libs - for testing out only
-//should be available because they were linked as public in Geom/Spg lib and propagated here
-#include <cxxopts.hpp>
-#include <fmt/format.h>
-#include <nlohmann/json.hpp>
-
-#include <spdlog/spdlog.h>
-#ifdef _WIN32
-  #include "ft2build.h"
-  #include <freetype/freetype.h>
-#endif
-#include <entt/entity/registry.hpp>
-
-#include "CoreLib/Init.h"
 #include "MathLib/MathLib.h"
 
 namespace Spg
@@ -30,61 +16,28 @@ namespace Spg
   GeomApp::GeomApp(const std::string& title) : 
     Application(title)
   {
-    Window& window = m_app_context.Get<Window>("Window");
-    SpgMth::Vec3 cam_pos = SpgMth::Vec3(0.0f,0.0f,1.0f);
-    SpgMth::Vec3 look_pos = SpgMth::Vec3(0.0f,0.0f,0.0f);
-    auto camera = std::make_shared<Camera2D>();
-    camera->SetPosition(cam_pos);
-    camera->LookAt(look_pos);
-    auto controller = std::make_shared<CameraController2D>(*camera);
+    m_service_locator.Register<GLRenderer>();
+    m_service_locator.Register<Camera2D>();
+
+    auto& window = m_service_locator.Get<Window>();
+    auto& camera = m_service_locator.Get<Camera2D>();
+
+    m_service_locator.Register<CameraController2D>(camera);
     #ifdef _WIN32
-      auto text_renderer = std::make_shared<GLTextRenderer>(*camera);
+      m_service_locator.Register<GLTextRenderer>(camera);
     #endif
 
-    m_app_context.Set("Camera2D", camera);
-    m_app_context.Set("CameraController2D", controller);
-    #ifdef _WIN32
-      m_app_context.Set("GLTextRenderer", text_renderer);
-    #endif
+    glm::vec3 cam_pos = glm::vec3(0.0f,0.0f,1.0f);
+    glm::vec3 look_pos = glm::vec3(0.0f,0.0f,0.0f);
+    camera.SetPosition(cam_pos);
+    camera.LookAt(look_pos);
 
-    DefaultLayer* layer = new DefaultLayer(m_app_context, std::string("Default Layer"));
+    DefaultLayer* layer = new DefaultLayer(m_service_locator, std::string("Default Layer"));
     PushLayer(layer);
   }
 
   GeomApp::~GeomApp()
   {
-  }
-
-  void Init()
-  {
-    SPG_WARN("Geom App Init");
-    
-    #ifdef SPG_DEBUG
-      SPG_TRACE("APP: SPG_DEBUG defined");
-    #elif defined(SPG_RELEASE)
-        SPG_TRACE("APP: SPG_RELEASE defined");
-    #endif  
-
-    #ifdef _WIN32
-      SPG_TRACE("APP: WIN platform");
-    #elif defined(__linux__)
-      SPG_TRACE("APP: LINUX platform");
-    #endif
-
-    #if defined(__x86_64__) || defined(_M_X64)
-      SPG_TRACE("APP: x86_64 architecture");
-    #endif
-
-    SPG_WARN("External libs linked into App exe:\n");
-    SPG_TRACE("JSON: {}.{}.{}", NLOHMANN_JSON_VERSION_MAJOR, NLOHMANN_JSON_VERSION_MINOR, NLOHMANN_JSON_VERSION_PATCH );
-    SPG_TRACE( "FMT: {} ", FMT_VERSION);
-    SPG_TRACE("CXXOPTS: {}.{}.{}",CXXOPTS__VERSION_MAJOR,CXXOPTS__VERSION_MAJOR, CXXOPTS__VERSION_PATCH);
-    SPG_TRACE("SPDLOG: {},{}.{}",SPDLOG_VER_MAJOR,SPDLOG_VER_MINOR,SPDLOG_VER_PATCH);
-    #ifdef _WIN32
-      SPG_TRACE( "FREETYPE: {}.{}.{}", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
-    #endif
-    SPG_TRACE("Entt {},{},{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR, ENTT_VERSION_PATCH );
-    SPG_WARN( "####################################################");
   }
 }
 
@@ -92,14 +45,9 @@ int main()
 {
   Spg::Application::SystemInit();
 #ifdef SPG_LIB_LINK_CHECK 
-  Core::Init();
-  SpgMth::Init();
-  Cyc::Init();
-  Geom::Init();
-  Spg::Init();
+ Spg::Application::PrintPlatformInfo();
+ Spg::Application::PrintExternalLibInfo();
 #endif
-
   auto app = Spg::CreateApplication();
   app->Run();
-  delete app; //Doesn't get called in release mode!
 }

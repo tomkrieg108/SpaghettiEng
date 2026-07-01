@@ -3,7 +3,5 @@
 
 namespace SpgMth
 {
-  void Init() {
-    SPG_WARN("Maths Lib Init:");
-  }
+  
 }

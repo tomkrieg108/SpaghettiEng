@@ -6,9 +6,9 @@
 namespace Cyc
 {
   SpgMth::Real ParticleLink::CurrentLength() const {
-    SpgMth::Vec3 relative_pos = m_particle[0]->GetPosition() - 
+    glm::vec3 relative_pos = m_particle[0]->GetPosition() - 
         m_particle[1]->GetPosition();
-    return SpgMth::Length(relative_pos);
+    return glm::length(relative_pos);
   }
 
   uint32_t ParticleCable::AddContact(ParticleContact *contact, uint32_t limit) const {
@@ -24,8 +24,8 @@ namespace Cyc
     contact->particle[1] = m_particle[1];
 
     // Calculate the normal
-    SpgMth::Vec3 normal = m_particle[1]->GetPosition() - m_particle[0]->GetPosition();
-    normal = SpgMth::Normalize(normal);
+    glm::vec3 normal = m_particle[1]->GetPosition() - m_particle[0]->GetPosition();
+    normal = glm::normalize(normal);
   
     contact->contact_normal = normal;
 
@@ -48,8 +48,8 @@ namespace Cyc
     contact->particle[1] = m_particle[1];
 
     // Calculate the normal
-    SpgMth::Vec3 normal = m_particle[1]->GetPosition() - m_particle[0]->GetPosition();
-    normal = SpgMth::Normalize(normal);
+    glm::vec3 normal = m_particle[1]->GetPosition() - m_particle[0]->GetPosition();
+    normal = glm::normalize(normal);
 
     // The contact normal depends on whether we're extending or compressing
     if(length > m_length) {
@@ -68,8 +68,8 @@ namespace Cyc
   } 
 
   SpgMth::Real ParticleConstraint::CurrentLength() const {
-    SpgMth::Vec3 relative_pos = m_particle->GetPosition() - m_anchor;
-    return SpgMth::Length(relative_pos);
+    glm::vec3 relative_pos = m_particle->GetPosition() - m_anchor;
+    return glm::length(relative_pos);
   }
 
   uint32_t ParticleCableConstraint::AddContact(ParticleContact *contact, uint32_t limit) const {
@@ -85,8 +85,8 @@ namespace Cyc
     contact->particle[1] = nullptr;
 
     // Calculate the normal
-    SpgMth::Vec3 normal = m_particle->GetPosition();
-    normal = SpgMth::Normalize(normal);
+    glm::vec3 normal = m_particle->GetPosition();
+    normal = glm::normalize(normal);
     contact->contact_normal = normal;
 
     contact->penetration = length - m_max_length;
@@ -108,8 +108,8 @@ namespace Cyc
     contact->particle[1] = nullptr;
 
     // Calculate the normal
-    SpgMth::Vec3 normal = m_anchor - m_particle->GetPosition();
-    normal = SpgMth::Normalize(normal);
+    glm::vec3 normal = m_anchor - m_particle->GetPosition();
+    normal = glm::normalize(normal);
 
     // The contact normal depends on whether we're extending or compressing
     if(length > m_length) {

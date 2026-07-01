@@ -31,5 +31,5 @@ namespace Geom
   //Generate a random non-convex simple polygon with better control
   std::vector<SpgMth::Point2d> GenerateRandomPolygon_XY(const PolygonParameters& params);
 
-  std::vector<float> GetMeshFromPoints(const std::vector<SpgMth::Point2d>& points, const SpgMth::Vec4& colour);
+  std::vector<float> GetMeshFromPoints(const std::vector<SpgMth::Point2d>& points, const glm::vec4& colour);
 }

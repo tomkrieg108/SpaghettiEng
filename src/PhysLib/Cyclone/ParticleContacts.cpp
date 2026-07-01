@@ -11,10 +11,10 @@ namespace Cyc
   }
 
   SpgMth::Real ParticleContact::CalculateSeparatingVelocity() const {
-    SpgMth::Vec3 relative_velocity = particle[0]->GetVelocity();
+    glm::vec3 relative_velocity = particle[0]->GetVelocity();
     if(particle[1] != nullptr)
       relative_velocity -= particle[1]->GetVelocity();
-    return SpgMth::Dot(relative_velocity,contact_normal);
+    return glm::dot(relative_velocity,contact_normal);
   }
 
   void ParticleContact::ResolveVelocity(SpgMth::Real time_step) {
@@ -29,10 +29,10 @@ namespace Cyc
      SpgMth::Real new_sep_velocity = -separating_velocity * restitution;
 
     // Check the velocity build-up due to acceleration only
-    SpgMth::Vec3 acc_caused_velocity = particle[0]->GetAcceleration();
+    glm::vec3 acc_caused_velocity = particle[0]->GetAcceleration();
     if (particle[1] != nullptr) 
       acc_caused_velocity -= particle[1]->GetAcceleration();
-    SpgMth::Real acc_caused_sep_velocity = SpgMth::Dot(acc_caused_velocity,contact_normal) * time_step;
+    SpgMth::Real acc_caused_sep_velocity = glm::dot(acc_caused_velocity,contact_normal) * time_step;
 
     // If we've got a closing velocity due to acceleration build-up,
     // remove it from the new separating velocity
@@ -58,7 +58,7 @@ namespace Cyc
     SpgMth::Real impulse = delta_velocity / total_inverse_mass;
     
     // The amount of impulse per unit of inverse mass
-    SpgMth::Vec3 impulse_per_imass = contact_normal*impulse;
+    glm::vec3 impulse_per_imass = contact_normal*impulse;
 
     // Apply impulses: they are applied in the direction of the contact,
     // and are proportional to the inverse mass.
@@ -88,14 +88,14 @@ namespace Cyc
       return;
 
      // Find the amount of penetration resolution per unit of inverse mass
-    SpgMth::Vec3 move_per_imass = contact_normal * (penetration / total_inverse_mass);
+    glm::vec3 move_per_imass = contact_normal * (penetration / total_inverse_mass);
 
     // Calculate the the movement amounts
     particle_movement[0] = move_per_imass * particle[0]->GetInverseMass();
     if (particle[1]) 
         particle_movement[1] = move_per_imass * -particle[1]->GetInverseMass();
     else 
-        particle_movement[1] = SpgMth::Vec3(0);
+        particle_movement[1] = glm::vec3(0);
     
   }
 
@@ -122,21 +122,21 @@ namespace Cyc
       contact_array[max_index].Resolve(time_step);
       
       // Update the interpenetrations for all particles
-      SpgMth::Vec3* move = contact_array[max_index].particle_movement;
+      glm::vec3* move = contact_array[max_index].particle_movement;
 
       for (auto i = 0; i < num_contacts; i++) {
         if (contact_array[i].particle[0] == contact_array[max_index].particle[0])
-          contact_array[i].penetration -= SpgMth::Dot(move[0], contact_array[i].contact_normal);
+          contact_array[i].penetration -= glm::dot(move[0], contact_array[i].contact_normal);
         
         else if (contact_array[i].particle[0] == contact_array[max_index].particle[1])
-          contact_array[i].penetration -= SpgMth::Dot(move[1], contact_array[i].contact_normal);
+          contact_array[i].penetration -= glm::dot(move[1], contact_array[i].contact_normal);
         
         if (contact_array[i].particle[1]) {
           if (contact_array[i].particle[1] == contact_array[max_index].particle[0])
-            contact_array[i].penetration += SpgMth::Dot(move[0], contact_array[i].contact_normal);
+            contact_array[i].penetration += glm::dot(move[0], contact_array[i].contact_normal);
           
           else if (contact_array[i].particle[1] == contact_array[max_index].particle[1])
-            contact_array[i].penetration += SpgMth::Dot(move[1], contact_array[i].contact_normal);
+            contact_array[i].penetration += glm::dot(move[1], contact_array[i].contact_normal);
         }
       }
 

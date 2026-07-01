@@ -1,7 +1,7 @@
 #pragma once
 #include "SpaghettiEng/SpaghettiEng.h"
 #include "MathLib/MathLib.h"
-#include "Geometry/Init.h"
+#include "Geometry/Geometry.h"
 
 namespace Spg
 {
@@ -62,7 +62,7 @@ namespace Spg
     };
 
   public:
-    DefaultLayer(AppContext& app_context, const std::string& name);
+    DefaultLayer(ServiceLocator& app_context, const std::string& name);
     ~DefaultLayer() = default;
 
     void OnAttach() override;

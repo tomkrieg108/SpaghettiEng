@@ -31,13 +31,13 @@ namespace Cyc
     SpgMth::Real restitution; 
 
     // The direction of the contact in world coordinates from the first particles perspective
-    SpgMth::Vec3 contact_normal; 
+    glm::vec3 contact_normal; 
 
     // The depth of penetration at the contact.
     SpgMth::Real penetration; 
 
     // the amount each particle is moved by during interpenetration resolution
-    SpgMth::Vec3 particle_movement[2]; 
+    glm::vec3 particle_movement[2]; 
 
     protected:
       //Resolves this contact, for both velocity and interpenetration.

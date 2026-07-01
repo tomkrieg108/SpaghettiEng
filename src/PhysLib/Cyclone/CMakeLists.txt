@@ -1,6 +1,4 @@
 add_library(${LIB_CYCLONE} STATIC 
-  "./Core.h"
-  "./Core.cpp"
   "./Particle.h"
   "./Particle.cpp"
   "./ParticleForceGen.h"

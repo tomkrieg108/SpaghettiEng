@@ -14,11 +14,11 @@ namespace Cyc
   class ParticleGravity : public ParticleForceGenerator
   {
     public:
-      ParticleGravity(SpgMth::Vec3 &gravity) : m_gravity{gravity} {}
+      ParticleGravity(glm::vec3 &gravity) : m_gravity{gravity} {}
       virtual void UpdateForce(Particle *particle, SpgMth::Real time_step) override;
 
     private:
-      SpgMth::Vec3 m_gravity;
+      glm::vec3 m_gravity;
   };
 
   class ParticleDrag : public ParticleForceGenerator
@@ -51,16 +51,16 @@ namespace Cyc
   {
     public:
 
-      ParticleAnchoredSpring(SpgMth::Vec3 *anchor, SpgMth::Real spring_const, 
+      ParticleAnchoredSpring(glm::vec3 *anchor, SpgMth::Real spring_const, 
         SpgMth::Real rest_length) :
       m_anchor{anchor}, m_spring_const{spring_const}, m_rest_length{rest_length} 
       {}
      
-      const SpgMth::Vec3* GetAnchor() const { 
+      const glm::vec3* GetAnchor() const { 
         return m_anchor; 
       }
 
-      void Init(SpgMth::Vec3 *anchor, SpgMth::Real spring_const, SpgMth::Real rest_length) {
+      void Init(glm::vec3 *anchor, SpgMth::Real spring_const, SpgMth::Real rest_length) {
         m_anchor = anchor;
         m_spring_const = spring_const;
         m_rest_length = rest_length;
@@ -69,7 +69,7 @@ namespace Cyc
       virtual void UpdateForce(Particle *particle, SpgMth::Real time_step) override;   
 
     protected:
-      SpgMth::Vec3 *m_anchor;      // The location of the anchored end of the spring..
+      glm::vec3 *m_anchor;      // The location of the anchored end of the spring..
       SpgMth::Real m_spring_const; // Holds the sprint constant.
       SpgMth::Real m_rest_length;  // Holds the rest length of the spring.
   };
@@ -77,14 +77,14 @@ namespace Cyc
   class ParticleFakeSpring : public ParticleForceGenerator
   {
     public:
-      ParticleFakeSpring(SpgMth::Vec3 *anchor, SpgMth::Real spring_const, SpgMth::Real damping) :
+      ParticleFakeSpring(glm::vec3 *anchor, SpgMth::Real spring_const, SpgMth::Real damping) :
       m_anchor{anchor}, m_spring_const{spring_const}, m_damping{damping} 
       {}
 
       virtual void UpdateForce(Particle *particle, SpgMth::Real time_step) override;   
 
     private:
-      SpgMth::Vec3 *m_anchor;      // The location of the anchored end of the spring..
+      glm::vec3 *m_anchor;      // The location of the anchored end of the spring..
       SpgMth::Real m_spring_const; // Holds the sprint constant.
       SpgMth::Real m_damping;      // Holds the damping on the oscillation of the spring.
   };

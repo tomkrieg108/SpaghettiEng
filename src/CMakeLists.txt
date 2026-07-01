@@ -4,6 +4,7 @@ add_subdirectory(Geometry)
 add_subdirectory(PhysLib)
 add_subdirectory(SpaghettiEng)
 add_subdirectory(GeomApp)
+add_subdirectory(SpgApp)
 
 target_include_directories(${LIB_CORE}  PUBLIC 
   "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -26,6 +27,10 @@ target_include_directories(${LIB_ENG}  PUBLIC
 ) 
 
 target_include_directories(${APP_GEOM}  PUBLIC 
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+) 
+
+target_include_directories(${APP_SPG}  PUBLIC 
   "${CMAKE_CURRENT_SOURCE_DIR}"
 ) 
 

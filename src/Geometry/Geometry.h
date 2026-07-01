@@ -16,7 +16,4 @@
 #include "Geometry/MonotonePartition.h"
 #include "Geometry/Voronoi.h"
 
-namespace Geom
-{
-  void Init();
-}
+

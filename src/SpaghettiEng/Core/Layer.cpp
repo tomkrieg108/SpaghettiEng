@@ -1,11 +1,11 @@
 
 
-//#include "AppContext.h"
+//#include "ServiceLocator.h"
 #include "Layer.h"
 
 namespace Spg
 {
-  Layer::Layer(AppContext& app_context, const std::string& name)
+  Layer::Layer(ServiceLocator& app_context, const std::string& name)
 	: m_app_conext{app_context}, m_name(name)
   {
   }
