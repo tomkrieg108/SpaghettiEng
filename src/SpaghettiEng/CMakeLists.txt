@@ -2,37 +2,41 @@
 add_library(${LIB_ENG} STATIC)
 
 target_sources(${LIB_ENG} PRIVATE 
-  "./Camera/Camera.cpp"
-  "./Camera/Camera2D.cpp"
-  "./Camera/CameraController2D.cpp"
-  "./Camera/Controller.cpp"
+
   "./Core/Application.cpp"
   "./Core/AppLayer.cpp"
   "./Core/Window.cpp"
   "./Core/Input.cpp"
   "./Core/Layer.cpp"
+
+  "./Render/Camera/Camera.cpp"
+  "./Render/Camera/Camera2D.cpp"
+  "./Render/Camera/CameraController2D.cpp"
+
+  "./Render/MeshData.cpp"
+ 
   "./Events/EventManager.cpp"
+
   "./ImGuiUtils/ImGuiUtils.cpp"
-  "./OpenGL32/GL32Shader.cpp"
-  "./OpenGL32/GL32ShaderUtils.cpp"
-  "./OpenGL32/GL32Context.cpp"
-  "./OpenGL32/GL32Buffer.cpp"
-  "./OpenGL32/GL32VertexArray.cpp"
-  "./OpenGL32/GL32Renderer.cpp"
+
+  "./Render/Backends/OpenGL32/GL32Shader.cpp"
+  "./Render/Backends/OpenGL32/GL32ShaderUtils.cpp"
+  "./Render/Backends/OpenGL32/GL32Context.cpp"
+  "./Render/Backends/OpenGL32/GL32Buffer.cpp"
+  "./Render/Backends/OpenGL32/GL32VertexArray.cpp"
+  "./Render/Backends/OpenGL32/GL32Renderer.cpp"
+ 
   "./Scene/Scene.cpp"
+  "./Scene/SceneCameraController.cpp"
   )
 
 if(WIN32)
   target_sources(${LIB_ENG} PRIVATE 
-  "./OpenGL32/GL32TextRenderer.cpp"
+  "./Render/Backends/OpenGL32/GL32TextRenderer.cpp"
   )
 endif()
 
 target_sources(${LIB_ENG} PRIVATE
-  "./Camera/Camera.h"
-  "./Camera/Camera2D.h"
-  "./Camera/CameraController2D.h"
-  "./Camera/Controller.h"
   "./Core/Application.h"
   "./Core/AppLayer.h"
   "./Core/ServiceLocator.h"
@@ -44,20 +48,31 @@ target_sources(${LIB_ENG} PRIVATE
   "./Events/Events.h"
   "./Events/EventManager.h"
   "./ImGuiUtils/ImGuiUtils.h"
-  "./OpenGL32/GL32Shader.h"
-  "./OpenGL32/GL32ShaderUtils.h"
-  "./OpenGL32/GL32Context.h"
-  "./OpenGL32/GL32Buffer.h"
-  "./OpenGL32/GL32VertexArray.h"
-  "./OpenGL32/GL32BufferLayout.h"
-  "./OpenGL32/GL32Renderer.h"
+
+  "./Render/Camera/Camera.h"
+  "./Render/Camera/Camera2D.h"
+  "./Render/Camera/CameraController2D.h"
+
+  "./Render/MeshData.h"
+  
+  "./Render/Backends/OpenGL32/GL32Shader.h"
+  "./Render/Backends/OpenGL32/GL32ShaderUtils.h"
+  "./Render/Backends/OpenGL32/GL32Context.h"
+  "./Render/Backends/OpenGL32/GL32Buffer.h"
+  "./Render/Backends/OpenGL32/GL32VertexArray.h"
+  "./Render/Backends/OpenGL32/GL32BufferLayout.h"
+  "./Render/Backends/OpenGL32/GL32Renderer.h"
+  "./Render/Backends/OpenGL32/GL32TextRenderer.h"
+
+  "./Scene/Components.h"
   "./Scene/Registry.h"
   "./Scene/Scene.h"
+  "./Scene/SceneCameraController.h"
 )
 
 if(WIN32)
   target_sources(${LIB_ENG} PRIVATE 
-  "./OpenGL32/GL32TextRenderer.h"
+  "./Render/Backends/OpenGL32/GL32TextRenderer.h"
   )
 endif()
 

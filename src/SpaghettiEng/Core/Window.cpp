@@ -5,10 +5,10 @@
 
 #include "CoreLib/Logger.h"
 
-#include "ImGuiUtils/ImGuiUtils.h"
-#include "Events/EventManager.h"
-#include "OpenGL32/GL32Context.h"
-#include "OpenGL32/GL32Renderer.h"
+#include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
+#include "SpaghettiEng/Events/EventManager.h"
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Context.h"
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Renderer.h"
 #include "Input.h"
 #include "Window.h"
 

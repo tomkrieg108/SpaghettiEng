@@ -1,6 +1,6 @@
 
 #include "CoreLib/Logger.h"
-#include "SpaghettiEng/Camera/Camera.h"
+#include "SpaghettiEng/Render/Camera/Camera.h"
 
 #include <glm/glm.hpp>
 

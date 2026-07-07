@@ -10,8 +10,8 @@ namespace Spg
   class ServiceLocator //Service Locator
   {
   public:
-      //#define TYPE_IDX(T) std::type_index(typeid(T)) //recommended
-      #define TYPE_IDX(T) typeid(T).hash_code() 
+      #define TYPE_IDX(T) std::type_index(typeid(T)) //preferred
+      //#define TYPE_IDX(T) typeid(T).hash_code() 
 
       template<typename T, typename... Args>
       void Register(Args&&... args) 
@@ -40,7 +40,7 @@ namespace Spg
           ServiceWrapper(std::unique_ptr<T> inst) : instance(std::move(inst)) {}
       };
 
-      std::unordered_map<size_t, std::unique_ptr<WrapperBase>> m_services;
+      std::unordered_map<std::type_index, std::unique_ptr<WrapperBase>> m_services;
   };
   
 }

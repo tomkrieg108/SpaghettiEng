@@ -12,11 +12,11 @@
 #include "SpaghettiEng/Events/EventManager.h"
 #include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 
-#include "SpaghettiEng/Camera/Camera2D.h"
-#include "SpaghettiEng/Camera/CameraController2D.h"
-#include "SpaghettiEng/OpenGL32/GL32BufferLayout.h"
-#include "SpaghettiEng/OpenGL32/GL32Buffer.h"
-#include "SpaghettiEng/OpenGL32/GL32VertexArray.h"
-#include "SpaghettiEng/OpenGL32/GL32Shader.h"
-#include <SpaghettiEng/OpenGL32/GL32Renderer.h>
-#include <SpaghettiEng/OpenGL32/GL32TextRenderer.h>
+#include "SpaghettiEng/Render/Camera/Camera2D.h"
+#include "SpaghettiEng/Render/Camera/CameraController2D.h"
+
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Buffer.h"
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32VertexArray.h"
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Shader.h"
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Renderer.h"
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32TextRenderer.h"

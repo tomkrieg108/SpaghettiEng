@@ -79,7 +79,7 @@ Extract Z Angle Only: float roll = glm::roll(myQuat);
 
 namespace Spg
 {
-  //* ======================================================
+   //* ======================================================
   //* pitch: X, yaw: Y, roll: Z
   //* ======================================================
 
@@ -111,7 +111,6 @@ namespace Spg
   {
     glm::mat4 m_transform = glm::mat4(1.0f);
   };
-
 
 
   class Transform
@@ -219,35 +218,4 @@ namespace Spg
       mutable bool m_dirty = false; //If true then construct matrix on demand
   };
 
-  
-
-
-  class TransformController
-  {
-    public:
-
-      TransformController(Transform& transform) : m_transform(transform) {}
-      ~TransformController() = default;
-
-      void MoveForward(float amount) {
-        glm::vec3 direction = m_transform.LocalForward();
-        m_transform.Translate(direction*amount);    
-      }
-
-      void MoveRight(float amount) {
-          m_transform.Translate(glm::vec3(1,0,0)*amount);  
-      }
-
-      void MoveVertically(float amount) {
-        m_transform.Translate(glm::vec3(0,1,0)*amount);  
-      }
-
-      void SetEnabled(bool enabled) {m_enabled = enabled;}
-      bool IsEnabled() const {return m_enabled;}
-
-    private:
-      bool m_enabled = true;
-      Transform& m_transform;
-
-  };
 }

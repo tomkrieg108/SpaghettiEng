@@ -26,11 +26,11 @@
 //============================================================
 
 //Project headers
-#include "Events/EventManager.h"
-#include "ImGuiUtils/ImGuiUtils.h"
-#include "OpenGL32/GL32Context.h"
-#include "OpenGL32/GL32Shader.h"
-#include "OpenGL32/GL32Renderer.h"
+#include "SpaghettiEng/Events/EventManager.h"
+#include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Context.h"
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Shader.h"
+#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Renderer.h"
 #include "Window.h"
 #include "ServiceLocator.h"
 #include "AppLayer.h"
