@@ -1,5 +1,5 @@
 #include <glad/gl.h> 
-#include "GL32Buffer.h"
+#include "GLBuffer.h"
 
 namespace Spg
 {

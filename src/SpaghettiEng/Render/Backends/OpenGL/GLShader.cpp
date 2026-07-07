@@ -1,8 +1,8 @@
 
 #include <glad/gl.h>
 #include "CoreLib/Core.h"
-#include "GL32ShaderUtils.h"
-#include "GL32Shader.h"
+#include "GLShaderUtils.h"
+#include "GLShader.h"
 
 using namespace std::string_literals;
 

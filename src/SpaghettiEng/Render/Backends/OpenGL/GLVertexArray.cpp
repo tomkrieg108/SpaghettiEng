@@ -1,5 +1,5 @@
 #include <glad/gl.h> 
-#include "GL32VertexArray.h"
+#include "GLVertexArray.h"
 
 namespace Spg
 {

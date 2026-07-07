@@ -1,5 +1,5 @@
 #include <glm/glm.hpp>
-#include "GL32Shader.h"
+#include "GLShader.h"
 #include "SpaghettiEng/Render/Camera/Camera2D.h"
 #include "CoreLib/Core.h"
 #include <map>

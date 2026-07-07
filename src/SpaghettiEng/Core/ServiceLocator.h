@@ -2,7 +2,7 @@
 #include "CoreLib/Core.h"
 #include <typeinfo>
 #include <typeindex>
-#include <any> //for V3!
+#include <memory>
 
 namespace Spg
 {

@@ -1,4 +1,4 @@
-#include "GL32TextRenderer.h"
+#include "GLTextRenderer.h"
 
 #include "ft2build.h"
 #include <freetype/freetype.h>

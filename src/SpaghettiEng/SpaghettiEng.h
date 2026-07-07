@@ -15,8 +15,8 @@
 #include "SpaghettiEng/Render/Camera/Camera2D.h"
 #include "SpaghettiEng/Render/Camera/CameraController2D.h"
 
-#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Buffer.h"
-#include "SpaghettiEng/Render/Backends/OpenGL32/GL32VertexArray.h"
-#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Shader.h"
-#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Renderer.h"
-#include "SpaghettiEng/Render/Backends/OpenGL32/GL32TextRenderer.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLBuffer.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLVertexArray.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLTextRenderer.h"

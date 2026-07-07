@@ -7,8 +7,8 @@
 
 #include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 #include "SpaghettiEng/Events/EventManager.h"
-#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Context.h"
-#include "SpaghettiEng/Render/Backends/OpenGL32/GL32Renderer.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLContext.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
 #include "Input.h"
 #include "Window.h"
 
@@ -46,7 +46,7 @@ namespace Spg
       SPG_CRITICAL("GLFW window creation failed. Terminating!");
 			glfwTerminate();
 		}
-     m_input = new Input(m_window_handle);
+    m_input = new Input(m_window_handle);
 
     m_graphics_context = new GLContext(m_window_handle);
     m_graphics_context->Initialise();

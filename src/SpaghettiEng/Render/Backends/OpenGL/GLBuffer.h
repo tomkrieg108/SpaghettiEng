@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GL32BufferLayout.h"
+#include "GLBufferLayout.h"
 
 namespace Spg
 {

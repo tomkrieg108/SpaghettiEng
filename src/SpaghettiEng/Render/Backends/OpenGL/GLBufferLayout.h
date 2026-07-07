@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GL32Shader.h"
-#include "GL32ShaderUtils.h"
+#include "GLShader.h"
+#include "GLShaderUtils.h"
 
 namespace Spg
 {

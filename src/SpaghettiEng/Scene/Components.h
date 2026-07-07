@@ -1,12 +1,19 @@
 #pragma once
 
+#include <cstdint>
+
+//for NameComponent(s)
+#include <string> 
+#include <cstddef>
+#include <string_view>
+
+//For TransformComponent
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 //#include <glm/gtc/matrix_access.hpp> // for glm::column(mat, col_idx)
 //#include <glm/gtx/matrix_interpolation.hpp> // Required for axisAngleMatrix
 //#include <glm/gtx/euler_angles.hpp> // Required for specific euler extraction seq
-
 #include "MathLib/MathLib.h"
 
 /*
@@ -83,6 +90,7 @@ namespace Spg
   //* pitch: X, yaw: Y, roll: Z
   //* ======================================================
 
+  //todo TransformComponent - just a struct with data.  Get something else do do these operations.
   
   class StaticTransform
   {
@@ -216,6 +224,51 @@ namespace Spg
 
       mutable glm::mat4 m_transform = glm::mat4(1.0f); //identity mat
       mutable bool m_dirty = false; //If true then construct matrix on demand
+  };
+
+  struct TagComponent
+  {
+    //Will use small string optimization if <= 15 chars (no heap alloc)
+    std::string name = std::string(""); 
+  };
+
+  struct TagComponent2
+  {
+    // 31 chars + 1 null terminator = 32 bytes perfectly aligned.
+    // Adjust to 63 + 1 if you need longer names.
+    char value[32] = {0}; 
+
+    // Constructor handles safe inline copying and truncation
+    TagComponent2(std::string_view name) {
+        size_t bytes_to_copy = std::min(name.size(), sizeof(value) - 1);
+        std::memcpy(value, name.data(), bytes_to_copy);
+        value[bytes_to_copy] = '\0'; // Always guarantee null-termination
+    }
+
+    // Default constructor for EnTT's registry emplace/implicit hooks
+    TagComponent2() = default;
+
+    // Fast, zero-allocation read access
+    std::string_view view() const {
+        return std::string_view(value);
+    }
+
+    // Allows you to do: if (name_comp == "Player")
+    bool operator==(std::string_view other) const {
+        return view() == other;
+    }
+  };
+
+  struct TransformComponent
+  {
+    Transform transform;
+  };
+
+  struct MeshComponent
+  {
+    MeshComponent() = default;
+    MeshComponent(uint32_t handle): mesh_handle(handle) {}
+    uint32_t mesh_handle = 0;
   };
 
 }

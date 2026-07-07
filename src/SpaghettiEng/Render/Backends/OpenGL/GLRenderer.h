@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GL32VertexArray.h"
-#include "GL32Shader.h"
+#include "GLVertexArray.h"
+#include "GLShader.h"
 #include <SpaghettiEng/Render/Camera/Camera2D.h>
 #include "CoreLib/Core.h" //Scope
 #include <glm/glm.hpp>

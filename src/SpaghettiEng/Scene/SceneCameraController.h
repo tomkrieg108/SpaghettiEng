@@ -1,37 +1,27 @@
 #pragma once
 
-#include "SpaghettiEng/Scene/Components.h"
-
 namespace Spg
 {
-  class TransformController
-  {
+  class Input;
+  class Transform;
 
+  class SceneCameraController
+  {
     public:
 
-      TransformController(Transform& transform) : m_transform(transform) {}
-      ~TransformController() = default;
+      SceneCameraController() = default;
+      ~SceneCameraController() = default;
 
-      void MoveForward(float amount) {
-        glm::vec3 direction = m_transform.LocalForward();
-        m_transform.Translate(direction*amount);    
-      }
-
-      void MoveRight(float amount) {
-          m_transform.Translate(glm::vec3(1,0,0)*amount);  
-    
-      }
-
-      void MoveVertically(float amount) {
-        m_transform.Translate(glm::vec3(0,1,0)*amount);  
-      }
-
-      void SetEnabled(bool enabled) {m_enabled = enabled;}
-      bool IsEnabled() const {return m_enabled;}
+      void OnUpdate(Transform& transform, Input& input, double delta_time);
+      void SetEnabled(bool enabled);
+      bool IsEnabled() const;
 
     private:
+      void MoveForward(Transform& transform, float amount);
+      void MoveRight(Transform& transform, float amount);
+      void MoveVertically(Transform&, float amount);
+    
+    private:  
       bool m_enabled = true;
-      Transform& m_transform;
-
   };
 }

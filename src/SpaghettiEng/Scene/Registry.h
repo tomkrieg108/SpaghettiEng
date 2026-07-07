@@ -1,28 +1,22 @@
 #pragma once
 
+//* NOTE: avoid including this in other header files
+
 #include <cstdint>
 #include <memory>
 
-#include <entt/entt.hpp> 
+//#include <entt/entt.hpp> 
+#include <entt/fwd.hpp>
+#include <entt/entity/registry.hpp>
+
+#include "SpaghettiEng/Scene/Entity.h"
 
 
 namespace Spg
 {
- 
-  struct Entity
-  {
-      operator entt::entity() const{ return handle; }
-      operator std::uint32_t() const { return entt::to_integral(handle); }
-      operator bool() const { return handle != entt::null; }
-
-      entt::entity handle;
-  };
-
-  
   class Registry
   {
     public:
-
 
       ~Registry() = default;
 
@@ -73,6 +67,12 @@ namespace Spg
       const T& GetComponent(Entity entity) const
       {
         return m_registry.get<T>(entity.handle);
+      }
+
+      template <typename T>
+      T* TryGetComponent(Entity entity) const
+      {
+        return m_registry.try_get<T>(entity.handle);
       }
 
       template <typename T>

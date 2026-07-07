@@ -1,5 +1,5 @@
 #include <glad/gl.h>
-#include "GL32Renderer.h"
+#include "GLRenderer.h"
 
 namespace Spg
 {

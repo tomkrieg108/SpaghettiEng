@@ -1,6 +1,8 @@
 # pragma once
 
+#include <cstdint>
 #include <vector>
+#include <unordered_map>
 
 /*
   {}
@@ -9,6 +11,44 @@
 
 namespace Spg
 {
+
+  enum class MeshPrimitive {Plane, Cube, Sphere, Other};
+
+  //default to AOS (interleaved attributes)
+  //SOA only for specific scenarios - do later...maybe!
+
+  struct MeshHandle
+  {
+    uint32_t handle;
+  };
+
+  // Check GLBufferLayout.h 
+  struct MeshFormat
+  {
+
+  };
+
+  struct MeshVertex
+  {
+
+  };
+
+  struct Mesh
+  {
+    MeshFormat format;
+    std::vector<float> data;
+  };
+
+  // Initialised on startup by AssetManager
+  class MeshRepo
+  {
+    public:
+
+
+    private:
+      std::unordered_map<MeshHandle,Mesh> m_mesh_map;
+  };
+
   namespace MeshData
   {
     std::vector<float> GenerateCoordsMeshData(float size);
