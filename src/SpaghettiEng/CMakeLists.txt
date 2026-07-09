@@ -9,16 +9,15 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/Input.cpp"
   "./Core/Layer.cpp"
 
-  "./Render/Camera/Camera.cpp"
-  "./Render/Camera/Camera2D.cpp"
-  "./Render/Camera/CameraController2D.cpp"
-  "./Render/Renderer.cpp"
-  "./Render/MeshData.cpp"
- 
   "./Events/EventManager.cpp"
 
   "./ImGuiUtils/ImGuiUtils.cpp"
 
+  "./Render/Camera/Camera.cpp"
+  "./Render/Camera/Camera2D.cpp"
+  "./Render/Camera/CameraController2D.cpp"
+  "./Render/Renderer.cpp"
+  "./Render/Mesh/MeshData.cpp"
   "./Render/Backends/OpenGL/GLShader.cpp"
   "./Render/Backends/OpenGL/GLShaderUtils.cpp"
   "./Render/Backends/OpenGL/GLContext.cpp"
@@ -54,9 +53,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Render/Camera/Camera2D.h"
   "./Render/Camera/CameraController2D.h"
   "./Render/Renderer.h"
-
-  "./Render/MeshData.h"
-  
+  "./Render/Mesh/MeshData.h"
   "./Render/Backends/OpenGL/GLShader.h"
   "./Render/Backends/OpenGL/GLShaderUtils.h"
   "./Render/Backends/OpenGL/GLContext.h"

@@ -1,6 +1,8 @@
 # pragma once
 
-#include <cstdint>
+#include "SpaghettiEng/Render/Mesh/MeshFormat.h"
+
+
 #include <vector>
 #include <unordered_map>
 
@@ -12,31 +14,23 @@
 namespace Spg
 {
 
+
   enum class MeshPrimitive {Plane, Cube, Sphere, Other};
 
-  //default to AOS (interleaved attributes)
-  //SOA only for specific scenarios - do later...maybe!
+  
+  
+  
 
-  struct MeshHandle
-  {
-    uint32_t handle;
-  };
-
-  // Check GLBufferLayout.h 
-  struct MeshFormat
-  {
-
-  };
-
-  struct MeshVertex
-  {
-
-  };
 
   struct Mesh
   {
     MeshFormat format;
-    std::vector<float> data;
+    std::vector<float> vertices;
+    std::vector<uint32_t> indices;
+    uint32_t handle;
+
+  private:
+    static uint32_t s_next_handle;
   };
 
   // Initialised on startup by AssetManager
@@ -46,7 +40,7 @@ namespace Spg
 
 
     private:
-      std::unordered_map<MeshHandle,Mesh> m_mesh_map;
+      std::unordered_map<uint32_t,Mesh> m_mesh_map;
   };
 
   namespace MeshData
@@ -63,6 +57,9 @@ namespace Spg
     std::vector<float> GenerateSphereMeshData();
     std::vector<float> GenerateSphereMeshDataTM();
 
+
+    Mesh GeneratePlaneMesh(float plane_size, MeshFormat mesh_format);
+    Mesh GenerateCubeMesh(float cube_size, MeshFormat mesh_format);
   }
 
 }

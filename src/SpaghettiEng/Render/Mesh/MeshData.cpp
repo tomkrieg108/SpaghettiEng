@@ -1,4 +1,4 @@
-# include "SpaghettiEng/Render/MeshData.h"
+# include "SpaghettiEng/Render/Mesh/MeshData.h"
 
 #include <vector>
 #include <numbers>  //std::pi
