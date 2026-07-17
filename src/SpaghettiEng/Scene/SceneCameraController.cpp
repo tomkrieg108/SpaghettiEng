@@ -1,6 +1,6 @@
 # include "SpaghettiEng/Scene/SceneCameraController.h"
 
-#include "SpaghettiEng/Core/Input.h"
+#include "SpaghettiEng/Core/InputState.h"
 #include "SpaghettiEng/Core/KeyCodes.h"
 #include "SpaghettiEng/Core/MouseCodes.h"
 #include "SpaghettiEng/Scene/Components.h"
@@ -15,20 +15,18 @@ namespace Spg
 
   static float s_move_speed = 5.0f;
 
-  void SceneCameraController::OnUpdate(Transform& transform, Input& input, double delta_time)
+  void SceneCameraController::OnUpdate(Transform& transform, InputState& input_state, double delta_time)
   {
     float dt = static_cast<float>(delta_time);
 
-    if(input.IsKeyPressed(Key::W))
+    if(input_state.IsKeyPressed(Key::W))
       MoveForward(transform, dt * s_move_speed);
-    if(input.IsKeyPressed(Key::S))
+    if(input_state.IsKeyPressed(Key::S))
       MoveForward(transform, -dt * s_move_speed);
-    if(input.IsKeyPressed(Key::D))
+    if(input_state.IsKeyPressed(Key::D))
       MoveRight(transform, dt * s_move_speed);
-    if(input.IsKeyPressed(Key::A))
+    if(input_state.IsKeyPressed(Key::A))
       MoveRight(transform, -dt * s_move_speed);  
-
-      
   }
 
   void SceneCameraController::MoveForward(Transform& transform, float amount)

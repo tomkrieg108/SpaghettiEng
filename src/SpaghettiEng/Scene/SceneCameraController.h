@@ -2,7 +2,7 @@
 
 namespace Spg
 {
-  class Input;
+  class InputState;
   class Transform;
 
   class SceneCameraController
@@ -12,7 +12,7 @@ namespace Spg
       SceneCameraController() = default;
       ~SceneCameraController() = default;
 
-      void OnUpdate(Transform& transform, Input& input, double delta_time);
+      void OnUpdate(Transform& transform, InputState& input_state, double delta_time);
       void SetEnabled(bool enabled);
       bool IsEnabled() const;
 

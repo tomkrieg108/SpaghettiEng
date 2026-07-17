@@ -15,6 +15,7 @@ namespace Spg
     {
       for(auto i=0; i<m_handler_list.size(); ++i)
       {
+        //Todo - memory leak - default handlers allocated here, then overwritten by AddHandler()
         EventHandler* handler = new EventHandlerFreeFunc(DefaultHandler); 
         m_handler_list[i] = handler;
       }

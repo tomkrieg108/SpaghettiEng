@@ -15,7 +15,7 @@ namespace Spg
     virtual void OnDetach() {}
     virtual void OnUpdate(double delta_time) {}
     virtual void OnEvent(Event& event) {};
-    virtual void OnImGuiRender() {}
+    virtual void OnImGuiRender() {} // todo - remove
     const std::string& GetName() const { return m_name; }
   protected:
     ServiceLocator& m_app_conext;

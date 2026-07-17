@@ -18,10 +18,6 @@ namespace Spg
   enum class MeshPrimitive {Plane, Cube, Sphere, Other};
 
   
-  
-  
-
-
   struct Mesh
   {
     MeshFormat format;

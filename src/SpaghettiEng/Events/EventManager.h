@@ -116,6 +116,7 @@ namespace Spg
       #endif
 
     private: 
+    // Todo - constrained to a single event handler per event
       std::array<EventHandler*, (size_t)EventType::Count> m_handler_list;
       std::queue<EventWrapper> m_event_queue;
 

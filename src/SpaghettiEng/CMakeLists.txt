@@ -6,7 +6,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/Application.cpp"
   "./Core/AppLayer.cpp"
   "./Core/Window.cpp"
-  "./Core/Input.cpp"
+  "./Core/InputState.cpp"
   "./Core/Layer.cpp"
 
   "./Events/EventManager.cpp"
@@ -41,7 +41,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/AppLayer.h"
   "./Core/ServiceLocator.h"
   "./Core/Window.h"
-  "./Core/Input.h"
+  "./Core/InputState.h"
   "./Core/Layer.h"
   "./Core/KeyCodes.h"
   "./Core/MouseCodes.h"

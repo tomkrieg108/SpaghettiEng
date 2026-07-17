@@ -28,6 +28,8 @@ namespace Spg
 
 
       std::unique_ptr<Registry> m_registry;
+
+      //todo - remove this.  Separate out the Scene camera(s) controllers, visuals (grid etc) from the simulated entities - ese a separate scene 
       std::unique_ptr<SceneCameraController> m_scene_camera_controller;
 
       //todo:  consider the pimpl idiom:

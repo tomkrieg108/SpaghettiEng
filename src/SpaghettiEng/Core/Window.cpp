@@ -1,16 +1,16 @@
 //#define GLFW_INCLUDE_NONE
+#include "SpaghettiEng/Core/Window.h"
 
-#include <glad/gl.h>  
+#include <glad/gl.h>  //Need to include before glfw3.h
 #include <GLFW/glfw3.h>
 
 #include "CoreLib/Logger.h"
 
+#include "SpaghettiEng/Core/InputState.h"
 #include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 #include "SpaghettiEng/Events/EventManager.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLContext.h"
-#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
-#include "Input.h"
-#include "Window.h"
+
 
 namespace Spg
 {
@@ -31,9 +31,10 @@ namespace Spg
     {
       SPG_CRITICAL("GLFW initalisation failed");
       glfwTerminate();
+      return;
     }
     //Todo. Linux does not work with V4.5 (V4.2 max?)
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -45,18 +46,13 @@ namespace Spg
 		{
       SPG_CRITICAL("GLFW window creation failed. Terminating!");
 			glfwTerminate();
+      return;
 		}
-    m_input = new Input(m_window_handle);
-
-    m_graphics_context = new GLContext(m_window_handle);
-    m_graphics_context->Initialise();
-
+   
     m_params.title = title;
     glfwGetWindowSize(m_window_handle, &m_params.width, &m_params.height);
     glfwGetFramebufferSize(m_window_handle, &m_params.buffer_width, &m_params.buffer_height);
 
-    GLRenderer::SetViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
-   
     SetVSyncEnabled(m_params.vsync_enabled);
     SetCursorEnabled(m_params.cursor_enabled);
     glfwSetWindowUserPointer(m_window_handle, this);  
@@ -65,6 +61,11 @@ namespace Spg
     SPG_INFO("Window Created.  Buffer width, height: {}, {}", m_params.buffer_width, m_params.buffer_height);
 
     s_window_count++;
+
+    m_graphics_context = new OpenGLContext(m_window_handle);
+    m_graphics_context->SetViewport(0, 0, m_params.buffer_width, m_params.buffer_height);
+
+     m_input_state = new InputState(m_window_handle);
   }
 
   Window::~Window()
@@ -75,8 +76,8 @@ namespace Spg
     if(m_graphics_context != nullptr)
       delete m_graphics_context;
 
-    if(m_input != nullptr)
-      delete m_input;
+    if(m_input_state != nullptr)
+      delete m_input_state;
 
     if(s_window_count == 0)
       glfwTerminate();
@@ -98,9 +99,16 @@ namespace Spg
     return m_params;     
   }
 
-  Input* Window::GetInput()
+  InputState* Window::GetInputState()
   {
-    return m_input;
+    SPG_ASSERT(m_input_state != nullptr);
+    return m_input_state;
+  }
+
+  OpenGLContext* Window::GetGraphicsContext()
+  {
+    SPG_ASSERT(m_graphics_context != nullptr);
+    return m_graphics_context;
   }
 
   bool Window::IsVSyncEnabled() const 
@@ -125,14 +133,14 @@ namespace Spg
 
   void Window::Clear() const
   {
-    GLRenderer::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
-    GLRenderer::ClearBuffers();
+    m_graphics_context->ClearBuffer();
   }
 
   float Window::GetAspectRatio() const
   {
-    SPG_ASSERT(m_params.buffer_height > 0); //Todo - triggered when window minimized
-    return (float)(m_params.buffer_width) / (float)(m_params.buffer_height);
+    if(!IsMinimised() && m_params.buffer_height > 0)
+      return (float)(m_params.buffer_width) / (float)(m_params.buffer_height);
+    return 1.0f;  
   }
 
   void Window::SetVSyncEnabled(bool enable)
@@ -171,7 +179,7 @@ namespace Spg
 
     glfwSetFramebufferSizeCallback(m_window_handle, [](GLFWwindow* handle, int width, int height){
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));  
-      GLRenderer::SetViewport(0,0,width,height);  
+      window->m_graphics_context->SetViewport(0,0,width,height);
       window->GetParams().buffer_width = width;
       window->GetParams().buffer_height = height;
       EventWindowResize e{width,height};
@@ -272,12 +280,14 @@ namespace Spg
         return; 
 
 		  Window* win = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-      Input* input = win->GetInput();
+      auto* input = win->GetInputState();
       if(!input->GetMouseFirstMoved())
         input->SetMouseFirstMoved();
 
       float x_new = (float)(xpos);
       float y_new = (float)(ypos);
+
+      //Todo - this will mostly be ignored - only queue if a mouse or key is also currently being pressed
       EventMouseMoved e{x_new,y_new,input->GetMouseDeltaX(x_new),input->GetMouseDeltaY(y_new)};
       EventManager::Enqueue(e);
     });

@@ -1,15 +1,110 @@
 
+#include "GLContext.h"
+
 #include <glad/gl.h>
 #include <GLFW/glfw3.h> 
+
 #include "CoreLib/Core.h"
-#include "GLContext.h"
 
 namespace Spg
 {
+
   static GLenum params[] = { GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, GL_MAX_CUBE_MAP_TEXTURE_SIZE, GL_MAX_DRAW_BUFFERS, GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, GL_MAX_TEXTURE_IMAGE_UNITS, GL_MAX_TEXTURE_SIZE, GL_MAX_VARYING_FLOATS, GL_MAX_VERTEX_ATTRIBS, GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, GL_MAX_VERTEX_UNIFORM_COMPONENTS, GL_MAX_UNIFORM_BUFFER_BINDINGS, GL_MAX_VIEWPORT_DIMS, GL_STEREO, };
 
   static const char* param_name[] = { "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS", "GL_MAX_CUBE_MAP_TEXTURE_SIZE", "GL_MAX_DRAW_BUFFERS", "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS",
   "GL_MAX_TEXTURE_IMAGE_UNITS", "GL_MAX_TEXTURE_SIZE", "GL_MAX_VARYING_FLOATS", "GL_MAX_VERTEX_ATTRIBS", "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS", "GL_MAX_VERTEX_UNIFORM_COMPONENTS", "GL_MAX_UNIFORM_BUFFER_BINDINGS", "GL_MAX_UNIFORM_BUFFERS" "GL_MAX_VIEWPORT_DIMS", "GL_STEREO" };
+
+  //https://learnopengl.com/In-Practice/Debugging
+  static void APIENTRY GLErrorCallback(GLenum source,GLenum type,unsigned int id,GLenum severity,GLsizei length,const char* message,const void* userParam);
+
+  OpenGLContext::OpenGLContext(GLFWwindow* glfw_window_handle) :
+    m_glfw_window_handle{glfw_window_handle}
+  {
+    SPG_ASSERT(m_glfw_window_handle != nullptr);
+
+    glfwMakeContextCurrent(m_glfw_window_handle);
+    int status = gladLoadGL(glfwGetProcAddress);
+		if (!status)
+		{
+      SPG_CRITICAL("OpenGL (Glad) Initialisation failed. Terminating");
+			glfwDestroyWindow(m_glfw_window_handle);
+			glfwTerminate();
+		}
+    else
+      SPG_INFO("OpenGL context Created");
+
+#ifdef SPG_DEBUG
+    int flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(GLErrorCallback, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
+#endif
+  }
+
+  void OpenGLContext::SwapBuffers()
+  {
+    glfwSwapBuffers(m_glfw_window_handle);
+  }
+
+  void OpenGLContext::ClearBuffer()
+  {
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  }
+
+  void OpenGLContext::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
+  {
+    glViewport(x, y, width, height);
+  }
+
+  void OpenGLContext::PrintSpecs()
+  {
+    PrintVideoModes();
+    PrintImplInfo();
+    PrintGLParams();
+  }
+
+
+  
+  void OpenGLContext::PrintVideoModes()
+  {
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    int count;
+    const GLFWvidmode* modes = glfwGetVideoModes(monitor, &count);
+    //std::cout << "Video modes supported: " << count << "\n\n";
+    SPG_INFO("Video Modes Supported:");
+    for (int i = 0; i < count; i++)
+    {
+        SPG_TRACE("   {}: {}: {}: {}: {}: {}: {}:", i, modes[i].height, modes[i].width, modes[i].redBits, modes[i].blueBits, modes[i].greenBits, modes[i].refreshRate);
+    }
+  }
+
+  void OpenGLContext::PrintImplInfo()
+  {
+    SPG_INFO("OpenGL Implementation Info:");
+    SPG_TRACE("  Vendor: {}", reinterpret_cast<char const*>(glGetString(GL_VENDOR)));
+    SPG_TRACE("  Renderer: {}", reinterpret_cast<char const*>(glGetString(GL_RENDERER)));
+    SPG_TRACE("  Version: {}", reinterpret_cast<char const*>(glGetString(GL_VERSION)));
+  }
+
+  void OpenGLContext::PrintGLParams()
+  {
+    SPG_INFO("OPENGL PARAMETER VALUES");
+    for (int i = 0; i <= 11; i++)
+    {
+        static int param_val;
+        glGetIntegerv(params[i], &param_val);
+        SPG_TRACE("   {} \t {}", param_name[i], param_val);
+    }
+    static GLboolean bool_val;
+    glGetBooleanv(GL_STEREO, &bool_val);
+    SPG_TRACE("   {} \t {}", param_name[11], bool_val);
+  }
 
   //https://learnopengl.com/In-Practice/Debugging
   static void APIENTRY GLErrorCallback(GLenum source,GLenum type,unsigned int id,GLenum severity,GLsizei length,const char* message,const void* userParam)
@@ -70,80 +165,71 @@ namespace Spg
     SPG_WARN("-----------------------------------------------------");
   }
 
-  GLContext::GLContext(GLFWwindow* glfw_window_handle) :
-    m_glfw_window_handle{glfw_window_handle}
-  {
-    SPG_ASSERT(m_glfw_window_handle != nullptr);
-  }
 
-  void GLContext::SwapBuffers()
+  namespace Graphics_CTX_V2 //AI
   {
-    glfwSwapBuffers(m_glfw_window_handle);
-  }
+    
+   // #include "GraphicsContext.hpp"
+  // #include <stdexcept>
+  // #include <iostream>
 
-  void GLContext::MakeContextCurrent()
-  {
-    glfwMakeContextCurrent(m_glfw_window_handle);
-  }
-
-  void GLContext::Initialise()
-  {
-    glfwMakeContextCurrent(m_glfw_window_handle);
-    int status = gladLoadGL(glfwGetProcAddress);
-		if (!status)
-		{
-      SPG_CRITICAL("OpenGL (Glad) Initialisation failed. Terminating");
-			glfwDestroyWindow(m_glfw_window_handle);
-			glfwTerminate();
-		}
-    SPG_INFO("OpenGL Context Initialised");
-
-#ifdef SPG_DEBUG
-    int flags;
-    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-    {
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(GLErrorCallback, nullptr);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    GraphicsContext::GraphicsContext(int width, int height, const std::string& title)
+        : m_Width(width), m_Height(height), m_Title(title) {
+        Init();
     }
-#endif
-  }
 
-  void GLContext::PrintVideoModes()
-  {
-    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-    int count;
-    const GLFWvidmode* modes = glfwGetVideoModes(monitor, &count);
-    //std::cout << "Video modes supported: " << count << "\n\n";
-    SPG_INFO("Video Modes Supported:");
-    for (int i = 0; i < count; i++)
-    {
-        SPG_TRACE("   {}: {}: {}: {}: {}: {}: {}:", i, modes[i].height, modes[i].width, modes[i].redBits, modes[i].blueBits, modes[i].greenBits, modes[i].refreshRate);
+    GraphicsContext::~GraphicsContext() {
+        if (m_Window) {
+            glfwDestroyWindow(m_Window);
+        }
+        glfwTerminate();
     }
-  }
 
-  void GLContext::PrintImplInfo()
-  {
-    SPG_INFO("OpenGL Implementation Info:");
-    SPG_TRACE("  Vendor: {}", reinterpret_cast<char const*>(glGetString(GL_VENDOR)));
-    SPG_TRACE("  Renderer: {}", reinterpret_cast<char const*>(glGetString(GL_RENDERER)));
-    SPG_TRACE("  Version: {}", reinterpret_cast<char const*>(glGetString(GL_VERSION)));
-  }
+    void GraphicsContext::Init() {
+        // 1. Initialize GLFW
+        if (!glfwInit()) {
+            throw std::runtime_error("Failed to initialize GLFW");
+        }
 
-  void GLContext::PrintGLParams()
-  {
-    SPG_INFO("OPENGL PARAMETER VALUES");
-    for (int i = 0; i <= 11; i++)
-    {
-        static int param_val;
-        glGetIntegerv(params[i], &param_val);
-        SPG_TRACE("   {} \t {}", param_name[i], param_val);
-    }
-    static GLboolean bool_val;
-    glGetBooleanv(GL_STEREO, &bool_val);
-    SPG_TRACE("   {} \t {}", param_name[11], bool_val);
+        // 2. Configure OpenGL versions
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6); // Or 3.3 depending on your hardware
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+        // 3. Create the window
+        m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
+        if (!m_Window) {
+            glfwTerminate();
+            throw std::runtime_error("Failed to create GLFW window");
+        }
+
+        // 4. Bind the context to the current thread
+        MakeCurrent();
+
+        // 5. Initialize GLAD loaders
+        // if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        //     throw std::runtime_error("Failed to initialize GLAD");
+        // }
+
+        // 6. Set initial viewport
+        glViewport(0, 0, m_Width, m_Height);
+      }
+
+      void GraphicsContext::MakeCurrent() {
+          glfwMakeContextCurrent(m_Window);
+      }
+
+      void GraphicsContext::SwapBuffers() {
+          glfwSwapBuffers(m_Window);
+      }
+
+      void GraphicsContext::PollEvents() {
+          glfwPollEvents();
+      }
+
+      bool GraphicsContext::ShouldClose() const {
+          return glfwWindowShouldClose(m_Window);
+      }
   }
 
 }

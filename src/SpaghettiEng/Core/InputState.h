@@ -6,12 +6,13 @@ struct GLFWwindow;
 
 namespace Spg
 {
- class Input
+  class InputState
   {
   public:
 
-    Input(GLFWwindow* glfw_window_handle);
-    ~Input() = default;
+    InputState(GLFWwindow* glfw_window_handle);
+    InputState() = delete;
+    ~InputState() = default;
 
     void SetMouseFirstMoved();
     bool GetMouseFirstMoved();

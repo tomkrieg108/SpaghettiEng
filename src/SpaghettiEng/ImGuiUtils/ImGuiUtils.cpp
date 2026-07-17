@@ -1,7 +1,12 @@
+
+#include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
+
 #include <filesystem>
 #include <GLFW/glfw3.h>
+
+#include "CoreLib/Core.h"
+
 #include "SpaghettiEng/Core/Window.h"
-#include "ImGuiUtils.h"
 
 
 namespace Spg

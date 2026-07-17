@@ -15,8 +15,9 @@ namespace Spg
 
   struct Event
   {
-		virtual ~Event() = default;
-		virtual EventType GetType() const { return EventType::None; }
+		// virtual ~Event() = default;
+		// virtual EventType GetType() const { return EventType::None; }
+    //EventType type = EventType::None;
 		bool handled = false;
   };
 
@@ -25,7 +26,7 @@ namespace Spg
   struct EventWindowClose : public Event
   {
       EventWindowClose() = default;
-      EventType GetType() const override { return EventType::WindowClose; }
+      //EventType GetType() const override { return EventType::WindowClose; }
       static EventType GetStaticType() { return EventType::WindowClose; }
   };
 
@@ -33,7 +34,7 @@ namespace Spg
   {
       EventWindowResize() = delete;
       EventWindowResize(int buffer_width, int buffer_height) : buffer_width{ buffer_width }, buffer_height{ buffer_height } {}
-      EventType GetType() const override { return EventType::WindowResize; }
+      //EventType GetType() const override { return EventType::WindowResize; }
       static EventType GetStaticType() { return EventType::WindowResize; }
       int buffer_width = 0, buffer_height = 0;
   };
@@ -42,7 +43,7 @@ namespace Spg
   {
       EventWindowFocusChange() = delete;
       EventWindowFocusChange(int focused) : has_focus { focused } {}
-      EventType GetType() const override { return EventType::WindowFocusChange; }
+      //EventType GetType() const override { return EventType::WindowFocusChange; }
       static EventType GetStaticType() { return EventType::WindowFocusChange; }
       int has_focus = 0;
   };
@@ -51,7 +52,7 @@ namespace Spg
   {
       EventWindowHoverChange() = delete;
       EventWindowHoverChange(int hovered) : hovered{ hovered } {}
-      EventType GetType() const override { return EventType::WindowHoverChange; }
+      //EventType GetType() const override { return EventType::WindowHoverChange; }
       static EventType GetStaticType() { return EventType::WindowHoverChange; }
       int hovered = 0;
   };
@@ -60,7 +61,7 @@ namespace Spg
   {
       EventWindowIconifyChange() = delete;
       EventWindowIconifyChange(int iconified) : is_iconified{ iconified } {}
-      EventType GetType() const override { return EventType::WindowIconifyChange; }
+      //EventType GetType() const override { return EventType::WindowIconifyChange; }
       static EventType GetStaticType() { return EventType::WindowIconifyChange; }
       int is_iconified = 0;
   };
@@ -69,7 +70,7 @@ namespace Spg
   {
       EventWindowMove() = delete;
       EventWindowMove(int xpos, int ypos) : xpos{ xpos }, ypos{ ypos } {}
-      EventType GetType() const override { return EventType::WindowMove; }
+      //EventType GetType() const override { return EventType::WindowMove; }
       static EventType GetStaticType() { return EventType::WindowMove; }
       int xpos = 0, ypos = 0;
   };
@@ -78,7 +79,7 @@ namespace Spg
   {
       EventViewportResize() = delete;
       EventViewportResize(int width, int height) : width{ width }, height{ height } {}
-      EventType GetType() const override { return EventType::ViewportResize; }
+      //EventType GetType() const override { return EventType::ViewportResize; }
       static EventType GetStaticType() { return EventType::ViewportResize; }
       int width = 0, height = 0;
   };
@@ -89,7 +90,7 @@ namespace Spg
   {
 		EventMouseButtonPressed() = delete;
 		EventMouseButtonPressed(float x, float y, int btn) : x{ x }, y{ y }, btn{ btn } {}
-		EventType GetType() const override { return EventType::MouseButtonPressed; }
+		//EventType GetType() const override { return EventType::MouseButtonPressed; }
     static EventType GetStaticType() { return EventType::MouseButtonPressed; }
 		float x = 0, y = 0;
 		int btn = 0;
@@ -99,7 +100,7 @@ namespace Spg
   {
 		EventMouseButtonReleased() = delete;
 		EventMouseButtonReleased(float x, float y, int btn) : x{ x }, y{ y }, btn{ btn } {}
-		EventType GetType() const override { return EventType::MouseButtonReleased; }
+		//EventType GetType() const override { return EventType::MouseButtonReleased; }
     static EventType GetStaticType() { return EventType::MouseButtonReleased; }
 		float x = 0, y = 0;
 		int btn = 0;
@@ -110,7 +111,7 @@ namespace Spg
     EventMouseMoved() = delete;
     EventMouseMoved(float x, float y, float delta_x, float delta_y) :
       x{ x }, y{y}, delta_x {delta_x}, delta_y {delta_y} {}
-    EventType GetType() const override { return EventType::MouseMoved; }
+    //EventType GetType() const override { return EventType::MouseMoved; }
     static EventType GetStaticType() { return EventType::MouseMoved; }
     float x, y;
     float delta_x, delta_y;
@@ -121,7 +122,7 @@ namespace Spg
     EventMouseScrolled() = delete;
     EventMouseScrolled(float x_offset, float y_offset) :
       x_offset{ x_offset }, y_offset{ y_offset } {}
-    EventType GetType() const override { return EventType::MouseScrolled; }
+    //EventType GetType() const override { return EventType::MouseScrolled; }
     static EventType GetStaticType() { return EventType::MouseScrolled; }
     float x_offset, y_offset;
   };
@@ -132,7 +133,7 @@ namespace Spg
   {
       EventKeyPressed() = delete;
       EventKeyPressed(int key, bool repeated = false) : key{ key }, repeated{ repeated } {}
-      EventType GetType() const override { return EventType::KeyPressed; }
+      //EventType GetType() const override { return EventType::KeyPressed; }
       static EventType GetStaticType() { return EventType::KeyPressed; }
       int key = 0;
       bool repeated = false;
@@ -142,7 +143,7 @@ namespace Spg
   {
       EventKeyReleased() = delete;
       EventKeyReleased(int key) : key{ key } {}
-      EventType GetType() const override { return EventType::KeyReleased; }
+      //EventType GetType() const override { return EventType::KeyReleased; }
       static EventType GetStaticType() { return EventType::KeyReleased; }
       int key = 0;
   };
@@ -151,7 +152,7 @@ namespace Spg
   {
       EventKeyTyped() = delete;
       EventKeyTyped(int key) : key{ key } {}
-      EventType GetType() const override { return EventType::KeyTyped; }
+      //EventType GetType() const override { return EventType::KeyTyped; }
       static EventType GetStaticType() { return EventType::KeyTyped; }
       int key;
   };

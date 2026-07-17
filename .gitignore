@@ -18,6 +18,8 @@ build/
 #assets/
 html/
 .vscode/
+
+ai_helpers/
 #external/glad
 #external/stb_image
 #external/
@@ -155,3 +157,6 @@ ipch/
 
 # Visual Studio Trace Files
 *.e2e
+
+# files generated for AI
+*

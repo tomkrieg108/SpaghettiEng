@@ -1,12 +1,12 @@
 #pragma once
-#include "CoreLib/Core.h"
+//#include "CoreLib/Core.h"
 
-struct GLFWwindow;
+struct GLFWwindow; //glfw lib window
 
 namespace Spg
 {
-  class Input;
-  class GLContext;
+  class InputState;
+  class OpenGLContext;
 
   class Window
   {
@@ -33,7 +33,8 @@ namespace Spg
     void SetCursorEnabled(bool enable);
     const Params& GetParams() const;
     Params& GetParams();
-    Input* GetInput();
+    InputState* GetInputState();
+    OpenGLContext* GetGraphicsContext();
 
     bool IsCursorEnabled() const;
     bool IsVSyncEnabled() const;
@@ -47,8 +48,8 @@ namespace Spg
   private:  
     Params m_params = Params();
     GLFWwindow* m_window_handle = nullptr;
-    GLContext* m_graphics_context = nullptr; 
-    Input* m_input = nullptr; 
+    OpenGLContext* m_graphics_context = nullptr; 
+    InputState* m_input_state = nullptr; 
 
     static uint32_t s_window_count;
   };

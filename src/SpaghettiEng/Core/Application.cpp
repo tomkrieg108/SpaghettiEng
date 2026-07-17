@@ -43,40 +43,7 @@ namespace Spg
 {
   namespace fs = std::filesystem;
 
-  static void OnMousePress(EventMouseButtonPressed& e)
-  {
-    SPG_WARN("App: Mouse Pressed: {},{}", e.x, e.y);
-  }
-  static void OnMouseRelease(EventMouseButtonReleased& e)
-  {
-   SPG_WARN("App: Mouse Released: {},{}", e.x, e.y);
-  }
-
-  static void OnMouseMoved(EventMouseMoved& e)
-  {
-    SPG_WARN("App Mouse Moved: [{},{}], [{},{}] ", e.x, e.y, e.delta_x, e.delta_y);
-  }
-
-  static void OnMouseScrolled(EventMouseScrolled& e)
-  {
-    SPG_WARN("App Mouse scrolled: {},{} ", e.x_offset, e.y_offset);
-  }
-
-  static void OnWindowResized(EventWindowResize& e)
-  {
-    SPG_WARN("App Window FB resize: {},{} ", e.buffer_width, e.buffer_height);
-  }
-
-  static void OnWindowClosed(EventWindowClose& e)
-  {
-    SPG_WARN("App Window closed");
-  }
-
-  static void OnKeyReleased(EventKeyReleased& e)
-  {
-    SPG_WARN("App Key released: {} ", e.key);
-  }
- 
+  
   Application* Application::s_instance = nullptr;
 
   void Application::SystemInit()
@@ -96,19 +63,16 @@ namespace Spg
   
     m_service_locator.Register<Window>(app_name);
 
-    const Window& win = m_service_locator.Get<Window>();
+    Window& win = m_service_locator.Get<Window>();
     ImGuiUtils::Initialise(win);
 
     AppLayer* app_layer = new AppLayer(m_service_locator, "App Layer");
     m_layer_stack.PushOverlay(app_layer);
 
   #ifdef SPG_DEBUG
-    GLContext::PrintVideoModes();
-    GLContext::PrintGLParams();
-    GLContext::PrintImplInfo();
+    win.GetGraphicsContext()->PrintSpecs();
   #endif  
-    //For testing
-    //SPG_ASSERT(1);
+    
   }
 
   Application::~Application()
@@ -140,21 +104,9 @@ namespace Spg
     m_layer_stack.PopLayer(layer); 
   }
 
-  void Application::SetEventHandlers()
-  {
-  #ifdef SPG_CALLBACK_CHECK
-    EventManager::AddHandler(OnMousePress);
-    EventManager::AddHandler(OnMouseRelease);
-    EventManager::AddHandler(OnMouseMoved);
-    EventManager::AddHandler(OnMouseScrolled);
-    EventManager::AddHandler(OnWindowResized);
-    EventManager::AddHandler(OnKeyReleased);
-  #endif
-    EventManager::AddHandler(this, &Application::OnWindowClosed);
-    EventManager::AddHandler(this, &Application::OnKeyPressed);
-  }
+  
 
-  //Todo - this should be setup in SystemInit()
+  //Todo - this should be setup in Assets module
   void Application::SetAssetsPath()
   {
     //Todo - this will need to be changed.  Currently depends on the location of this source file, which won't work when app is 'deployed'
@@ -178,22 +130,7 @@ namespace Spg
     SPG_INFO("Current working directory successfully set to: {}", fs::current_path().string());
   }
 
-  void Application::OnWindowClosed(EventWindowClose& e)
-  {
-    SPG_WARN("App Window closed **");
-    m_running = false;
-    e.handled = true;   
-  }
-
-  void Application::OnKeyPressed(EventKeyPressed& e)
-  {
-    SPG_WARN("Key pressed ** {} ", e.key);
-    if(e.key == GLFW_KEY_ESCAPE)
-    {
-      m_running = false;
-      e.handled = true;   
-    }
-  }
+ 
 
   void Application::Run()
   {
@@ -263,5 +200,75 @@ namespace Spg
     SPG_TRACE("This file is: {}", source_file_path.string());
 
     SPG_WARN( "####################################################");
+  }
+
+  //=========================================================================================
+  //  Event handler setup
+  //==========================================================================================
+
+  void Application::SetEventHandlers()
+  {
+  #ifdef SPG_CALLBACK_CHECK
+    EventManager::AddHandler(OnMousePress);
+    EventManager::AddHandler(OnMouseRelease);
+    EventManager::AddHandler(OnMouseMoved);
+    EventManager::AddHandler(OnMouseScrolled);
+    EventManager::AddHandler(OnWindowResized);
+    EventManager::AddHandler(OnKeyReleased);
+  #endif
+    EventManager::AddHandler(this, &Application::OnWindowClosed);
+    EventManager::AddHandler(this, &Application::OnKeyPressed);
+  }
+
+   void Application::OnWindowClosed(EventWindowClose& e)
+  {
+    SPG_WARN("App Window closed **");
+    m_running = false;
+    e.handled = true;   
+  }
+
+  void Application::OnKeyPressed(EventKeyPressed& e)
+  {
+    SPG_WARN("Key pressed ** {} ", e.key);
+    if(e.key == GLFW_KEY_ESCAPE)
+    {
+      m_running = false;
+      e.handled = true;   
+    }
+  }
+
+
+  static void OnMousePress(EventMouseButtonPressed& e)
+  {
+    SPG_WARN("App: Mouse Pressed: {},{}", e.x, e.y);
+  }
+  static void OnMouseRelease(EventMouseButtonReleased& e)
+  {
+   SPG_WARN("App: Mouse Released: {},{}", e.x, e.y);
+  }
+
+  static void OnMouseMoved(EventMouseMoved& e)
+  {
+    SPG_WARN("App Mouse Moved: [{},{}], [{},{}] ", e.x, e.y, e.delta_x, e.delta_y);
+  }
+
+  static void OnMouseScrolled(EventMouseScrolled& e)
+  {
+    SPG_WARN("App Mouse scrolled: {},{} ", e.x_offset, e.y_offset);
+  }
+
+  static void OnWindowResized(EventWindowResize& e)
+  {
+    SPG_WARN("App Window FB resize: {},{} ", e.buffer_width, e.buffer_height);
+  }
+
+  static void OnWindowClosed(EventWindowClose& e)
+  {
+    SPG_WARN("App Window closed");
+  }
+
+  static void OnKeyReleased(EventKeyReleased& e)
+  {
+    SPG_WARN("App Key released: {} ", e.key);
   }
 }
