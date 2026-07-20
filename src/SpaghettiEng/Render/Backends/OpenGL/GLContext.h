@@ -7,16 +7,19 @@ struct GLFWwindow;
 namespace Spg
 {
   //Todo:  Future - derived from a base GraphicsContext class
+  //Todo Prefer GLuint over int32_t etc
   class OpenGLContext
   {
     public:
 
+      OpenGLContext() = delete;
       OpenGLContext(GLFWwindow* glfw_window_handle);
       ~OpenGLContext() = default;
       
       void SwapBuffers();
       void ClearBuffer();
       void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
+
       void PrintSpecs();
       
     private:

@@ -44,10 +44,6 @@ namespace Spg
 int main()
 {
   Spg::Application::SystemInit();
-#ifdef SPG_LIB_LINK_CHECK 
- Spg::Application::PrintPlatformInfo();
- Spg::Application::PrintExternalLibInfo();
-#endif
   auto app = Spg::CreateApplication();
   app->Run();
 }

@@ -1,6 +1,13 @@
-#include "ImGuiUtils/ImGuiUtils.h"
-#include "ServiceLocator.h"
-#include "AppLayer.h"
+
+#include "SpaghettiEng/Core/AppLayer.h"
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
+#include "SpaghettiEng/Core/Window.h"
+#include "SpaghettiEng/Core/ServiceLocator.h"
+#include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 
 namespace Spg
 {
@@ -9,7 +16,7 @@ namespace Spg
   {
   }
 
-  void AppLayer::OnImGuiRender()
+  void AppLayer::ImGuiRender()
   {
     ImGui::Begin(m_name.c_str());
     if (ImGui::CollapsingHeader("Window: Size,Framerate"))

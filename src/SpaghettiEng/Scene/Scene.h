@@ -4,36 +4,43 @@
 
 #include "SpaghettiEng/Scene/Entity.h"
 
+// {}
 namespace Spg
 {
   class Registry;
-  class SceneCameraController;
-   
+  
   class Scene
   {
     public:
       Scene();
       ~Scene();
 
-      Entity CreateEmpty(const std::string& name);
-      Entity CreatePlane(const std::string& name);
-      Entity CreateCube(const std::string& name);
-      Entity CreateSphere(const std::string& name);
+      Scene(Scene&& scene) noexcept;
+      Scene& operator=(Scene&& scene) noexcept;
 
-   
+      Scene(const Scene&) = delete;            
+      Scene& operator=(const Scene&) = delete;
+
+      void OnSimulationStart() {}
+		  void OnSimulationStop() {}
+      bool IsRunning() const {}
+		  bool IsPaused() const {}
+
+		  void SetPaused(bool paused) {}
+		  void Step(int frames = 1) {} 
+
+      // Entity CreateEmpty(const std::string& name);
+      // Entity CreatePlane(const std::string& name);
+      // Entity CreateCube(const std::string& name);
+      // Entity CreateSphere(const std::string& name);
+
+      Registry& GetRegistry() { return *m_registry; }
+      Registry* GetRegistryPtr() { return m_registry.get(); }
+
     private:
-      //Use pointers here to avoid #including Registry.h (<entt/entt.hpp>) in the header - big compile time savings!
-      //Scene members will only be called a few times per frame - no performance issue
-      
-
-
+     
       std::unique_ptr<Registry> m_registry;
 
-      //todo - remove this.  Separate out the Scene camera(s) controllers, visuals (grid etc) from the simulated entities - ese a separate scene 
-      std::unique_ptr<SceneCameraController> m_scene_camera_controller;
-
-      //todo:  consider the pimpl idiom:
-      //std::unique_ptr<Impl> m_impl; 
   };
 
   

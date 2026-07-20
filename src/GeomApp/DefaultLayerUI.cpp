@@ -1,6 +1,10 @@
 
 #include <vector>
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 #include "GeomApp/DefaultLayer.h"
 
 #include "MathLib/MathLib.h"
@@ -13,7 +17,7 @@ namespace Spg
   std::string DefaultLayer::s_active_mesh = "";
   static uint32_t s_montotone_algo_state = 0;
   
-  void DefaultLayer::OnImGuiRender()
+  void DefaultLayer::ImGuiRender()
   {
     ImGui::Begin(m_name.c_str());
 

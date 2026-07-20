@@ -2,7 +2,10 @@
 #include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 
 #include <filesystem>
-#include <GLFW/glfw3.h>
+#include <GLFW/glfw3.h> //Needed in PostRender()
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include "CoreLib/Core.h"
 
@@ -34,10 +37,10 @@ namespace Spg
     auto font_regular = fs::absolute(fs::current_path() / fs::path{"Fonts/Opensans/OpenSans-Regular.ttf"});
     
     if(!fs::is_regular_file(font_bold))
-      SPG_ERROR("Cannor find font: {}", font_bold.string());
+      SPG_ERROR("Cannot find font: {}", font_bold.string());
 
     if(!fs::is_regular_file(font_regular))
-      SPG_ERROR("Cannor find font: {}", font_regular.string());
+      SPG_ERROR("Cannot find font: {}", font_regular.string());
 
     io.Fonts->AddFontFromFileTTF(font_bold.string().c_str(), fontSize);
     io.Fonts->AddFontFromFileTTF(font_regular.string().c_str(), fontSize);

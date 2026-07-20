@@ -4,22 +4,3 @@
 #include "CoreLib/HelperMacros.h"
 #include "CoreLib/Logger.h"
 #include "CoreLib/SpgAssert.h"
-
-#define SPG_LIB_LINK_CHECK
-//#define SPG_CALLBACK_CHECK
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

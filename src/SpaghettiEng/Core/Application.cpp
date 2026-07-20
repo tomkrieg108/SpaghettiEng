@@ -1,3 +1,7 @@
+
+//#define SPG_LIB_LINK_CHECK
+//#define SPG_PRINT_GRAPHICS_SPECS
+
 //Paired header
 #include "SpaghettiEng/Core/Application.h"
 
@@ -26,19 +30,21 @@
 //============================================================
 
 //Project headers
-#include "SpaghettiEng/Events/EventManager.h"
+#include "CoreLib/Logger.h"
+#include "CoreLib/PlatformDetect/PlatformDetect.h"
+
+#include "SpaghettiEng/Core/Window.h"
+#include "SpaghettiEng/Core/WindowEvents.h"
+#include "SpaghettiEng/Core/ServiceLocator.h"
+#include "SpaghettiEng/Core/AppLayer.h"
+#include "SpaghettiEng/Scene/SceneManager.h"
+
 #include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLContext.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
-#include "Window.h"
-#include "ServiceLocator.h"
-#include "AppLayer.h"
 
-#include "CoreLib/Logger.h"
-#include "CoreLib/PlatformDetect/PlatformDetect.h"
-
-
+// {} []
 namespace Spg
 {
   namespace fs = std::filesystem;
@@ -48,9 +54,7 @@ namespace Spg
 
   void Application::SystemInit()
   {
-    //Static method - called in main() before app is created
     Core::Logger::Initialise();
-    EventManager::Initialise(); //todo - does nothing!
   }
 
   Application::Application(const std::string& app_name) :
@@ -58,55 +62,134 @@ namespace Spg
   {
     SPG_ASSERT(s_instance == nullptr);
     s_instance = this;
-    SetEventHandlers();
+
     SetAssetsPath();
-  
+    
     m_service_locator.Register<Window>(app_name);
+    m_service_locator.Register<SceneManager>();
 
     Window& win = m_service_locator.Get<Window>();
-    ImGuiUtils::Initialise(win);
+    win.SetEventCallback( WinEvt::MakeCallback(this, &Application::OnWindowsEvent) );
 
+    ImGuiUtils::Initialise(win);
+    
     AppLayer* app_layer = new AppLayer(m_service_locator, "App Layer");
     m_layer_stack.PushOverlay(app_layer);
 
-  #ifdef SPG_DEBUG
+  #ifdef SPG_PRINT_GRAPHICS_SPECS
     win.GetGraphicsContext()->PrintSpecs();
-  #endif  
+  #endif
+
+  #ifdef SPG_LIB_LINK_CHECK 
+    PrintPlatformInfo();
+    PrintExternalLibInfo();
+  #endif
     
   }
 
   Application::~Application()
   {
-  #ifdef SPG_DEBUG
-    SPG_INFO("Max event queue size: {}", EventManager::GetMaxQueueSize());
-    SPG_INFO("Current event queue size: {}", EventManager::GetCurrentQueueSize());
-  #endif  
     ImGuiUtils::Shutdown();
-
-    //Todo detatch / delete all layers
   }
 
-  Application* Application::Instance()
+  void Application::OnWindowsEvent(WinEvt::Event& event)
   {
-    SPG_ASSERT(s_instance != nullptr);
-    return s_instance;
+    //Chain of responsibility (not an event queue)
+    // WinEvt::Dispatcher d(event);
+    // d.Dsipatch<WinEvt::WindowClose>([this](WinEvt::WindowClose& e) {OnWindowClosed(e);});
+    // d.Dsipatch<WinEvt::MouseBtnPressed>([this](WinEvt::MouseBtnPressed& e) {OnMouseBtnPressed(e);});
+    // d.Dsipatch<WinEvt::KeyPressed>([this](WinEvt::KeyPressed& e) {OnKeyPressed(e);});
+
+    //This works fine - no need for the dispatcher in WindowsEvent.h!!
+    switch(event.type)
+    {
+      case WinEvt::EventType::WindowClose: 
+        OnWindowClosed(static_cast<WinEvt::WindowClose&>(event)); break;
+      case WinEvt::EventType::MouseBtnPressed:
+        OnMouseBtnPressed(static_cast<WinEvt::MouseBtnPressed&>(event)); break; 
+      case WinEvt::EventType::KeyPressed:
+        OnKeyPressed(static_cast<WinEvt::KeyPressed&>(event)); break; 
+    } 
+
+    for(auto itr = m_layer_stack.rbegin(); itr!=m_layer_stack.rend(); ++itr)
+    {
+      if(event.handled)
+        break;
+      (*itr)->OnEvent(event) ;
+    }
+  }
+
+  void Application::OnMouseBtnPressed(WinEvt::MouseBtnPressed e)
+  {
+    SPG_INFO("***** A MOUSE BTN WAS PRESSED *****");
+  }
+
+  void Application::OnWindowClosed(WinEvt::WindowClose& e)
+  {
+    SPG_WARN("App Window closed **");
+    m_running = false;
+    e.handled = true;   
+  }
+
+  void Application::OnKeyPressed(WinEvt::KeyPressed& e)
+  {
+    SPG_WARN("Key pressed ** {} ", e.key);
+    if(e.key == GLFW_KEY_ESCAPE)
+    {
+      m_running = false;
+      e.handled = true;   
+    }
   }
 
   void Application::PushLayer(Layer* layer)
   {
     m_layer_stack.PushLayer(layer);
-    layer->OnAttach();
   }
 
   void Application::PopLayer(Layer* layer)
   {
-    layer->OnDetach();
     m_layer_stack.PopLayer(layer); 
   }
 
   
+  void Application::Run()
+  {
+    SPG_WARN("App loop starting");
+    auto delta_time = 0.0;
+    auto last_time = glfwGetTime();
 
-  //Todo - this should be setup in Assets module
+    Window& win = m_service_locator.Get<Window>();
+
+    while(m_running)
+    {
+      //if(win.ShouldClose())
+      // break;
+        
+      auto now = glfwGetTime(); //in seconds
+      delta_time = now - last_time;
+      last_time = now;
+
+      win.Clear();
+     
+      if(!win.IsMinimised())
+      {
+        for (Layer* layer : m_layer_stack)
+		      layer->Render(delta_time);  
+
+        ImGuiUtils::PreRender();
+        for (Layer* layer : m_layer_stack)
+		      layer->ImGuiRender();
+        ImGuiUtils::PostRender();
+      }
+
+      // This calls glfwPollEvents() - windows events are guaranteed to be triggered here, sycnhronously - there's no need to process input events inside the main loop or to queue input events
+      win.OnUpdate();
+    }
+  }
+
+  //=============================================================================
+  // todo Move this to Assets modules
+  //=============================================================================
   void Application::SetAssetsPath()
   {
     //Todo - this will need to be changed.  Currently depends on the location of this source file, which won't work when app is 'deployed'
@@ -130,41 +213,9 @@ namespace Spg
     SPG_INFO("Current working directory successfully set to: {}", fs::current_path().string());
   }
 
- 
-
-  void Application::Run()
-  {
-    SPG_WARN("App loop starting");
-    auto delta_time = 0.0;
-    auto last_time = glfwGetTime();
-
-    //Window& win = m_service_locator.Get<Window>("Window");
-    Window& win = m_service_locator.Get<Window>();
-
-    while(m_running)
-    {
-      auto now = glfwGetTime(); //in seconds
-      delta_time = now - last_time;
-      last_time = now;
-
-      win.Clear();
-     
-      if(!win.IsMinimised())
-      {
-        for (Layer* layer : m_layer_stack)
-		      layer->OnUpdate(delta_time);
-
-        ImGuiUtils::PreRender();
-        for (Layer* layer : m_layer_stack)
-		      layer->OnImGuiRender();
-        ImGuiUtils::PostRender();
-      }
-
-      win.OnUpdate();
-
-      EventManager::DispatchQueuedEvents();
-    }
-  }
+  //=============================================================================
+  // For checking external lib linkage
+  //=============================================================================
 
   void Application::PrintPlatformInfo()
   {
@@ -200,75 +251,5 @@ namespace Spg
     SPG_TRACE("This file is: {}", source_file_path.string());
 
     SPG_WARN( "####################################################");
-  }
-
-  //=========================================================================================
-  //  Event handler setup
-  //==========================================================================================
-
-  void Application::SetEventHandlers()
-  {
-  #ifdef SPG_CALLBACK_CHECK
-    EventManager::AddHandler(OnMousePress);
-    EventManager::AddHandler(OnMouseRelease);
-    EventManager::AddHandler(OnMouseMoved);
-    EventManager::AddHandler(OnMouseScrolled);
-    EventManager::AddHandler(OnWindowResized);
-    EventManager::AddHandler(OnKeyReleased);
-  #endif
-    EventManager::AddHandler(this, &Application::OnWindowClosed);
-    EventManager::AddHandler(this, &Application::OnKeyPressed);
-  }
-
-   void Application::OnWindowClosed(EventWindowClose& e)
-  {
-    SPG_WARN("App Window closed **");
-    m_running = false;
-    e.handled = true;   
-  }
-
-  void Application::OnKeyPressed(EventKeyPressed& e)
-  {
-    SPG_WARN("Key pressed ** {} ", e.key);
-    if(e.key == GLFW_KEY_ESCAPE)
-    {
-      m_running = false;
-      e.handled = true;   
-    }
-  }
-
-
-  static void OnMousePress(EventMouseButtonPressed& e)
-  {
-    SPG_WARN("App: Mouse Pressed: {},{}", e.x, e.y);
-  }
-  static void OnMouseRelease(EventMouseButtonReleased& e)
-  {
-   SPG_WARN("App: Mouse Released: {},{}", e.x, e.y);
-  }
-
-  static void OnMouseMoved(EventMouseMoved& e)
-  {
-    SPG_WARN("App Mouse Moved: [{},{}], [{},{}] ", e.x, e.y, e.delta_x, e.delta_y);
-  }
-
-  static void OnMouseScrolled(EventMouseScrolled& e)
-  {
-    SPG_WARN("App Mouse scrolled: {},{} ", e.x_offset, e.y_offset);
-  }
-
-  static void OnWindowResized(EventWindowResize& e)
-  {
-    SPG_WARN("App Window FB resize: {},{} ", e.buffer_width, e.buffer_height);
-  }
-
-  static void OnWindowClosed(EventWindowClose& e)
-  {
-    SPG_WARN("App Window closed");
-  }
-
-  static void OnKeyReleased(EventKeyReleased& e)
-  {
-    SPG_WARN("App Key released: {} ", e.key);
   }
 }

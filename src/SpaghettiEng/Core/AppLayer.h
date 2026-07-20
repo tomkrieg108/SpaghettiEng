@@ -1,21 +1,19 @@
 #pragma once
 
-#include "Window.h"
-#include "Layer.h"
+#include "SpaghettiEng/Core/Layer.h"
+#include "SpaghettiEng/Core/WindowEvents.h"
 
 namespace Spg
 {
+  class Window;
+  
   class AppLayer : public Layer
   {
   public:
     AppLayer(ServiceLocator& app_context, const std::string& name);
     ~AppLayer() = default;
 
-    void OnAttach() override {};
-    void OnDetach() override {};
-    void OnUpdate(double time_step) override {};
-    void OnEvent(Event& event) override {};
-    void OnImGuiRender() override;  
+    void ImGuiRender() override;  
   private:
     Window& m_window;  
   };

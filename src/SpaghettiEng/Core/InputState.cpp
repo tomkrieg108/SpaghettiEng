@@ -2,9 +2,9 @@
 #include "SpaghettiEng/Core/InputState.h"
 
 #include <GLFW/glfw3.h>
+#include <glm/vec2.hpp>
 
 #include "CoreLib/Core.h"
-#include "Window.h"
 
 namespace Spg
 {

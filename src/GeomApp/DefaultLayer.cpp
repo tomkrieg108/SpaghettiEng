@@ -34,11 +34,126 @@ namespace Spg
     GeomTest();
   }
 
+  void DefaultLayer::OnEvent(WinEvt::Event& event) 
+  {
+    WinEvt::Dispatcher d(event);
+    d.Dsipatch<WinEvt::WindowResize>([this](WinEvt::WindowResize& e) {OnWindowResize(e);});
+    d.Dsipatch<WinEvt::MouseScrolled>([this](WinEvt::MouseScrolled& e) {OnMouseScrolled(e);});
+    d.Dsipatch<WinEvt::MouseMoved>([this](WinEvt::MouseMoved& e) {OnMouseMoved(e);});
+    d.Dsipatch<WinEvt::MouseBtnPressed>([this](WinEvt::MouseBtnPressed& e) {OnMouseButtonPressed(e);});
+    d.Dsipatch<WinEvt::MouseBtnReleased>([this](WinEvt::MouseBtnReleased& e) {OnMouseButtonReleased(e);});
+  };
+
+  void DefaultLayer::OnWindowResize(WinEvt::WindowResize& e)
+  {
+    UpdateCanvas();
+    e.handled = true;
+  }
+
+  void DefaultLayer::OnMouseMoved(WinEvt::MouseMoved& e)
+  {
+    if(m_pan_enabled)
+    {
+      const float factor = -0.2f;
+      m_camera_controller.Pan(e.delta_x*factor, e.delta_y*factor);
+    }
+    e.handled = true;
+    #ifdef _WIN32
+       m_text_renderer.UpdateView();
+    #endif 
+  }
+
+  void DefaultLayer::OnMouseScrolled(WinEvt::MouseScrolled& e)
+  {
+    float new_canvas_size = m_canvas_size - e.y_offset*10.0f;
+    if(( new_canvas_size > 50.0f) && (new_canvas_size < 5000.0f))
+    {
+      m_canvas_size = new_canvas_size;
+      UpdateCanvas();
+    }
+    #ifdef _WIN32
+     m_text_renderer.UpdateView();
+    #endif
+    e.handled = true;
+  }
+
+  void DefaultLayer::OnMouseButtonPressed(WinEvt::MouseBtnPressed& e)
+  {
+    if(e.btn == Mouse::ButtonLeft)
+      SPG_INFO("Left mouse btn presssed: ({},{})",e.x,e.y);
+    if(e.btn == Mouse::ButtonRight)
+      SPG_INFO("Right mouse btn presssed");  
+    if(e.btn == Mouse::ButtonMiddle)
+    {
+      SPG_INFO("Middle mouse btn presssed - pan enabled");  
+      m_pan_enabled = true;
+      m_window.SetCursorEnabled(false); 
+    }
+    e.handled = true;
+  }
+
+  void DefaultLayer::OnMouseButtonReleased(WinEvt::MouseBtnReleased& e)
+  {
+    if(e.btn == Mouse::ButtonLeft)
+      SPG_INFO("Left mouse btn released");
+    if(e.btn == Mouse::ButtonRight)
+      SPG_INFO("Right mouse btn released");  
+    if(e.btn == Mouse::ButtonMiddle)
+    {
+      SPG_INFO("Middle mouse btn presssed - pan disabled");  
+      m_pan_enabled = false;
+      m_window.SetCursorEnabled(true);
+    }
+    e.handled = true;  
+  }
+
   void DefaultLayer::SetCanvasSize(float canvas_size)
   {
     m_canvas_size = canvas_size;
     UpdateCanvas();
   }
+
+  
+#if 0
+  void DefaultLayer::Update(double delta_time) 
+  { 
+    //Primitive shape rendering
+    m_renderer.Draw(m_camera);
+    
+    //Text Rendering
+  #ifdef _WIN32
+    if(m_mesh_list.find(s_active_mesh) == m_mesh_list.end()) {
+      m_text_renderer.Render("Hello from TexRenderer!!", -50,-50,0.5f,glm::vec3(0,1,0));
+      return;
+    }
+  
+    Mesh& mesh = m_mesh_list[s_active_mesh];
+    for(auto& label : mesh.labels) {
+      m_text_renderer.Render(label.text, label.pos.x, label.pos.y, 0.35f, {1,1,1});
+    }
+   #endif 
+  }
+#endif
+
+  void DefaultLayer::Render(double delta_time) 
+  { 
+    //Primitive shape rendering
+    m_renderer.Draw(m_camera);
+    
+    //Text Rendering
+  #ifdef _WIN32
+    if(m_mesh_list.find(s_active_mesh) == m_mesh_list.end()) {
+      m_text_renderer.Render("Hello from TexRenderer!!", -50,-50,0.5f,glm::vec3(0,1,0));
+      return;
+    }
+  
+    Mesh& mesh = m_mesh_list[s_active_mesh];
+    for(auto& label : mesh.labels) {
+      m_text_renderer.Render(label.text, label.pos.x, label.pos.y, 0.35f, {1,1,1});
+    }
+   #endif 
+  }
+
 
   void DefaultLayer::MonotoneAlgoSweepLineUpdate(uint32_t render_id)
   { // render_id is the id of the sweep line
@@ -76,7 +191,7 @@ namespace Spg
     mesh.children["Points"] = point_mesh;
     
     //set the colours on the polygon vertices based on their category
-    //Todo - could update the mootone event to store the index of the original passed in vertex, then use the to supply the correct index in UpdateColour.  This save having to record the unsorted events in the monotone algo and passing those back in GetEventPoints(). Might have been less effort just to implement this thing rather than type out this todo.
+    //Todo - could update the monotone event to store the index of the original passed in vertex, then use the to supply the correct index in UpdateColour.  This save having to record the unsorted events in the monotone algo and passing those back in GetEventPoints(). Might have been less effort just to implement this thing rather than type out this todo.
     auto& monotone_event_points = m_monotone_spawner.GetEventPoints();
     for(uint32_t i=0; i< point_mesh->vertices.size(); ++i) {
       if(monotone_event_points[i].vertex_category == VertexCategory::Start) {
@@ -135,101 +250,6 @@ namespace Spg
   #ifdef _WIN32
     m_text_renderer.UpdateView();
   #endif
-  }
-
-  void DefaultLayer::OnUpdate(double delta_time) 
-  { 
-    //Primitive shape rendering
-    m_renderer.Draw(m_camera);
-    
-    //Text Rendering
-  #ifdef _WIN32
-    if(m_mesh_list.find(s_active_mesh) == m_mesh_list.end()) {
-      m_text_renderer.Render("Hello from TexRenderer!!", -50,-50,0.5f,glm::vec3(0,1,0));
-      return;
-    }
-  
-    Mesh& mesh = m_mesh_list[s_active_mesh];
-    for(auto& label : mesh.labels) {
-      m_text_renderer.Render(label.text, label.pos.x, label.pos.y, 0.35f, {1,1,1});
-    }
-   #endif 
-  }
-
-  void DefaultLayer::OnAttach()
-  {
-    EventManager::AddHandler(this, &DefaultLayer::OnWindowResize);
-    EventManager::AddHandler(this, &DefaultLayer::OnMouseScrolled);
-    EventManager::AddHandler(this, &DefaultLayer::OnMouseMoved);
-    EventManager::AddHandler(this, &DefaultLayer::OnMouseButtonPressed);
-    EventManager::AddHandler(this, &DefaultLayer::OnMouseButtonReleased);
-  }
-
-  void DefaultLayer::OnDetach()
-  {
-    //Todo remove handlers
-  }
-
-  void DefaultLayer::OnMouseMoved(EventMouseMoved& e)
-  {
-    if(m_pan_enabled)
-    {
-      const float factor = -0.2f;
-      m_camera_controller.Pan(e.delta_x*factor, e.delta_y*factor);
-    }
-    e.handled = true;
-    #ifdef _WIN32
-       m_text_renderer.UpdateView();
-    #endif 
-  }
-
-  void DefaultLayer::OnMouseScrolled(EventMouseScrolled& e)
-  {
-    float new_canvas_size = m_canvas_size - e.y_offset*10.0f;
-    if(( new_canvas_size > 50.0f) && (new_canvas_size < 5000.0f))
-    {
-      m_canvas_size = new_canvas_size;
-      UpdateCanvas();
-    }
-    e.handled = true;
-
-    #ifdef _WIN32
-     m_text_renderer.UpdateView();
-    #endif
-  }
-
-  void DefaultLayer::OnMouseButtonPressed(EventMouseButtonPressed& e)
-  {
-    if(e.btn == Mouse::ButtonLeft)
-      SPG_INFO("Left mouse btn presssed: ({},{})",e.x,e.y);
-    if(e.btn == Mouse::ButtonRight)
-      SPG_INFO("Right mouse btn presssed");  
-    if(e.btn == Mouse::ButtonMiddle)
-    {
-      m_pan_enabled = true;
-      m_window.SetCursorEnabled(false); 
-    }
-    e.handled = true;
-  }
-
-  void DefaultLayer::OnMouseButtonReleased(EventMouseButtonReleased& e)
-  {
-    if(e.btn == Mouse::ButtonLeft)
-      SPG_INFO("Left mouse btn released");
-    if(e.btn == Mouse::ButtonRight)
-      SPG_INFO("Right mouse btn released");  
-    if(e.btn == Mouse::ButtonMiddle)
-    {
-      m_pan_enabled = false;
-      m_window.SetCursorEnabled(true);
-    }
-    e.handled = true;  
-  }
-
-  void DefaultLayer::OnWindowResize(EventWindowResize& e)
-  {
-    UpdateCanvas();
-    e.handled = true;
   }
 
   void DefaultLayer::Create2DGrid()

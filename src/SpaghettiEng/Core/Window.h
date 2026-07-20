@@ -1,5 +1,6 @@
 #pragma once
-//#include "CoreLib/Core.h"
+
+#include <functional>
 
 struct GLFWwindow; //glfw lib window
 
@@ -7,7 +8,14 @@ namespace Spg
 {
   class InputState;
   class OpenGLContext;
-
+  class MemberCallback;
+  
+  namespace WinEvt
+  {
+    struct Event;
+    using Callback = std::function<void(Event&)>;
+  }
+  // {}
   class Window
   {
   public:
@@ -28,29 +36,36 @@ namespace Spg
 
     void Clear() const;
     void OnUpdate();
+    bool ShouldClose();
     
     void SetVSyncEnabled(bool enable);
     void SetCursorEnabled(bool enable);
-    const Params& GetParams() const;
-    Params& GetParams();
-    InputState* GetInputState();
-    OpenGLContext* GetGraphicsContext();
-
-    bool IsCursorEnabled() const;
-    bool IsVSyncEnabled() const;
     bool IsMinimised() const;
     float GetAspectRatio() const;
-    GLFWwindow* GetWindowHandle() const;
 
+    GLFWwindow* GetWindowHandle() const { return m_window_handle; }
+    const Params& GetParams() const { return m_params; }
+    Params& GetParams() { return m_params; };
+    InputState* GetInputState() const { return m_input_state;  }  
+    OpenGLContext* GetGraphicsContext() const { return m_graphics_context; }
+
+    bool IsCursorEnabled() const { return m_params.cursor_enabled;  }
+    bool IsVSyncEnabled() const  { return m_params.vsync_enabled; }
+    
+    void SetEventCallback(const WinEvt::Callback& callback) { m_event_callback = callback;}
+    WinEvt::Callback& GetEventCallback() { return m_event_callback; }
+   
   private:
     void SetWindowEventCallbacks();
     
   private:  
     Params m_params = Params();
-    GLFWwindow* m_window_handle = nullptr;
-    OpenGLContext* m_graphics_context = nullptr; 
-    InputState* m_input_state = nullptr; 
 
+    GLFWwindow* m_window_handle = nullptr; //has to be a pointer
+    OpenGLContext* m_graphics_context = nullptr; // pointer, since maybe an interface later
+    InputState* m_input_state; //could be instance!
+    WinEvt::Callback m_event_callback;
+    
     static uint32_t s_window_count;
   };
 }

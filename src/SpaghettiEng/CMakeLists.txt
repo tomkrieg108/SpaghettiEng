@@ -9,6 +9,8 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/InputState.cpp"
   "./Core/Layer.cpp"
 
+  "./Assets/AssetManager.cpp"
+
   "./Events/EventManager.cpp"
 
   "./ImGuiUtils/ImGuiUtils.cpp"
@@ -24,10 +26,11 @@ target_sources(${LIB_ENG} PRIVATE
   "./Render/Backends/OpenGL/GLBuffer.cpp"
   "./Render/Backends/OpenGL/GLVertexArray.cpp"
   "./Render/Backends/OpenGL/GLRenderer.cpp"
- 
-  "./Scene/Scene.cpp"
+
   "./Scene/Entity.cpp"
   "./Scene/SceneCameraController.cpp"
+  "./Scene/Scene.cpp"
+  "./Scene/SceneManager.cpp"
   )
 
 if(WIN32)
@@ -42,9 +45,13 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/ServiceLocator.h"
   "./Core/Window.h"
   "./Core/InputState.h"
+  "./Core/WindowEvents.h"
   "./Core/Layer.h"
   "./Core/KeyCodes.h"
   "./Core/MouseCodes.h"
+
+  "./Assets/AssetManager.h"
+
   "./Events/Events.h"
   "./Events/EventManager.h"
   "./ImGuiUtils/ImGuiUtils.h"
@@ -67,6 +74,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Scene/Entity.h"
   "./Scene/Registry.h"
   "./Scene/Scene.h"
+  "./Scene/SceneManager.h"
   "./Scene/SceneCameraController.h"
 )
 

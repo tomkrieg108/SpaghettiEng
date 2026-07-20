@@ -10,26 +10,14 @@
 
 namespace Spg
 {
-  //pimpl idiom
-  //contains all instance members (packed tightly).  Define here
-  /*
-  struct Impl
-  {
-    Registry registry;
-    SceneCameraController scene_camera_controller
-  };
-
-  Scene::Scene() : m_impl(std::make_unique<Impl>()) {}
-  */ 
-
-  Scene::Scene() : 
-  m_registry(std::make_unique<Registry>()),
-  m_scene_camera_controller(std::make_unique<SceneCameraController>())
-  {
-  }
-
+  
+  Scene::Scene() : m_registry(std::make_unique<Registry>()) {}
   Scene::~Scene() = default;
 
+  Scene::Scene(Scene&& scene) noexcept = default;
+  Scene& Scene::operator=(Scene&& scene) noexcept = default;
+
+#if 0
   Entity Scene::CreateEmpty(const std::string& name)
   {
     Entity entity = m_registry->CreateEntity();
@@ -59,7 +47,7 @@ namespace Spg
     m_registry->AddComponent<MeshComponent>(entity);
     return entity;
   }
-
+#endif
 
 
 }

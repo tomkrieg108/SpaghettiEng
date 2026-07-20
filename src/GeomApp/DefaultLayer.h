@@ -65,18 +65,22 @@ namespace Spg
     DefaultLayer(ServiceLocator& app_context, const std::string& name);
     ~DefaultLayer() = default;
 
-    void OnAttach() override;
-    void OnDetach() override;
-    void OnUpdate(double time_step) override;
-    void OnImGuiRender() override;
+    //void Attach() override;
+    //void Detach() override;
+    //void Update(double time_step) override;
+    void Render(double time_step) override;
+    void ImGuiRender() override;
+    void OnEvent(WinEvt::Event& event) override;
+
     void SetCanvasSize(float canvas_size);
 
   private:
-    void OnWindowResize(EventWindowResize& e);
-    void OnMouseMoved(EventMouseMoved& e);
-    void OnMouseScrolled(EventMouseScrolled& e);
-    void OnMouseButtonPressed(EventMouseButtonPressed& e);
-    void OnMouseButtonReleased(EventMouseButtonReleased& e);
+    
+    void OnWindowResize(WinEvt::WindowResize& e);
+    void OnMouseMoved(WinEvt::MouseMoved& e);
+    void OnMouseScrolled(WinEvt::MouseScrolled& e);
+    void OnMouseButtonPressed(WinEvt::MouseBtnPressed& e);
+    void OnMouseButtonReleased(WinEvt::MouseBtnReleased& e);
 
     void Create2DGrid();
     void UpdateCanvas();

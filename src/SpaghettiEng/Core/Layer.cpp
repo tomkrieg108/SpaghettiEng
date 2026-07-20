@@ -5,8 +5,9 @@
 
 namespace Spg
 {
-  Layer::Layer(ServiceLocator& app_context, const std::string& name)
-	: m_app_conext{app_context}, m_name(name)
+  Layer::Layer(ServiceLocator& app_context, const std::string& name):
+   m_app_conext{app_context}, 
+   m_name(name)
   {
   }
 
@@ -14,7 +15,6 @@ namespace Spg
   {
     for (Layer* layer : m_Layers)
     {
-      layer->OnDetach();
       delete layer;
     }
   }
@@ -35,7 +35,6 @@ namespace Spg
     auto it = std::find(m_Layers.begin(), m_Layers.begin() + m_LayerInsertIndex, layer);
     if (it != m_Layers.begin() + m_LayerInsertIndex)
     {
-      layer->OnDetach();
       m_Layers.erase(it);
       m_LayerInsertIndex--;
     }
@@ -46,7 +45,6 @@ namespace Spg
     auto it = std::find(m_Layers.begin() + m_LayerInsertIndex, m_Layers.end(), overlay);
     if (it != m_Layers.end())
     {
-      overlay->OnDetach();
       m_Layers.erase(it);
     }
   }
