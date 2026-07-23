@@ -10,13 +10,13 @@ namespace Spg
     GLShaderBuilder shader_builder;
     m_shader = shader_builder.Add(ShaderType::Vertex, "text.vs").Add(ShaderType::Fragment, "text.fs").Build("Text Shader");
 
-    m_shader->Bind();
-    m_shader->SetUniform1i("u_text", 0);
+    m_shader.Bind();
+    m_shader.SetUniform1i("u_text", 0);
     auto model = glm::mat4(1.0f);
-    m_shader->SetUniformMat4f("u_model", model);
-    m_shader->SetUniformMat4f("u_view", m_camera.GetViewMatrix());
-    m_shader->SetUniformMat4f("u_proj", m_camera.GetProjMatrix());
-    m_shader->Unbind();
+    m_shader.SetUniformMat4f("u_model", model);
+    m_shader.SetUniformMat4f("u_view", m_camera.GetViewMatrix());
+    m_shader.SetUniformMat4f("u_proj", m_camera.GetProjMatrix());
+    m_shader.Unbind();
 
     m_font_path = fs::current_path() / fs::path{"Fonts"};
     m_font_path = fs::absolute(m_font_path);
@@ -110,17 +110,17 @@ namespace Spg
   
   void GLTextRenderer::UpdateView()
   {
-    m_shader->Bind();
-    m_shader->SetUniformMat4f("u_view", m_camera.GetViewMatrix());
-    m_shader->SetUniformMat4f("u_proj", m_camera.GetProjMatrix());
-    m_shader->Unbind();
+    m_shader.Bind();
+    m_shader.SetUniformMat4f("u_view", m_camera.GetViewMatrix());
+    m_shader.SetUniformMat4f("u_proj", m_camera.GetProjMatrix());
+    m_shader.Unbind();
   }
 
   // render line of text
   void GLTextRenderer::Render(std::string text, float x, float y, float scale, glm::vec3 color)
   {
-    m_shader->Bind();
-    glUniform3f(glGetUniformLocation(m_shader->GetProgramID(), "u_text_color"), color.x, color.y, color.z);
+    m_shader.Bind();
+    glUniform3f(glGetUniformLocation(m_shader.GetProgramID(), "u_text_color"), color.x, color.y, color.z);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(m_VAO);
 
@@ -159,7 +159,7 @@ namespace Spg
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-    m_shader->Unbind();
+    m_shader.Unbind();
   }
 
 }

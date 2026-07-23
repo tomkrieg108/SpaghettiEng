@@ -33,8 +33,6 @@ namespace Spg
     void OnWindowClosed(WinEvt::WindowClose& e);
     void OnKeyPressed(WinEvt::KeyPressed& e);
 
-    void OnMouseBtnPressed(WinEvt::MouseBtnPressed e);
-  
   protected:
     ServiceLocator m_service_locator;
     LayerStack m_layer_stack;

@@ -74,7 +74,7 @@ namespace Spg
    
   private:
 
-    std::unique_ptr<GLShader> m_basic_shader = nullptr; 
+    GLShader m_basic_shader; 
     std::unordered_map<uint32_t, Drawable> m_vao_map;
     uint32_t m_draw_calls = 0;
     uint32_t m_vertices_rendered = 0;

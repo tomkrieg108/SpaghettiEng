@@ -37,6 +37,7 @@ namespace Spg
 
   public:
 
+    Camera() = default;
     Camera(CameraType camera_type, float width, float height);
     ~Camera() = default;
 

@@ -68,12 +68,12 @@ namespace Spg
     return *this;
   }
 
-  std::unique_ptr<GLShader> GLShaderBuilder::Build(const std::string& name)
+  GLShader GLShaderBuilder::Build(const std::string& name)
   {
-    auto shader = std::make_unique<GLShader>();
+    auto shader = GLShader();
     uint32_t program = glCreateProgram();
-    shader->m_name = name;
-    shader->m_program_id = program;
+    shader.m_name = name;
+    shader.m_program_id = program;
     bool success = true;
 
     bool compile_errors = false;
@@ -110,16 +110,16 @@ namespace Spg
 		}
 		PrintBuildLog();
   #endif
-    shader->m_build_success = success;
+    shader.m_build_success = success;
 
     for (auto& shader_info : m_shader_list)
       glDeleteShader(shader_info.id);
 
     m_shader_list.clear();
 
-    shader->ReadAttributes();
-    shader->ReadUniforms();
-    shader->ReadUniformBlocks();
+    shader.ReadAttributes();
+    shader.ReadUniforms();
+    shader.ReadUniformBlocks();
     return shader;
   }
 

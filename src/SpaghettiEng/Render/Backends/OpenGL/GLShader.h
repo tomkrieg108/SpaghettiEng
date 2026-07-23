@@ -10,6 +10,8 @@ namespace Spg
 
   namespace fs = std::filesystem;
 
+  using ShaderId = uint32_t;
+
   class GLShader;
 
   struct GLShaderInfo
@@ -27,7 +29,7 @@ namespace Spg
     GLShaderBuilder();
     ~GLShaderBuilder() = default;
     GLShaderBuilder& Add(ShaderType type, const std::string& file_name);
-    std::unique_ptr<GLShader> Build(const std::string& shader_name);
+    GLShader Build(const std::string& shader_name);
 
   private:
     void PrintBuildLog();
@@ -95,9 +97,12 @@ namespace Spg
     void ReadAttributes();  
 
   private:
+    
+    //ShaderId id; 
+
     std::string m_name{"Unnamed Shader"};
     bool m_build_success = false;
-    uint32_t m_program_id = 0;
+    uint32_t m_program_id = 0;    //Allocated by OpenGL
 
     std::unordered_map<std::string, DataItem> m_uniforms;
     std::unordered_map<std::string, UniformBlock> m_uniform_blocks;

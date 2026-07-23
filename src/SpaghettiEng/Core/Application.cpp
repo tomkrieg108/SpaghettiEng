@@ -37,6 +37,9 @@
 #include "SpaghettiEng/Core/WindowEvents.h"
 #include "SpaghettiEng/Core/ServiceLocator.h"
 #include "SpaghettiEng/Core/AppLayer.h"
+#include "SpaghettiEng/Resource/ResourceManager.h"
+#include "SpaghettiEng/Render/Mesh/MeshCache.h"
+#include "SpaghettiEng/Render/ShaderCache.h"
 #include "SpaghettiEng/Scene/SceneManager.h"
 
 #include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
@@ -52,9 +55,15 @@ namespace Spg
   
   Application* Application::s_instance = nullptr;
 
+  // Initialise static singletons - called in main before instantiating App
   void Application::SystemInit()
   {
     Core::Logger::Initialise();
+   
+    Spg::ResourceManager::Init();
+    Spg::MeshCache::Init();
+
+    //Spg::ShaderCache::Init();
   }
 
   Application::Application(const std::string& app_name) :
@@ -67,7 +76,7 @@ namespace Spg
     
     m_service_locator.Register<Window>(app_name);
     m_service_locator.Register<SceneManager>();
-
+    
     Window& win = m_service_locator.Get<Window>();
     win.SetEventCallback( WinEvt::MakeCallback(this, &Application::OnWindowsEvent) );
 
@@ -105,8 +114,6 @@ namespace Spg
     {
       case WinEvt::EventType::WindowClose: 
         OnWindowClosed(static_cast<WinEvt::WindowClose&>(event)); break;
-      case WinEvt::EventType::MouseBtnPressed:
-        OnMouseBtnPressed(static_cast<WinEvt::MouseBtnPressed&>(event)); break; 
       case WinEvt::EventType::KeyPressed:
         OnKeyPressed(static_cast<WinEvt::KeyPressed&>(event)); break; 
     } 
@@ -117,11 +124,6 @@ namespace Spg
         break;
       (*itr)->OnEvent(event) ;
     }
-  }
-
-  void Application::OnMouseBtnPressed(WinEvt::MouseBtnPressed e)
-  {
-    SPG_INFO("***** A MOUSE BTN WAS PRESSED *****");
   }
 
   void Application::OnWindowClosed(WinEvt::WindowClose& e)

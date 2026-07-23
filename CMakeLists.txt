@@ -234,6 +234,10 @@ target_precompile_headers(${LIB_ENG} PRIVATE
   <queue>
   <type_traits>
   <numbers>
+
+  <entt/fwd.hpp>
+  <entt/entt.hpp> 
+  <entt/entity/registry.hpp>
 )
 
 target_precompile_headers(${APP_GEOM} PRIVATE 

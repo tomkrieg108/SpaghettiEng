@@ -26,7 +26,7 @@ namespace Spg
 
       std::map<char, Character> m_characters;
       uint32_t m_VAO = 0, m_VBO = 0;
-      std::unique_ptr<GLShader> m_shader; 
+      GLShader m_shader; 
       fs::path m_font_path{""};
       Camera2D& m_camera; 
   };

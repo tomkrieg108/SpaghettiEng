@@ -9,7 +9,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/InputState.cpp"
   "./Core/Layer.cpp"
 
-  "./Assets/AssetManager.cpp"
+  "./Resource/ResourceManager.cpp"
 
   "./Events/EventManager.cpp"
 
@@ -18,8 +18,14 @@ target_sources(${LIB_ENG} PRIVATE
   "./Render/Camera/Camera.cpp"
   "./Render/Camera/Camera2D.cpp"
   "./Render/Camera/CameraController2D.cpp"
+
   "./Render/Renderer.cpp"
+  "./Render/ShaderCache.cpp"
+
+  "./Render/Mesh/Mesh.cpp"
+  "./Render/Mesh/MeshCache.cpp"
   "./Render/Mesh/MeshData.cpp"
+
   "./Render/Backends/OpenGL/GLShader.cpp"
   "./Render/Backends/OpenGL/GLShaderUtils.cpp"
   "./Render/Backends/OpenGL/GLContext.cpp"
@@ -31,6 +37,8 @@ target_sources(${LIB_ENG} PRIVATE
   "./Scene/SceneCameraController.cpp"
   "./Scene/Scene.cpp"
   "./Scene/SceneManager.cpp"
+  "./Scene/SceneVisuals.cpp"
+
   )
 
 if(WIN32)
@@ -50,17 +58,25 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/KeyCodes.h"
   "./Core/MouseCodes.h"
 
-  "./Assets/AssetManager.h"
+  "./Resource/ResourceManager.h"
+  "./Resource/ResourceCache.h"
 
   "./Events/Events.h"
   "./Events/EventManager.h"
+
   "./ImGuiUtils/ImGuiUtils.h"
 
   "./Render/Camera/Camera.h"
   "./Render/Camera/Camera2D.h"
   "./Render/Camera/CameraController2D.h"
+
   "./Render/Renderer.h"
+  "./Render/ShaderCache.h"
+
+  "./Render/Mesh/Mesh.h"
   "./Render/Mesh/MeshData.h"
+  "./Render/Mesh/MeshCache.h"
+
   "./Render/Backends/OpenGL/GLShader.h"
   "./Render/Backends/OpenGL/GLShaderUtils.h"
   "./Render/Backends/OpenGL/GLContext.h"
@@ -75,6 +91,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Scene/Registry.h"
   "./Scene/Scene.h"
   "./Scene/SceneManager.h"
+  "./Scene/SceneVisuals.h"
   "./Scene/SceneCameraController.h"
 )
 

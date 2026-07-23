@@ -229,7 +229,8 @@ namespace Spg
   struct TagComponent
   {
     //Will use small string optimization if <= 15 chars (no heap alloc)
-    std::string name = std::string(""); 
+    TagComponent(const std::string& tag) : tag{tag} {}
+    std::string tag = std::string(""); 
   };
 
   struct TagComponent2
@@ -264,11 +265,11 @@ namespace Spg
     Transform transform;
   };
 
-  struct MeshComponent
-  {
-    MeshComponent() = default;
-    MeshComponent(uint32_t handle): mesh_handle(handle) {}
-    uint32_t mesh_handle = 0;
-  };
+  // struct MeshComponent
+  // {
+  //   MeshComponent() = default;
+  //   MeshComponent(uint32_t handle): mesh_handle(handle) {}
+  //   uint32_t mesh_handle = 0;
+  // };
 
 }

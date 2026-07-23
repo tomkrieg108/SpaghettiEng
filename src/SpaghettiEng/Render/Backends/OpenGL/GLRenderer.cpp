@@ -53,12 +53,12 @@ namespace Spg
 
   void GLRenderer::Draw(const Camera2D& camera)
   {
-    m_basic_shader->Bind();
+    m_basic_shader.Bind();
   
     auto model = glm::mat4(1.0f);
-    m_basic_shader->SetUniformMat4f("u_model", model);
-    m_basic_shader->SetUniformMat4f("u_proj", camera.GetProjMatrix());
-    m_basic_shader->SetUniformMat4f("u_view", camera.GetViewMatrix());
+    m_basic_shader.SetUniformMat4f("u_model", model);
+    m_basic_shader.SetUniformMat4f("u_proj", camera.GetProjMatrix());
+    m_basic_shader.SetUniformMat4f("u_view", camera.GetViewMatrix());
     
     for(auto& element : m_vao_map) {
       Drawable& drawable = element.second;
@@ -70,7 +70,7 @@ namespace Spg
       glDrawArrays(primitive, 0, vbo.GetVertexCount());
       drawable.VAO.Unbind();
     }
-    m_basic_shader->Unbind();
+    m_basic_shader.Unbind();
    
   }
 
