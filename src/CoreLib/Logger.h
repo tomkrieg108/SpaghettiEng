@@ -12,7 +12,7 @@ namespace Core
 	public:
      // Initializes the core application logger and shared sinks
      // Currently called in void Application::SystemInit() Application.cppp (EngLib)
-		static void Initialise();
+		static void Init();
 
     // Only for the main executable/core messages
 		static auto& GetDefault() { return s_default_logger; }

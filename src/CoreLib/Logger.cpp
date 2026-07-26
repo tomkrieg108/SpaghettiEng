@@ -9,7 +9,7 @@ namespace Core
   std::vector<spdlog::sink_ptr> Logger::s_shared_sinks;
   bool Logger::s_initialised = false;
 
-  void Logger::Initialise()
+  void Logger::Init()
   {
     if(s_initialised)
       return;
@@ -35,7 +35,7 @@ namespace Core
   {
     // Force initialization if forgot
     if (!s_initialised) 
-      Initialise();
+      Init();
 
     // Prevent duplicates and crashes
     if (auto existing = spdlog::get(name)) {

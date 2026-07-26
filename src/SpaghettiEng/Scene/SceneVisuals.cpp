@@ -5,7 +5,6 @@
 #include "SpaghettiEng/Scene/Registry.h"
 #include "SpaghettiEng/Scene/Components.h"
 #include "SpaghettiEng/Render/Mesh/Mesh.h"
-#include "SpaghettiEng/Render/Mesh/MeshCache.h"
 #include "SpaghettiEng/Render/Camera/Camera.h"
 
 // {}
@@ -23,14 +22,14 @@ namespace Spg
     Entity grid_entity = m_registry->CreateEntity();
     m_registry->AddComponent<TagComponent>(grid_entity, TagComponent{"Grid"});
     m_registry->AddComponent<StaticTransform>(grid_entity);
-    m_registry->AddComponent<MeshComponent>(grid_entity,MeshCache::GetMeshComponent("grid"));
+    //m_registry->AddComponent<MeshComponent>(grid_entity,MeshCache::GetMeshComponent("grid"));
 
 
     // World Coords
     Entity coords_entity = m_registry->CreateEntity();
     m_registry->AddComponent<TagComponent>(coords_entity, TagComponent{"Coords"});
     m_registry->AddComponent<StaticTransform>(coords_entity);
-    m_registry->AddComponent<MeshComponent>(coords_entity,MeshCache::GetMeshComponent("coords"));
+    //m_registry->AddComponent<MeshComponent>(coords_entity,MeshCache::GetMeshComponent("coords"));
 
     // Scene camera 
     Entity camera_entity = m_registry->CreateEntity();

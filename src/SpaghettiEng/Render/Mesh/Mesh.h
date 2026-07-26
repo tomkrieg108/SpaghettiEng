@@ -1,10 +1,11 @@
 # pragma once
 
 #include <vector>
-//#include <unordered_map>
 #include <string>
-#include <cstdint> 
+//#include <cstdint> 
 #include <bitset>
+
+#include "SpaghettiEng/Resource/Resource.h"
 
  /*
   {}
@@ -13,8 +14,6 @@
 
 namespace Spg
 {
-
-  using MeshId = uint32_t;
 
   enum class MeshType : uint8_t
   {
@@ -53,11 +52,9 @@ namespace Spg
     uint32_t GetOffsetInBytes(MeshAttribute attribute);
   };  
   
-  struct Mesh
+  struct Mesh : ResourceBase<Mesh>
   {
-    MeshId id;
     MeshUsage usage = MeshUsage::Static;
-    std::string name;
     MeshType type;
     MeshLayout layout;
     
@@ -68,7 +65,7 @@ namespace Spg
   // Used in ECS
   struct MeshComponent
   {
-    MeshId id;
+    ResourceID<Mesh> id;
   };
 
   //==========================================================

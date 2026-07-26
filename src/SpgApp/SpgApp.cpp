@@ -35,7 +35,7 @@ namespace Spg
 
 int main()
 {
-  Spg::Application::SystemInit();
+  Spg::Application::Init();
   auto app = Spg::CreateApplication();
   app->Run();
 }

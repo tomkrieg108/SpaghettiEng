@@ -1,13 +1,13 @@
 #include "SpaghettiEng/Render/Mesh/MeshData.h"
 
 #include <vector>
-//#include <unordered_map>
-//#include <string>
+#include <string>
 #include <cstdint>  //uint32_t
 #include <numbers>  //std::pi
 
-//#include "CoreLib/Core.h"
-//#include "SpaghettiEng/Render/Mesh/Mesh.h"
+#include "CoreLib/Core.h"
+#include "SpaghettiEng/Render/Mesh/Mesh.h"
+#include "SpaghettiEng/Resource/ResourceCache.h"
 
 /*
   {} []
@@ -15,6 +15,41 @@
 
 namespace Spg
 {
+
+  
+
+  
+  namespace MeshData
+  {
+    void Generate(ResourceCache<Mesh>& mesh_cache)
+    {
+
+    }
+  }
+ 
+
+
+  Mesh GenerateGridMesh()
+  {
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttribute::Position);
+    layout.PushAttribute(MeshAttribute::Color);
+
+    Mesh mesh;
+    //mesh.id = MeshCache::NextId();
+    mesh.name = "grid";
+    mesh.type = MeshType::Grid;
+    mesh.layout = layout;
+    mesh.vertices = GenerateGridMeshData();
+    return mesh;
+  }
+
+  Mesh GenerateCoordsMesh()
+  {
+    Mesh mesh;
+    //
+    return mesh;
+  }
 
   std::vector<float> GenerateCoordsMeshData(float size)
   {

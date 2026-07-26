@@ -20,10 +20,8 @@ target_sources(${LIB_ENG} PRIVATE
   "./Render/Camera/CameraController2D.cpp"
 
   "./Render/Renderer.cpp"
-  "./Render/ShaderCache.cpp"
-
+  
   "./Render/Mesh/Mesh.cpp"
-  "./Render/Mesh/MeshCache.cpp"
   "./Render/Mesh/MeshData.cpp"
 
   "./Render/Backends/OpenGL/GLShader.cpp"
@@ -58,9 +56,10 @@ target_sources(${LIB_ENG} PRIVATE
   "./Core/KeyCodes.h"
   "./Core/MouseCodes.h"
 
-  "./Resource/ResourceManager.h"
+  "./Resource/Resource.h"
   "./Resource/ResourceCache.h"
-
+  "./Resource/ResourceManager.h"
+  
   "./Events/Events.h"
   "./Events/EventManager.h"
 
@@ -71,12 +70,10 @@ target_sources(${LIB_ENG} PRIVATE
   "./Render/Camera/CameraController2D.h"
 
   "./Render/Renderer.h"
-  "./Render/ShaderCache.h"
-
+  
   "./Render/Mesh/Mesh.h"
   "./Render/Mesh/MeshData.h"
-  "./Render/Mesh/MeshCache.h"
-
+  
   "./Render/Backends/OpenGL/GLShader.h"
   "./Render/Backends/OpenGL/GLShaderUtils.h"
   "./Render/Backends/OpenGL/GLContext.h"

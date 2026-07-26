@@ -2,16 +2,18 @@
 
 #include "CoreLib/Core.h"
 
-// #if defined(_WIN32)
-// #include <windows.h>
-// #include <vector>
-// #elif defined(__linux__)
-// #include <unistd.h>
-// #include <limits.h>
-// #elif defined(__APPLE__)
-// #include <mach-o/dyld.h>
-// #include <vector>
-// #endif
+/*
+#if defined(_WIN32)
+#include <windows.h>
+#include <vector>
+#elif defined(__linux__)
+#include <unistd.h>
+#include <limits.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#include <vector>
+#endif
+*/
 
 #if defined(OS_WINDOWS)
 #include <windows.h>
@@ -36,36 +38,54 @@ namespace Spg
 
   namespace fs = std::filesystem;
 
-  fs::path ResourceManager::s_assets_path;
+  
+  ResourceManager::ResourceManager()
+  {
+    Init();
+  }
 
   void ResourceManager::Init()
   {
-    auto exe_dir = GetExecutableDirectory();
-    SPG_INFO("Path to executable: {}", exe_dir.string());
-    // SetAssetsPath();
+    SetAssetsPath();
   }
 
   void ResourceManager::SetAssetsPath()
   {
-
+    auto exe_dir = GetExecutableDirectory();
+    //SPG_INFO("Path to executable: {}", exe_dir.string());
+    m_assets_path = SearchDown(exe_dir,"Assets");
+    
+    if(m_assets_path.string() == "")
+      m_assets_path = SearchUp(exe_dir, "Assets");
+      
+    SPG_INFO("Path to Assets folder: {}", m_assets_path.string());
+    SPG_ASSERT(m_assets_path.string() != "");
   }
 
-  fs::path ResourceManager::SearchTargetDirectoryChildren(const std::string& target_directory)
+  fs::path ResourceManager::SearchDown(fs::path current_dir, const std::string& target_dir)
   {
-    // Container to hold the paths of child directories
-    std::vector<fs::path> child_directories;
+    // if(!fs::is_directory(current_dir))
+    //   return fs::path("");
 
-    fs::path current_dir = GetExecutableDirectory();
+    //Todo - needs fixing and testing - check again!
+   
     for(const auto& entry : fs::directory_iterator(current_dir))
     { 
-      //if(fs::is_directory(entry.status()) && entry.) 
+      auto entry_name = entry.path().filename().string();
+      
+      if(entry.is_directory())
+      {
+        if(entry_name == target_dir)
+          return entry.path();
+        else
+          return SearchDown(entry.path(), target_dir);  
+      }
     }
+    return fs::path("");
   }
 
-  fs::path ResourceManager::SearchTargetDirectoryParent(const std::string& target_directory)
+  fs::path ResourceManager::SearchUp(fs::path current_dir, const std::string& target_directory)
   {
-    fs::path current_dir = GetExecutableDirectory();
-
     // Loop until we reach the root path (root's parent path is itself)
     while (current_dir.has_parent_path() && current_dir != current_dir.parent_path()) {
         fs::path potential_path = current_dir / target_directory;
@@ -81,8 +101,7 @@ namespace Spg
     }
     
     // Return an empty path if it was never found
-    SPG_ASSERT(false);
-    return "";
+    return fs::path("");
   }
 
 

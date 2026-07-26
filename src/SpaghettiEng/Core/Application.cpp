@@ -38,8 +38,9 @@
 #include "SpaghettiEng/Core/ServiceLocator.h"
 #include "SpaghettiEng/Core/AppLayer.h"
 #include "SpaghettiEng/Resource/ResourceManager.h"
-#include "SpaghettiEng/Render/Mesh/MeshCache.h"
-#include "SpaghettiEng/Render/ShaderCache.h"
+
+#include "SpaghettiEng/Render/Mesh/Mesh.h"
+#include "SpaghettiEng/Render/Mesh/MeshData.h"
 #include "SpaghettiEng/Scene/SceneManager.h"
 
 #include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
@@ -55,27 +56,31 @@ namespace Spg
   
   Application* Application::s_instance = nullptr;
 
-  // Initialise static singletons - called in main before instantiating App
-  void Application::SystemInit()
+  void Application::Init()
   {
-    Core::Logger::Initialise();
-   
-    Spg::ResourceManager::Init();
-    Spg::MeshCache::Init();
-
-    //Spg::ShaderCache::Init();
-  }
-
+    Core::Logger::Init();
+  } 
+  
   Application::Application(const std::string& app_name) :
     m_app_name{app_name}
   {
+    
     SPG_ASSERT(s_instance == nullptr);
     s_instance = this;
 
     SetAssetsPath();
-    
+  
     m_service_locator.Register<Window>(app_name);
+    m_service_locator.Register<ResourceManager>();
     m_service_locator.Register<SceneManager>();
+    
+    auto& resource_manager = m_service_locator.Get<ResourceManager>();
+    auto& mesh_cache = resource_manager.MakeResourceCache<Mesh>();
+    MeshData::Generate(mesh_cache);
+
+    auto id1 = mesh_cache.Add(Mesh(), "Mesh1");
+    auto id2 = mesh_cache.Add(Mesh(), "Mesh2");
+    auto id3 = mesh_cache.Add(Mesh(), "Mesh3");
     
     Window& win = m_service_locator.Get<Window>();
     win.SetEventCallback( WinEvt::MakeCallback(this, &Application::OnWindowsEvent) );
@@ -214,7 +219,7 @@ namespace Spg
     }
     SPG_INFO("Current working directory successfully set to: {}", fs::current_path().string());
   }
-
+  
   //=============================================================================
   // For checking external lib linkage
   //=============================================================================

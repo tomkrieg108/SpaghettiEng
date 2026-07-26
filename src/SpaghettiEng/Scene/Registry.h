@@ -17,7 +17,7 @@ namespace Spg
   {
     public:
 
-      ~Registry() = default;
+      //~Registry() = default;
 
       Entity CreateEntity()
       {

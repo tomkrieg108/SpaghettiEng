@@ -6,6 +6,8 @@
 #include "SpaghettiEng/Core/Layer.h"
 #include "SpaghettiEng/Core/ServiceLocator.h"
 
+#include "SpaghettiEng/Resource/ResourceManager.h"
+
 namespace Spg
 {
   class Application
@@ -20,8 +22,9 @@ namespace Spg
 
     void OnWindowsEvent(WinEvt::Event& event);
 
-    static void SystemInit();
     static Application* Instance() {return s_instance;}
+
+    static void Init();
 
     static void PrintPlatformInfo();
     static void PrintExternalLibInfo();
@@ -29,15 +32,19 @@ namespace Spg
   private:
 
     void SetAssetsPath();
-   
+
     void OnWindowClosed(WinEvt::WindowClose& e);
     void OnKeyPressed(WinEvt::KeyPressed& e);
 
   protected:
     ServiceLocator m_service_locator;
     LayerStack m_layer_stack;
+    //ResourceManager m_resource_manager;
+
     std::string m_app_name;
     bool m_running = true;
+
+
     static Application* s_instance;
   };
 
