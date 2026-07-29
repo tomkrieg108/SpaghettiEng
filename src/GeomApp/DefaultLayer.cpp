@@ -28,7 +28,7 @@ namespace Spg
     m_text_renderer(app_context.Get<GLTextRenderer>())
   #endif
   {
-    m_logger = Core::Logger::Create("Bubble Layer");
+    m_logger = Core::Logger::Create("Default Layer");
     Create2DGrid();
     SetCanvasSize(500.0f);
     GeomTest();

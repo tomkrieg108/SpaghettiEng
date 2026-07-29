@@ -36,7 +36,8 @@
 #include "SpaghettiEng/Core/Window.h"
 #include "SpaghettiEng/Core/WindowEvents.h"
 #include "SpaghettiEng/Core/ServiceLocator.h"
-#include "SpaghettiEng/Core/AppLayer.h"
+
+#include "SpaghettiEng/Resource/ResourceCache.h"
 #include "SpaghettiEng/Resource/ResourceManager.h"
 
 #include "SpaghettiEng/Render/Mesh/Mesh.h"
@@ -48,7 +49,10 @@
 #include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
 
-// {} []
+/*
+  {} []
+*/
+
 namespace Spg
 {
   namespace fs = std::filesystem;
@@ -56,6 +60,8 @@ namespace Spg
   
   Application* Application::s_instance = nullptr;
 
+  //static method called in main before instantiating Application 
+  //Todo - can't we do away with this?
   void Application::Init()
   {
     Core::Logger::Init();
@@ -64,31 +70,46 @@ namespace Spg
   Application::Application(const std::string& app_name) :
     m_app_name{app_name}
   {
-    
     SPG_ASSERT(s_instance == nullptr);
     s_instance = this;
 
-    SetAssetsPath();
+    //SetAssetsPath();
   
     m_service_locator.Register<Window>(app_name);
+    m_service_locator.Register<GLRenderer>();
     m_service_locator.Register<ResourceManager>();
     m_service_locator.Register<SceneManager>();
+
+    Window& win = m_service_locator.Get<Window>();
+    win.SetEventCallback( WinEvt::MakeCallback(this, &Application::OnWindowsEvent) );
     
     auto& resource_manager = m_service_locator.Get<ResourceManager>();
     auto& mesh_cache = resource_manager.MakeResourceCache<Mesh>();
+    auto& shader_cache = resource_manager.MakeResourceCache<GLShader>();
+
     MeshData::Generate(mesh_cache);
+    GLShaderBuilder::BuildAll(resource_manager.GetAssetsPath(), shader_cache);
 
-    auto id1 = mesh_cache.Add(Mesh(), "Mesh1");
-    auto id2 = mesh_cache.Add(Mesh(), "Mesh2");
-    auto id3 = mesh_cache.Add(Mesh(), "Mesh3");
-    
-    Window& win = m_service_locator.Get<Window>();
-    win.SetEventCallback( WinEvt::MakeCallback(this, &Application::OnWindowsEvent) );
+    //Todo - initializing the renderer service requires shader_cache loaded - not ideal 
+    m_service_locator.Get<GLRenderer>().SetShaderCache(shader_cache); 
 
-    ImGuiUtils::Initialise(win);
+    //==== Try out only =====================================
+    /*
+      auto handle = mesh_cache.GetHandle("grid");
+      auto* grid_mesh_ptr =  mesh_cache.GetPtr(handle);
+
+      auto s1h = shader_cache.GetHandle("Basic Shader");
+      auto& s1 = shader_cache.Get(s1h);
+
+      auto s2h = shader_cache.GetHandle("Text Shader");
+      auto& s2 = shader_cache.Get(s2h);
+    */
+    // =======================================================
+
+    //ImGuiUtils::Initialise(win);
     
-    AppLayer* app_layer = new AppLayer(m_service_locator, "App Layer");
-    m_layer_stack.PushOverlay(app_layer);
+    //AppLayer* app_layer = new AppLayer(m_service_locator, "App Layer");
+    //m_layer_stack.PushOverlay(app_layer);
 
   #ifdef SPG_PRINT_GRAPHICS_SPECS
     win.GetGraphicsContext()->PrintSpecs();
@@ -108,7 +129,7 @@ namespace Spg
 
   void Application::OnWindowsEvent(WinEvt::Event& event)
   {
-    //Chain of responsibility (not an event queue)
+    // Chain of responsibility (not an event queue)
     // WinEvt::Dispatcher d(event);
     // d.Dsipatch<WinEvt::WindowClose>([this](WinEvt::WindowClose& e) {OnWindowClosed(e);});
     // d.Dsipatch<WinEvt::MouseBtnPressed>([this](WinEvt::MouseBtnPressed& e) {OnMouseBtnPressed(e);});
@@ -117,10 +138,8 @@ namespace Spg
     //This works fine - no need for the dispatcher in WindowsEvent.h!!
     switch(event.type)
     {
-      case WinEvt::EventType::WindowClose: 
-        OnWindowClosed(static_cast<WinEvt::WindowClose&>(event)); break;
-      case WinEvt::EventType::KeyPressed:
-        OnKeyPressed(static_cast<WinEvt::KeyPressed&>(event)); break; 
+      case WinEvt::EventType::WindowClose: OnWindowClosed(static_cast<WinEvt::WindowClose&>(event)); break;
+      case WinEvt::EventType::KeyPressed: OnKeyPressed(static_cast<WinEvt::KeyPressed&>(event)); break; 
     } 
 
     for(auto itr = m_layer_stack.rbegin(); itr!=m_layer_stack.rend(); ++itr)
@@ -148,17 +167,6 @@ namespace Spg
     }
   }
 
-  void Application::PushLayer(Layer* layer)
-  {
-    m_layer_stack.PushLayer(layer);
-  }
-
-  void Application::PopLayer(Layer* layer)
-  {
-    m_layer_stack.PopLayer(layer); 
-  }
-
-  
   void Application::Run()
   {
     SPG_WARN("App loop starting");
@@ -183,10 +191,10 @@ namespace Spg
         for (Layer* layer : m_layer_stack)
 		      layer->Render(delta_time);  
 
-        ImGuiUtils::PreRender();
-        for (Layer* layer : m_layer_stack)
-		      layer->ImGuiRender();
-        ImGuiUtils::PostRender();
+        // ImGuiUtils::PreRender();
+        // for (Layer* layer : m_layer_stack)
+		    //   layer->ImGuiRender();
+        // ImGuiUtils::PostRender();
       }
 
       // This calls glfwPollEvents() - windows events are guaranteed to be triggered here, sycnhronously - there's no need to process input events inside the main loop or to queue input events
@@ -220,6 +228,8 @@ namespace Spg
     SPG_INFO("Current working directory successfully set to: {}", fs::current_path().string());
   }
   
+
+
   //=============================================================================
   // For checking external lib linkage
   //=============================================================================

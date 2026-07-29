@@ -2,12 +2,11 @@
 
 //#include <functional> //std::hash
 #include <cstdint> // uint32_t
-
 #include <vector>
 #include <unordered_map>
 #include <string>
-#include <utility> //std::forward
-#include <concepts>
+//#include <utility> //std::forward
+//#include <concepts>
 
 #include "SpaghettiEng/Resource/Resource.h"
 #include "CoreLib/Core.h" 
@@ -22,12 +21,20 @@ namespace Spg
   template<typename T>
   class ResourceCache
   {
-    static_assert(std::derived_from<T, ResourceBase<T>>, "T must derive from ResourceBase<T>");
+    //static_assert(std::derived_from<T, ResourceBase<T>>, "T must derive from ResourceBase<T>");
 
   public:
 
     ResourceID<T> Add(T&& resource, const std::string& name)
     {
+      auto it = m_name_to_id.find(name);
+      if (it != m_name_to_id.end())
+      {
+        SPG_WARN("Resource name: {} in cache for: {} already exists.  Not added ", 
+          name, typeid(T).name());
+        return it->second;
+      } 
+
       uint32_t idx;
       if (!m_free_list.empty())
       {
@@ -45,35 +52,15 @@ namespace Spg
       ResourceID<T> id{ idx, m_generations[idx] };
       m_name_to_id[name] = id;
       return id;
-
-      #if 0
-      auto it = m_name_to_id.find(resource_name);
-      if (it != m_name_to_id.end())
-      {
-        SPG_WARN("Resource: {} in cache for: {} already exists.  Not added ", resource_name, typeid(T).name());
-        return it->second;
-      } 
-
-      ResourceID id = static_cast<ResourceID>(m_resources.size());
-     
-      resource.id = id;
-      resource.name = resource_name;
-
-      m_resources.push_back(std::move(resource));
-      m_name_to_id[resource_name] = id;
-      return id;
-    #endif  
     }
 
-    #if 1
     const T& Get(ResourceID<T> id)
     {
       // Note: If m_resources reallocates, every T& handed out is invalidated
-      SPG_ASSERT(id < m_resources.size() && m_generations[id.index] == id.generation);
-      return m_resources[id];
+      SPG_ASSERT(id.index < m_resources.size() && m_generations[id.index] == id.generation);
+      return m_resources[id.index];
     }
-    #endif
-
+    
     T* GetPtr(ResourceID<T> id)
     {
       // Note If m_resources reallocates, every T* previously handed out is invalidated
@@ -86,8 +73,14 @@ namespace Spg
     {
       if (id.index >= m_resources.size() || m_generations[id.index] != id.generation)
         return;
-      m_generations[id.index]++;      // invalidates every existing handle to this slot
+      m_generations[id.index]++; // invalidates every existing handle to this slot
       m_free_list.push_back(id.index);
+    }
+
+    ResourceID<T> GetHandle(const std::string& name) {
+      auto it = m_name_to_id.find(name);
+      SPG_ASSERT(it != m_name_to_id.end());
+      return it->second; 
     }
 
     private:

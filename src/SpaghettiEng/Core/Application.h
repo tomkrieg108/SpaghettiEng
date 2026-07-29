@@ -8,6 +8,10 @@
 
 #include "SpaghettiEng/Resource/ResourceManager.h"
 
+/*
+  {} []
+*/
+
 namespace Spg
 {
   class Application
@@ -17,15 +21,14 @@ namespace Spg
     virtual ~Application();
 
     void Run();
-    void PushLayer(Layer* layer);
-    void PopLayer(Layer* layer);
-
     void OnWindowsEvent(WinEvt::Event& event);
+
+    void PushLayer(Layer* layer) {  m_layer_stack.PushLayer(layer); } 
+    void PopLayer(Layer* layer) {  m_layer_stack.PopLayer(layer);  } 
 
     static Application* Instance() {return s_instance;}
 
     static void Init();
-
     static void PrintPlatformInfo();
     static void PrintExternalLibInfo();
 
@@ -39,11 +42,8 @@ namespace Spg
   protected:
     ServiceLocator m_service_locator;
     LayerStack m_layer_stack;
-    //ResourceManager m_resource_manager;
-
     std::string m_app_name;
     bool m_running = true;
-
 
     static Application* s_instance;
   };

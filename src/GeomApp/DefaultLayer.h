@@ -65,11 +65,8 @@ namespace Spg
     DefaultLayer(ServiceLocator& app_context, const std::string& name);
     ~DefaultLayer() = default;
 
-    //void Attach() override;
-    //void Detach() override;
-    //void Update(double time_step) override;
     void Render(double time_step) override;
-    void ImGuiRender() override;
+    //void ImGuiRender() override;
     void OnEvent(WinEvt::Event& event) override;
 
     void SetCanvasSize(float canvas_size);
@@ -98,7 +95,7 @@ namespace Spg
   #endif  
     Camera2D& m_camera;
     CameraController2D& m_camera_controller;
-    Core::SpdLogger m_logger;
+    Core::SpdLogger  ;
     bool m_pan_enabled = false;
     float m_canvas_size = 500.0f;
 

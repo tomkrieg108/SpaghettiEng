@@ -17,10 +17,7 @@ namespace Spg
   {
   public:
       
-      template<typename T>
-      static std::type_index TypeKey()
-      {
-        /*
+      /*
         typeid(T) executes: This produces an expression of type const std::type_info&
 
         Implicit match: The compiler looks at the return type, std::type_index
@@ -30,18 +27,14 @@ namespace Spg
         Conversion: The compiler automatically wraps the type_info inside a new std::type_index object and returns it.
 
         std::type_index has a constructor that takes a const std::type_info&
-        */
-        
-
+      */
+      template<typename T>
+      static std::type_index TypeKey()
+      {
         // return std::type_index(typeid(T)); equivalent to below
         return typeid(T);
       }
   
-      // template<typename T>
-      // inline static const std::type_index TypeKey = typeid(T); 
-
-      // can just call typeid(T); does same as above!
-
       template<typename T, typename... Args>
       void Register(Args&&... args) 
       {
@@ -57,10 +50,18 @@ namespace Spg
       template<typename T>
       T& Get() 
       {
-          auto it = m_services.find(TypeKey<T>());
-          SPG_ASSERT(it != m_services.end());
-          return *static_cast<ServiceWrapper<T>*>(it->second.get())->instance;
+        auto it = m_services.find(typeid(T));
+        SPG_ASSERT(it != m_services.end());
+        return *static_cast<ServiceWrapper<T>*>(it->second.get())->instance;
       }
+
+      // template<typename T>
+      // const T& Get() const
+      // {
+      //   auto it = m_services.find(typeid(T));
+      //   SPG_ASSERT(it != m_services.end());
+      //   return *static_cast<ServiceWrapper<T>*>(it->second.get())->instance;
+      // }
 
       template<typename T>
       T* TryGet()

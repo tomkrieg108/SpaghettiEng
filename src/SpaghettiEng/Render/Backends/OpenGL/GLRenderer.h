@@ -1,10 +1,18 @@
 #pragma once
 
-#include "GLVertexArray.h"
-#include "GLShader.h"
-#include <SpaghettiEng/Render/Camera/Camera2D.h>
-#include "CoreLib/Core.h" //Scope
-#include <glm/glm.hpp>
+//#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
+#include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLVertexArray.h"
+#include "SpaghettiEng/Render/Camera/Camera2D.h"
+
+#include "SpaghettiEng/Resource/ResourceCache.h"
+
+/*
+  {} []
+*/
 
 namespace Spg
 {
@@ -44,7 +52,8 @@ namespace Spg
     GLRenderer();
     ~GLRenderer() = default;
 
-    
+    void SetShaderCache(ResourceCache<GLShader>& shader_cache) ;
+
     void Draw(const GLVertexArray& vertex_array, const GLShader& shader, PrimitiveType draw_mode);
 
   
@@ -73,7 +82,7 @@ namespace Spg
 
    
   private:
-
+    ResourceCache<GLShader>* m_shader_cache;
     GLShader m_basic_shader; 
     std::unordered_map<uint32_t, Drawable> m_vao_map;
     uint32_t m_draw_calls = 0;

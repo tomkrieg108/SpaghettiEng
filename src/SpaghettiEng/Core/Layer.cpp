@@ -1,12 +1,17 @@
+#include "SpaghettiEng/Core/Layer.h"
 
+#include <string>
 
-//#include "ServiceLocator.h"
-#include "Layer.h"
+#include "SpaghettiEng/Core/ServiceLocator.h"
+
+/*
+  {} []
+*/
 
 namespace Spg
 {
-  Layer::Layer(ServiceLocator& app_context, const std::string& name):
-   m_app_conext{app_context}, 
+  Layer::Layer(ServiceLocator& service_locator, const std::string& name):
+   m_service_locator{service_locator}, 
    m_name(name)
   {
   }

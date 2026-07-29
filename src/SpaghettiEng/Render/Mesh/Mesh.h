@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <string>
-//#include <cstdint> 
+#include <cstdint> 
 #include <bitset>
 
 #include "SpaghettiEng/Resource/Resource.h"
@@ -52,7 +52,7 @@ namespace Spg
     uint32_t GetOffsetInBytes(MeshAttribute attribute);
   };  
   
-  struct Mesh : ResourceBase<Mesh>
+  struct Mesh
   {
     MeshUsage usage = MeshUsage::Static;
     MeshType type;
@@ -67,15 +67,5 @@ namespace Spg
   {
     ResourceID<Mesh> id;
   };
-
-  //==========================================================
-  // Util functions
-  //===========================================================
-  static uint32_t MeshBaseTypeSizeBytes(MeshBaseType base_type);
-  static MeshBaseType GetMeshBaseType(MeshAttribute attribute);
-
-  static uint32_t MeshComponentCount(MeshAttribute attribute);
-  static uint32_t MeshElementSizeBytes(MeshAttribute tag);
-
-
+  
 }

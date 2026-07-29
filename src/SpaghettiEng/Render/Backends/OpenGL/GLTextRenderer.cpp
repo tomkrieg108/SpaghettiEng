@@ -1,14 +1,22 @@
 #include "GLTextRenderer.h"
-
+ 
+#include <glad/gl.h>
 #include "ft2build.h"
 #include <freetype/freetype.h>
+
+/*
+  {} []
+*/
 
 namespace Spg
 {
   GLTextRenderer::GLTextRenderer(Camera2D& camera) : m_camera{camera}
   {
-    GLShaderBuilder shader_builder;
-    m_shader = shader_builder.Add(ShaderType::Vertex, "text.vs").Add(ShaderType::Fragment, "text.fs").Build("Text Shader");
+  }
+
+  void GLTextRenderer::Init(ResourceCache<GLShader>& shader_cache)
+  {
+    SetShaderCache(shader_cache);
 
     m_shader.Bind();
     m_shader.SetUniform1i("u_text", 0);
@@ -106,7 +114,14 @@ namespace Spg
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-  }
+
+  } 
+
+  void GLTextRenderer::SetShaderCache(ResourceCache<GLShader>& shader_cache)  {
+    m_shader_cache = &shader_cache;
+    auto handle = m_shader_cache->GetHandle("Text Shader");
+    m_shader = m_shader_cache->Get(handle);
+  } 
   
   void GLTextRenderer::UpdateView()
   {

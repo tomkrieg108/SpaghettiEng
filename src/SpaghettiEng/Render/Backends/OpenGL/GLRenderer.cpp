@@ -1,5 +1,14 @@
+
+#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
+
 #include <glad/gl.h>
-#include "GLRenderer.h"
+
+#include "SpaghettiEng/Resource/ResourceCache.h"
+#include "SpaghettiEng/Resource/ResourceManager.h"
+
+/*
+  {} []
+*/
 
 namespace Spg
 {
@@ -23,11 +32,15 @@ namespace Spg
     //glEnable(GL_CULL_FACE);
     //glCullFace(GL_BACK);
     //glFrontFace(GL_CW);	//or GL_CCW     
-    GLShaderBuilder shader_builder;
-    m_basic_shader = shader_builder.Add(ShaderType::Vertex, "basic.vs").Add(ShaderType::Fragment, "basic.fs").Build("Basic Shader");
+
   }
 
-  
+  void GLRenderer::SetShaderCache(ResourceCache<GLShader>& shader_cache)  {
+    m_shader_cache = &shader_cache;
+    auto handle = m_shader_cache->GetHandle("Basic Shader");
+    m_basic_shader = m_shader_cache->Get(handle);
+  } 
+
   static GLenum GetGLDrawPrimitive(PrimitiveType draw_mode)
   {
     switch (draw_mode) {

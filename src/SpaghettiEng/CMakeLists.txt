@@ -4,10 +4,10 @@ add_library(${LIB_ENG} STATIC)
 target_sources(${LIB_ENG} PRIVATE 
 
   "./Core/Application.cpp"
-  "./Core/AppLayer.cpp"
   "./Core/Window.cpp"
   "./Core/InputState.cpp"
   "./Core/Layer.cpp"
+  "./Core/ImguiLayer.cpp"
 
   "./Resource/ResourceManager.cpp"
 
@@ -47,12 +47,12 @@ endif()
 
 target_sources(${LIB_ENG} PRIVATE
   "./Core/Application.h"
-  "./Core/AppLayer.h"
   "./Core/ServiceLocator.h"
   "./Core/Window.h"
   "./Core/InputState.h"
   "./Core/WindowEvents.h"
   "./Core/Layer.h"
+  "./Core/ImguiLayer.h"
   "./Core/KeyCodes.h"
   "./Core/MouseCodes.h"
 

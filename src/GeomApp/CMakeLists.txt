@@ -1,11 +1,15 @@
 set(EDITOR_SOURCES 
   "./GeomApp.cpp" 
   "./DefaultLayer.cpp" 
-  "./DefaultLayerUI.cpp")
+  "./DefaultLayerUI.cpp"
+  "./UILayer.cpp"
+  )
 
 set(EDITOR_HEADERS 
   "./GeomApp.h" 
-  "./DefaultLayer.h")
+  "./DefaultLayer.h"
+  "./UILayer.h"
+  )
 
 set(EDITOR_INCLUDES ".")
 

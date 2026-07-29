@@ -4,6 +4,12 @@
 #include "CoreLib/Core.h"
 #include <map>
 
+#include "SpaghettiEng/Resource/ResourceCache.h"
+
+/*
+  {} []
+*/
+
 namespace Spg
 {
   namespace fs = std::filesystem;
@@ -12,6 +18,10 @@ namespace Spg
   {
     public:
       GLTextRenderer(Camera2D& camera);
+
+      void Init(ResourceCache<GLShader>& shader_cache);
+      void SetShaderCache(ResourceCache<GLShader>& shader_cache) ;
+      
       void Render(std::string text, float x, float y, float scale, glm::vec3 color);
       void UpdateView();
 
@@ -24,6 +34,7 @@ namespace Spg
         uint32_t Advance;   // Horizontal offset to advance to next glyph
       };
 
+      ResourceCache<GLShader>* m_shader_cache;
       std::map<char, Character> m_characters;
       uint32_t m_VAO = 0, m_VBO = 0;
       GLShader m_shader; 

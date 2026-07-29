@@ -5,7 +5,7 @@
 #include <typeindex>
 #include <memory>
 #include <utility> //std::forward
-#include <concepts>
+//#include <concepts>
 
 #include "SpaghettiEng/Resource/Resource.h"
 #include "SpaghettiEng/Resource/ResourceCache.h"
@@ -64,9 +64,10 @@ namespace Spg
 
     ResourceManager();
     void Init();
+    fs::path GetAssetsPath()  { return m_assets_path; } 
 
     template<typename T, typename... Args>
-      requires std::derived_from<T, ResourceBase<T>>
+      //requires std::derived_from<T, ResourceBase<T>>
     ResourceCache<T>& MakeResourceCache(Args&&... args) {
       Register<ResourceCache<T>>(std::forward<Args>(args)...);
       return Get<ResourceCache<T>>();
@@ -94,13 +95,6 @@ namespace Spg
 
   private:
  
-    //Todo
-    /*
-     'Type erased' container to store ResourceCache<T>
-      Almost identical to ServiceLocator
-      consider composition or inheritance of this
-    */
-  
     template<typename T, typename... Args>
     void Register(Args&&... args) 
     {

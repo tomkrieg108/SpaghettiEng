@@ -16,19 +16,35 @@
 namespace Spg
 {
 
-  
+  static Mesh GenerateGridMesh();
+  static Mesh GenerateCoordsMesh();
 
-  
+  // Move the declarations into the cpp file later (and make static)
+  static std::vector<float> GenerateCoordsMeshData(float size = 1.0f);
+  static std::vector<float> GenerateGridMeshData(float size = 20.0f);
+
+  static std::vector<float> GeneratePlaneMeshData(float size);
+  static std::vector<float> GeneratePlaneMeshDataTM(float size);
+
+  static std::vector<float> GenerateCubeMeshData(float size);
+  static std::vector<float> GenerateCubeMeshDataTM(float size);
+
+  static std::vector<float> GenerateSphereMeshData();
+  static std::vector<float> GenerateSphereMeshDataTM();
+
   namespace MeshData
   {
     void Generate(ResourceCache<Mesh>& mesh_cache)
     {
+      auto grid_mesh = GenerateGridMesh();
+      auto id1 = mesh_cache.Add(std::move(grid_mesh), "grid");
 
+      auto id2 = mesh_cache.Add(GenerateGridMesh(), "coords");
+
+      int a = 2;
     }
   }
  
-
-
   Mesh GenerateGridMesh()
   {
     MeshLayout layout;
@@ -36,8 +52,6 @@ namespace Spg
     layout.PushAttribute(MeshAttribute::Color);
 
     Mesh mesh;
-    //mesh.id = MeshCache::NextId();
-    mesh.name = "grid";
     mesh.type = MeshType::Grid;
     mesh.layout = layout;
     mesh.vertices = GenerateGridMeshData();
@@ -46,8 +60,14 @@ namespace Spg
 
   Mesh GenerateCoordsMesh()
   {
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttribute::Position);
+    layout.PushAttribute(MeshAttribute::Color);
+
     Mesh mesh;
-    //
+    mesh.type = MeshType::Coords;
+    mesh.layout = layout;
+    mesh.vertices = GenerateCoordsMeshData();
     return mesh;
   }
 

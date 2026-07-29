@@ -1,16 +1,19 @@
 #pragma once
 #include <filesystem>
-#include <glad/gl.h>
+
+//#include <glad/gl.h>
 #include <glm/glm.hpp>
+
 #include "CoreLib/Core.h"
-#include "GLShaderUtils.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLShaderUtils.h"
 
 namespace Spg
 {
 
-  namespace fs = std::filesystem;
+  class GLShader;
+  template<typename T> class ResourceCache;
 
-  using ShaderId = uint32_t;
+  namespace fs = std::filesystem;
 
   class GLShader;
 
@@ -26,10 +29,12 @@ namespace Spg
   class GLShaderBuilder
   {
   public: 
-    GLShaderBuilder();
+    GLShaderBuilder(const fs::path assets_path);
     ~GLShaderBuilder() = default;
     GLShaderBuilder& Add(ShaderType type, const std::string& file_name);
     GLShader Build(const std::string& shader_name);
+
+    static void BuildAll(const fs::path assets_path, ResourceCache<GLShader>& shader_cache);
 
   private:
     void PrintBuildLog();
@@ -87,7 +92,7 @@ namespace Spg
 
     uint32_t GetProgramID() const { return m_program_id; }
     std::string GetName() const { return m_name; }
-    bool BuildSuccess() const { return m_build_success; }
+    bool BuildSuccessFul() const { return m_build_success; }
     void PrintInfo();
 
   private:
@@ -98,8 +103,6 @@ namespace Spg
 
   private:
     
-    //ShaderId id; 
-
     std::string m_name{"Unnamed Shader"};
     bool m_build_success = false;
     uint32_t m_program_id = 0;    //Allocated by OpenGL

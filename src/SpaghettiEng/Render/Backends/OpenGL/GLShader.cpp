@@ -1,20 +1,29 @@
+#include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
+
+#include <filesystem>
 
 #include <glad/gl.h>
+#include <glm/glm.hpp>
+
 #include "CoreLib/Core.h"
-#include "GLShaderUtils.h"
-#include "GLShader.h"
+
+#include "SpaghettiEng/Render/Backends/OpenGL/GLShaderUtils.h"
+#include "SpaghettiEng/Resource/ResourceManager.h"
+#include "SpaghettiEng/Resource/ResourceCache.h"
+
+/*
+  {} []
+*/
 
 using namespace std::string_literals;
 
 namespace Spg
 {
-  /* **************************************************************************************
-    BUILDER
-  * **************************************************************************************/
 
-  GLShaderBuilder::GLShaderBuilder() 
+  GLShaderBuilder::GLShaderBuilder(const fs::path assets_path) 
   {
-    m_shader_path = fs::current_path() / fs::path{"Shaders"};
+    //m_shader_path = fs::current_path() / fs::path{"Shaders"};
+    m_shader_path = assets_path / fs::path{"Shaders"};
     m_shader_path = fs::absolute(m_shader_path);
     SPG_INFO("Absolute shaders path: {}", m_shader_path.string());
 
@@ -25,6 +34,31 @@ namespace Spg
 
     if(!fs::is_directory(m_shader_path))
       SPG_ERROR("Shaders path is not a directory: {}", m_shader_path.string());
+  }
+
+  void GLShaderBuilder::BuildAll(const fs::path assets_path, ResourceCache<GLShader>& shader_cache)
+  {
+    //Todo - read in all shaders in the Shaders folder - define shaders in a JSON file
+
+    fs::path shader_path = assets_path / "Shaders";
+    SPG_ASSERT(fs::exists(shader_path));
+    SPG_ASSERT(fs::is_directory(shader_path));
+
+    GLShaderBuilder shader_builder(assets_path);
+
+    auto basic_shader = shader_builder.Add(ShaderType::Vertex, "basic.vs")
+                                      .Add(ShaderType::Fragment, "basic.fs")
+                                      .Build("Basic Shader");                               
+
+    auto text_shader = shader_builder.Add(ShaderType::Vertex, "text.vs")
+                                     .Add(ShaderType::Fragment, "text.fs")
+                                     .Build("Text Shader");    
+                                     
+    SPG_ASSERT(basic_shader.BuildSuccessFul());
+    SPG_ASSERT(text_shader.BuildSuccessFul());                                 
+
+    shader_cache.Add(std::move(basic_shader), basic_shader.GetName());
+    shader_cache.Add(std::move(text_shader), text_shader.GetName());
   }
 
   std::string GLShaderBuilder::ReadSource(const std::string& file_name)
@@ -139,9 +173,6 @@ namespace Spg
     } 
   }
 
-/* **************************************************************************************
-SHADER
-* **************************************************************************************/
 
   void GLShader::Bind() const
   {

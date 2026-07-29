@@ -8,6 +8,8 @@
 #include "SpaghettiEng/Scene/SceneManager.h"
 #include "SpaghettiEng/Scene/SceneVisuals.h"
 
+#include "SpgApp/EditorLayer.h"
+
 //Test only
 #include "SpaghettiEng/Scene/Registry.h"
 
@@ -26,6 +28,9 @@ namespace Spg
   {
     m_service_locator.Register<Renderer>();
     m_service_locator.Register<SceneVisuals>();
+
+    EditorLayer* editor_layer = new EditorLayer(m_service_locator, "Editor Layer");
+    m_layer_stack.PushOverlay(editor_layer);
   }
 
   SpgApp::~SpgApp()

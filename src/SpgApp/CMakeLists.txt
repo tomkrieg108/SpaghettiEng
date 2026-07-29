@@ -2,7 +2,10 @@ add_executable(${APP_SPG} ${EDITOR_SOURCES} ${EDITOR_HEADERS})
 
 target_sources(${APP_SPG} PRIVATE
   "./SpgApp.h"
+  "./EditorLayer.h"
+
   "./SpgApp.cpp"
+  "./EditorLayer.cpp"
 )
 
 target_include_directories(${LIB_ENG}  PUBLIC

@@ -17,11 +17,14 @@ namespace Spg
 
     static constexpr uint32_t InvalidIndex = std::numeric_limits<uint32_t>::max();
     explicit operator bool() const { return index != InvalidIndex; }
+    bool IsValid() const { return index != InvalidIndex; }
 
     //auto-generates all comparison operators <, <= etc
     auto operator<=>(const ResourceID&) const = default; 
   };
 
+  // =====================================================
+  // Currently not used - to use, every resource needs to inherit from this as below
   template<typename T>
   struct ResourceBase
   {
@@ -30,5 +33,7 @@ namespace Spg
 
     template<typename U> friend class ResourceCache;
   };
+  struct SomeResource : ResourceBase<SomeResource> {};
+  // =====================================================
 
 }

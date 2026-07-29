@@ -11,6 +11,14 @@
 
 namespace Spg
 {
+  //==========================================================
+  // Util functions
+  //===========================================================
+  static uint32_t MeshBaseTypeSizeBytes(MeshBaseType base_type);
+  static MeshBaseType GetMeshBaseType(MeshAttribute attribute);
+
+  static uint32_t MeshComponentCount(MeshAttribute attribute);
+  static uint32_t MeshElementSizeBytes(MeshAttribute tag);
 
   MeshLayout& MeshLayout::PushAttribute(MeshAttribute attribute)
   {
@@ -49,13 +57,13 @@ namespace Spg
   uint32_t MeshBaseTypeSizeBytes(MeshBaseType base_type)
   {
     switch(base_type)
-      {
-        case MeshBaseType::Float: return 4;
-        case MeshBaseType::Int: return 4;
-        case MeshBaseType::Bool: return 1;
-        default: return 0;
-      }
-      return 0;
+    {
+      case MeshBaseType::Float: return 4;
+      case MeshBaseType::Int: return 4;
+      case MeshBaseType::Bool: return 1;
+      default: return 0;
+    }
+    return 0;
   }
 
   MeshBaseType GetMeshBaseType(MeshAttribute attribute)
@@ -66,20 +74,20 @@ namespace Spg
   uint32_t MeshComponentCount(MeshAttribute attribute)
   {
     switch (attribute)
-      {
-        case MeshAttribute::Position:
-        case MeshAttribute::Normal:
-        case MeshAttribute::Tangent:
-        case MeshAttribute::Bitangent:
-          return 3;
-        case MeshAttribute::TexCoords:
-          return 2;
-        case MeshAttribute::Color:
-          return 4;
-        default:
-          return 0;    
-      }
-      return 0;
+    {
+      case MeshAttribute::Position:
+      case MeshAttribute::Normal:
+      case MeshAttribute::Tangent:
+      case MeshAttribute::Bitangent:
+        return 3;
+      case MeshAttribute::TexCoords:
+        return 2;
+      case MeshAttribute::Color:
+        return 4;
+      default:
+        return 0;    
+    }
+    return 0;
   }
 
   uint32_t MeshElementSizeBytes(MeshAttribute attribute)
@@ -87,13 +95,6 @@ namespace Spg
     auto base_type = GetMeshBaseType(attribute);
     return MeshComponentCount(attribute) * MeshBaseTypeSizeBytes(base_type);
   }
-
-  //==================================================================
-  // Mesh layout
-  //==================================================================
-
-
-
 
 
 }
