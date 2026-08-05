@@ -23,9 +23,9 @@ namespace Spg
     m_window(app_context.Get<Window>()),
     m_renderer(app_context.Get<GLRenderer>()),
     m_camera(app_context.Get<Camera2D>()),
-    m_camera_controller(app_context.Get<CameraController2D>()),
+    m_camera_controller(app_context.Get<CameraController2D>())
   #ifdef _WIN32
-    m_text_renderer(app_context.Get<GLTextRenderer>())
+    ,m_text_renderer(app_context.Get<GLTextRenderer>())
   #endif
   {
     m_logger = Core::Logger::Create("Default Layer");
