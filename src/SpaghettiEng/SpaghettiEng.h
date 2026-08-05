@@ -12,7 +12,6 @@
 #include "SpaghettiEng/Core/Layer.h"
 
 #include "SpaghettiEng/Events/EventManager.h"
-#include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 
 #include "SpaghettiEng/Render/Camera/Camera2D.h"
 #include "SpaghettiEng/Render/Camera/CameraController2D.h"

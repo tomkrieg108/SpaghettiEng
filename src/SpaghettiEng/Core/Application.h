@@ -20,6 +20,9 @@ namespace Spg
     Application(const std::string& app_name = std::string{"Spaghetti App"});
     virtual ~Application();
 
+    virtual void Start() {}
+    virtual void End() {}
+
     void Run();
     void OnWindowsEvent(WinEvt::Event& event);
 
@@ -33,8 +36,6 @@ namespace Spg
     static void PrintExternalLibInfo();
 
   private:
-
-    void SetAssetsPath();
 
     void OnWindowClosed(WinEvt::WindowClose& e);
     void OnKeyPressed(WinEvt::KeyPressed& e);

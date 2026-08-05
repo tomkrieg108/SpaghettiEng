@@ -16,6 +16,7 @@
 //#include <glm/gtx/euler_angles.hpp> // Required for specific euler extraction seq
 #include "MathLib/MathLib.h"
 
+// {} []
 /*
 
 *Note that where a function explicitly specified a sequence, it is mathematically structured as an extrinsic sequence 
@@ -91,7 +92,7 @@ namespace Spg
   //* ======================================================
 
   //todo TransformComponent - just a struct with data.  Get something else do do these operations.
-  
+#if 0
   class StaticTransform
   {
     public:
@@ -106,22 +107,26 @@ namespace Spg
       }
 
     private:
-      //glm::mat4x3 m_mat; //Todo - this works too - 48 instead of 64 bytes
+      //glm::mat4x3 m_mat; //*  This works too - 48 instead of 64 bytes
       glm::mat4 m_transform = glm::mat4(1.0f); //identity mat
 
       glm::vec3 m_position = glm::vec3(0.0f);
       glm::vec3 m_scale = glm::vec3(1.0f);
       glm::vec3 m_euler_angles = glm::vec3(0.0f);
   };
+#endif
+
 
   // Seperate this out from the transform component
+#if 0  
   struct RenderMatrix
   {
     glm::mat4 m_transform = glm::mat4(1.0f);
   };
+#endif
 
-
-  class Transform
+#if 0
+class Transform
   {
     public:
 
@@ -225,6 +230,7 @@ namespace Spg
       mutable glm::mat4 m_transform = glm::mat4(1.0f); //identity mat
       mutable bool m_dirty = false; //If true then construct matrix on demand
   };
+#endif
 
   struct TagComponent
   {
@@ -260,16 +266,11 @@ namespace Spg
     }
   };
 
+ #if 0 
   struct TransformComponent
   {
     Transform transform;
   };
-
-  // struct MeshComponent
-  // {
-  //   MeshComponent() = default;
-  //   MeshComponent(uint32_t handle): mesh_handle(handle) {}
-  //   uint32_t mesh_handle = 0;
-  // };
+#endif
 
 }

@@ -3,16 +3,12 @@
 #include <string>
 
 #include "SpaghettiEng/Core/ServiceLocator.h"
-#include "SpaghettiEng/Render/Renderer.h"
 #include "SpaghettiEng/Render/Camera/Camera.h"
 #include "SpaghettiEng/Scene/SceneManager.h"
-#include "SpaghettiEng/Scene/SceneVisuals.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer2.h"
 
+#include "SpgApp/SimLayer.h"
 #include "SpgApp/EditorLayer.h"
-
-//Test only
-#include "SpaghettiEng/Scene/Registry.h"
-
 
 using namespace std::string_literals;
 
@@ -26,10 +22,17 @@ namespace Spg
   SpgApp::SpgApp(const std::string& title) :
     Spg::Application(title)
   {
-    m_service_locator.Register<Renderer>();
-    m_service_locator.Register<SceneVisuals>();
+    auto& resource_mgr = m_service_locator.Get<ResourceManager>();
+    auto& scene_mgr = m_service_locator.Get<SceneManager>();
 
-    EditorLayer* editor_layer = new EditorLayer(m_service_locator, "Editor Layer");
+    scene_mgr.BuildDefaultScene(resource_mgr);
+    
+    m_service_locator.Register<GLRenderer2>(resource_mgr); //todo = not ideal to pass in mgr
+    
+    auto* sim_layer = new SimLayer(m_service_locator, "Sim Layer");
+    auto* editor_layer = new EditorLayer(m_service_locator, "Editor Layer");
+
+    m_layer_stack.PushLayer(sim_layer);
     m_layer_stack.PushOverlay(editor_layer);
   }
 

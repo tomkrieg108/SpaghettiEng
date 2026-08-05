@@ -79,6 +79,11 @@ namespace Spg
     }
 
     template<typename T>
+    const ResourceCache<T>& GetResourceCache() const {
+      return Get<ResourceCache<T>>();
+    }
+
+    template<typename T>
     ResourceCache<T>* TryGetResourceCache() {
       return TryGet<ResourceCache<T>>();
     }
@@ -109,6 +114,14 @@ namespace Spg
 
     template<typename T>
     T& Get() 
+    {
+        auto it = m_map.find(typeid(T));
+        SPG_ASSERT(it != m_map.end());
+        return *static_cast<TypeWrapper<T>*>(it->second.get())->instance;
+    }
+
+    template<typename T>
+    const T& Get() const
     {
         auto it = m_map.find(typeid(T));
         SPG_ASSERT(it != m_map.end());

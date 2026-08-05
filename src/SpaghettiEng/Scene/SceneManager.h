@@ -6,29 +6,40 @@
 #include <cstdint>
 
 #include "SpaghettiEng/Scene/Scene.h"
+#include "SpaghettiEng/Render/Camera/Camera.h"
+
 
 // {}
 namespace Spg
 {
+  class ResourceManager;
+
   class SceneManager
   {
     public:
       SceneManager() = default;
       ~SceneManager() = default;
 
-      void CreateScene(const std::string& name);
+      Scene& CreateScene(const std::string& name);
       void SetActiveScene(const std::string& name);
+
       Scene& GetActiveScene();
       void RenameScene(const std::string& name, const std::string& new_name) {}
-
       void LoadScene(const std::string& name) {} 
       void UnloadScene(const std::string& name) {} 
       
-      uint32_t GetSceneCount() { return m_sim_scenes.size(); }
+      uint32_t GetSceneCount() { return m_scenes.size(); }
+
+      void BuildDefaultScene(const ResourceManager& resource_manager);
+      
+      Camera& GetSceneCamera() {return m_scene_camera;}
+      const Camera& GetSceneCamera() const {return m_scene_camera;}
 
     private:
-      std::unordered_map<std::string, Scene> m_sim_scenes;
+      std::unordered_map<std::string, Scene> m_scenes;
       std::string m_active_sim_scene_name = std::string("");
+
+      Camera m_scene_camera;
   };
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint> // 
+#include <cstdint> 
 #include <string>
 #include <limits> // std::numeric_limits
 /*
@@ -24,7 +24,7 @@ namespace Spg
   };
 
   // =====================================================
-  // Currently not used - to use, every resource needs to inherit from this as below
+  //* Currently not used 
   template<typename T>
   struct ResourceBase
   {
@@ -33,6 +33,8 @@ namespace Spg
 
     template<typename U> friend class ResourceCache;
   };
+
+  //* - to use, every resource needs to inherit from this:
   struct SomeResource : ResourceBase<SomeResource> {};
   // =====================================================
 

@@ -1,17 +1,18 @@
 #pragma once
 
-//* NOTE: avoid including this in too many other header files
+//* NOTE: Compiler firewall.  Avoid including in any headers
 
 #include <cstdint>
-#include <memory>
+#include <utility>
 
 #include <entt/fwd.hpp>
 #include <entt/entity/registry.hpp>
 
+#include "CoreLib/Core.h"
+
 #include "SpaghettiEng/Scene/Entity.h"
-/*
-  {} []
-*/
+
+// {} []
 
 namespace Spg
 {
@@ -24,67 +25,94 @@ namespace Spg
       Entity CreateEntity()
       {
         Entity entity;
-        entity.handle = m_registry.create(); 
+        entity.handle = m_entt_reg.create(); 
         return entity;
       }
       
       void DestroyEntity(Entity entity)
       {
-        m_registry.destroy(entity.handle);
+        m_entt_reg.destroy(entity.handle);
       }
 
       bool IsValid(Entity entity) const 
       { 
-        return m_registry.valid(entity.handle); 
+        return m_entt_reg.valid(entity.handle); 
       }
 
       template <typename T, typename... Args>
       T& AddComponent(Entity entity, Args&&... args)
       {
-          T& component = m_registry.emplace<T>(entity.handle, std::forward<Args>(args)...);
+          SPG_ASSERT(!HasComponent<T>(entity));
+          T& component = m_entt_reg.emplace<T>(entity.handle, std::forward<Args>(args)...);
           return component;
       }
 
       template <typename T, typename... Args>
       T& AddOrReplaceComponent(Entity entity, Args&&... args)
       {
-        T& component = m_registry.emplace_or_replace<T>(entity.handle, std::forward<Args>(args)...);
+        T& component = m_entt_reg.emplace_or_replace<T>(entity.handle, std::forward<Args>(args)...);
         return component;
       }
 
       template <typename T>
       bool HasComponent(Entity entity) const
       {
-          return m_registry.any_of<T>(entity.handle);
+        return m_entt_reg.any_of<T>(entity.handle);
+      }
+
+      template <typename... T>
+      bool HasAllComponents(Entity entity) const
+      {
+        return m_entt_reg.all_of<T...>(entity.handle);
+      }
+
+      template <typename... T>
+      bool HasAnyComponents(Entity entity) const
+      {
+        return m_entt_reg.any_of<T...>(entity.handle);
       }
 
       template <typename T>
       T& GetComponent(Entity entity)
       {
-        return m_registry.get<T>(entity.handle);
+        SPG_ASSERT(HasComponent<T>(entity));
+        return m_entt_reg.get<T>(entity.handle);
       }
 
       template <typename T>
       const T& GetComponent(Entity entity) const
       {
-        return m_registry.get<T>(entity.handle);
+        SPG_ASSERT(HasComponent<T>(entity));
+        return m_entt_reg.get<T>(entity.handle);
       }
 
       template <typename T>
       T* TryGetComponent(Entity entity) const
       {
-        return m_registry.try_get<T>(entity.handle);
+        return m_entt_reg.try_get<T>(entity.handle);
       }
 
       template <typename T>
       void RemoveComponent(Entity entity)
       {
-          m_registry.remove<T>(entity.handle);
+          m_entt_reg.remove<T>(entity.handle);
+      }
+
+      template <typename... T>
+      auto GetAllEntitiesWith()
+      {
+        return m_entt_reg.view<T...>();
+      }
+
+      template <typename... T>
+      const auto GetAllEntitiesWith() const
+      {
+        return m_entt_reg.view<T...>();
       }
       
     private:
     
-      entt::registry m_registry;
+      entt::registry m_entt_reg;
   };
   
 

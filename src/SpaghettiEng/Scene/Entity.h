@@ -6,6 +6,13 @@ namespace Spg
 {
   struct Entity
   {
-      entt::entity handle;
+    Entity(); // Defer definition to source file
+    Entity(entt::entity handle); // Defer definition to source file
+
+    explicit operator bool() const;
+    operator entt::entity() const;
+    operator std::uint32_t() const;
+
+    entt::entity handle;
   };
 }

@@ -11,15 +11,7 @@
 
 namespace Spg
 {
-  //==========================================================
-  // Util functions
-  //===========================================================
-  static uint32_t MeshBaseTypeSizeBytes(MeshBaseType base_type);
-  static MeshBaseType GetMeshBaseType(MeshAttribute attribute);
-
-  static uint32_t MeshComponentCount(MeshAttribute attribute);
-  static uint32_t MeshElementSizeBytes(MeshAttribute tag);
-
+  
   MeshLayout& MeshLayout::PushAttribute(MeshAttribute attribute)
   {
     MeshElement el;
@@ -28,7 +20,7 @@ namespace Spg
 
     element_list.push_back(el);
     attribute_set.set(static_cast<uint8_t>(attribute));
-    size_in_bytes += MeshElementSizeBytes(attribute);
+    size_in_bytes += AttributeSizeBytes(attribute);
 
     return *this;
   }
@@ -38,7 +30,7 @@ namespace Spg
     return attribute_set.test(static_cast<uint8_t>(attribute));
   }
 
-  uint32_t MeshLayout::GetOffsetInBytes(MeshAttribute attribute)
+  uint64_t MeshLayout::GetOffsetInBytes(MeshAttribute attribute)
   {
     if(!HasAttribute(attribute))
       return size_in_bytes;
@@ -54,24 +46,24 @@ namespace Spg
   // Util functions
   //==================================================================
 
-  uint32_t MeshBaseTypeSizeBytes(MeshBaseType base_type)
+  uint32_t AttributehBaseTypeSizeBytes(MeshAttributeBaseType base_type)
   {
     switch(base_type)
     {
-      case MeshBaseType::Float: return 4;
-      case MeshBaseType::Int: return 4;
-      case MeshBaseType::Bool: return 1;
+      case MeshAttributeBaseType::Float: return 4;
+      case MeshAttributeBaseType::Int: return 4;
+      case MeshAttributeBaseType::Bool: return 1;
       default: return 0;
     }
     return 0;
   }
 
-  MeshBaseType GetMeshBaseType(MeshAttribute attribute)
+  MeshAttributeBaseType GetAttribBaseType(MeshAttribute attribute)
   {
-    return MeshBaseType::Float; 
+    return MeshAttributeBaseType::Float; 
   }
 
-  uint32_t MeshComponentCount(MeshAttribute attribute)
+  uint32_t AttributeComponentCount(MeshAttribute attribute)
   {
     switch (attribute)
     {
@@ -90,10 +82,10 @@ namespace Spg
     return 0;
   }
 
-  uint32_t MeshElementSizeBytes(MeshAttribute attribute)
+  uint32_t AttributeSizeBytes(MeshAttribute attribute)
   {
-    auto base_type = GetMeshBaseType(attribute);
-    return MeshComponentCount(attribute) * MeshBaseTypeSizeBytes(base_type);
+    auto base_type = GetAttribBaseType(attribute);
+    return AttributeComponentCount(attribute) * AttributehBaseTypeSizeBytes(base_type);
   }
 
 

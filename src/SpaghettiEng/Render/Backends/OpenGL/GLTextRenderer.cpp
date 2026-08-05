@@ -14,20 +14,21 @@ namespace Spg
   {
   }
 
-  void GLTextRenderer::Init(ResourceCache<GLShader>& shader_cache)
+  void GLTextRenderer::Init(fs::path assets_path, ResourceCache<GLShader>& shader_cache)
   {
     SetShaderCache(shader_cache);
 
     m_shader.Bind();
-    m_shader.SetUniform1i("u_text", 0);
+    m_shader.SetUniform1i("u_tex_idx", 0);
     auto model = glm::mat4(1.0f);
     m_shader.SetUniformMat4f("u_model", model);
     m_shader.SetUniformMat4f("u_view", m_camera.GetViewMatrix());
     m_shader.SetUniformMat4f("u_proj", m_camera.GetProjMatrix());
     m_shader.Unbind();
 
-    m_font_path = fs::current_path() / fs::path{"Fonts"};
-    m_font_path = fs::absolute(m_font_path);
+   
+    m_font_path = assets_path / fs::path{"Fonts"};
+
     SPG_INFO("Absolute fonts path: {}", m_font_path.string());
 
     if (!fs::exists(m_font_path)) {
@@ -119,8 +120,8 @@ namespace Spg
 
   void GLTextRenderer::SetShaderCache(ResourceCache<GLShader>& shader_cache)  {
     m_shader_cache = &shader_cache;
-    auto handle = m_shader_cache->GetHandle("Text Shader");
-    m_shader = m_shader_cache->Get(handle);
+    auto shader_id = m_shader_cache->GetResourceID("Text Shader");
+    m_shader = m_shader_cache->Get(shader_id);
   } 
   
   void GLTextRenderer::UpdateView()

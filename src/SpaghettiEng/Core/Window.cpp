@@ -9,7 +9,6 @@
 #include "SpaghettiEng/Core/WindowEvents.h"
 #include "SpaghettiEng/Core/InputState.h"
 #include "SpaghettiEng/Core/WindowEvents.h"
-#include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 #include "SpaghettiEng/Events/EventManager.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLContext.h"
 
@@ -196,9 +195,6 @@ namespace Spg
     });
 
     glfwSetKeyCallback(m_window_handle, [](GLFWwindow* handle, int key, int code, int action, int mode){
-      if(ImGuiUtils::WantCaptureKeyboard())  
-        return;
-
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
       auto& callback = window->GetEventCallback();
       if (action == GLFW_PRESS)
@@ -225,9 +221,6 @@ namespace Spg
     
     glfwSetMouseButtonCallback(m_window_handle, [](GLFWwindow* handle, int button, int action, int mods)
     {
-      if(ImGuiUtils::WantCaptureMouse())  
-        return;
-
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
       auto& callback = window->GetEventCallback();
 
@@ -247,8 +240,6 @@ namespace Spg
     });
 
     glfwSetScrollCallback(m_window_handle, [](GLFWwindow* handle, double xoffset, double yoffset){
-      if(ImGuiUtils::WantCaptureMouse())  
-        return;
       Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
       WinEvt::MouseScrolled e{(float)xoffset,(float)yoffset};
       auto& callback = window->GetEventCallback();
@@ -256,9 +247,6 @@ namespace Spg
     });
 
     glfwSetCursorPosCallback(m_window_handle, [](GLFWwindow* handle, double xpos, double ypos) {
-      if(ImGuiUtils::WantCaptureMouse())  
-        return; 
-
 		  Window* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
       auto* input = window->GetInputState();
       if(!input->GetMouseFirstMoved())

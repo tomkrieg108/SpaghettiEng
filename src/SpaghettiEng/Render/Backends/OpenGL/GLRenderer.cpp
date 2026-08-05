@@ -12,6 +12,7 @@
 
 namespace Spg
 {
+
   using PrimitiveType = GLRenderer::PrimitiveType;
 
   static BufferLayout s_layout =
@@ -37,8 +38,8 @@ namespace Spg
 
   void GLRenderer::SetShaderCache(ResourceCache<GLShader>& shader_cache)  {
     m_shader_cache = &shader_cache;
-    auto handle = m_shader_cache->GetHandle("Basic Shader");
-    m_basic_shader = m_shader_cache->Get(handle);
+    auto shader_id = m_shader_cache->GetResourceID("Basic Shader");
+    m_basic_shader = m_shader_cache->Get(shader_id);
   } 
 
   static GLenum GetGLDrawPrimitive(PrimitiveType draw_mode)
@@ -84,7 +85,7 @@ namespace Spg
       drawable.VAO.Unbind();
     }
     m_basic_shader.Unbind();
-   
+  
   }
 
   uint32_t GLRenderer::Submit(const std::vector<float>& data, PrimitiveType draw_mode)
@@ -128,7 +129,7 @@ namespace Spg
 
     //pos data needs to be a vec3!
     glm::vec3 pos_3d = glm::vec3(position_data,0); 
-   
+  
     auto offset_bytes = index * vbo.GetLayout().GetStride() + vbo.GetLayout().GetOffset("a_position");
     vbo.UpdateRawData(offset_bytes, sizeof(glm::vec3), &pos_3d);
   }
@@ -202,14 +203,14 @@ namespace Spg
   void GLRenderer::Enable(uint32_t render_id)
   {
     SPG_ASSERT (m_vao_map.find(render_id) != m_vao_map.end());
-		auto& drawable =  m_vao_map[render_id];
+    auto& drawable =  m_vao_map[render_id];
     drawable.enabled = true;
   }
 
   void GLRenderer::Disable(uint32_t render_id)
   {
     SPG_ASSERT (m_vao_map.find(render_id) != m_vao_map.end());
-		auto& drawable =  m_vao_map[render_id];
+    auto& drawable =  m_vao_map[render_id];
     drawable.enabled = false;
   }
 
@@ -221,7 +222,7 @@ namespace Spg
     m_vao_map.erase(render_id);
   }
 
- 
+
   void GLRenderer::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
   {
     glViewport(x, y, width, height);
@@ -241,5 +242,5 @@ namespace Spg
   {
     glLineWidth(width);
   }
-
+  
 }

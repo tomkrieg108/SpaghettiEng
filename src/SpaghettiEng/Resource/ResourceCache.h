@@ -54,16 +54,22 @@ namespace Spg
       return id;
     }
 
-    const T& Get(ResourceID<T> id)
+    const T& Get(ResourceID<T> id) const
     {
-      // Note: If m_resources reallocates, every T& handed out is invalidated
+      //* Note: If m_resources reallocates, every T& handed out is invalidated
+      SPG_ASSERT(id.index < m_resources.size() && m_generations[id.index] == id.generation);
+      return m_resources[id.index];
+    }
+
+    T& Get(ResourceID<T> id)
+    {
       SPG_ASSERT(id.index < m_resources.size() && m_generations[id.index] == id.generation);
       return m_resources[id.index];
     }
     
     T* GetPtr(ResourceID<T> id)
     {
-      // Note If m_resources reallocates, every T* previously handed out is invalidated
+      //* Note If m_resources reallocates, every T* previously handed out is invalidated
       if (id.index >= m_resources.size() || m_generations[id.index] != id.generation)
         return nullptr;   // stale or invalid handle — caught, not silently wrong
       return &m_resources[id.index];
@@ -77,7 +83,7 @@ namespace Spg
       m_free_list.push_back(id.index);
     }
 
-    ResourceID<T> GetHandle(const std::string& name) {
+    ResourceID<T> GetResourceID(const std::string& name) const {
       auto it = m_name_to_id.find(name);
       SPG_ASSERT(it != m_name_to_id.end());
       return it->second; 
@@ -94,7 +100,7 @@ namespace Spg
 }
 
 
-//Store by value?
+//Store reource by value?
 /*
 Is Storing by Value Okay? 
 

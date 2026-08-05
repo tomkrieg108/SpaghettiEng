@@ -55,13 +55,13 @@ namespace Spg
         return *static_cast<ServiceWrapper<T>*>(it->second.get())->instance;
       }
 
-      // template<typename T>
-      // const T& Get() const
-      // {
-      //   auto it = m_services.find(typeid(T));
-      //   SPG_ASSERT(it != m_services.end());
-      //   return *static_cast<ServiceWrapper<T>*>(it->second.get())->instance;
-      // }
+      template<typename T>
+      const T& Get() const
+      {
+        auto it = m_services.find(typeid(T));
+        SPG_ASSERT(it != m_services.end());
+        return *static_cast<ServiceWrapper<T>*>(it->second.get())->instance;
+      }
 
       template<typename T>
       T* TryGet()
@@ -69,7 +69,7 @@ namespace Spg
         auto it = m_services.find(typeid(T));
         if (it == m_services.end())
             return nullptr;
-        return *static_cast<ServiceWrapper<T>*>(it->second.get())->instance;    
+        return static_cast<ServiceWrapper<T>*>(it->second.get())->instance.get();    
       }
 
   private:
@@ -84,7 +84,8 @@ namespace Spg
             instance(std::make_unique<T>(std::forward<Args>(args)...))
           {} 
           
-          std::unique_ptr<T> instance;
+          //todo: does instance also need to be a unique_ptr? why not an instance?
+          std::unique_ptr<T> instance; 
       };
 
       std::unordered_map<std::type_index, std::unique_ptr<WrapperBase>> m_services;

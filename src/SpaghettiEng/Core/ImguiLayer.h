@@ -25,7 +25,7 @@ namespace Spg
    
   protected:
     
-    virtual void Draw(double delta_time) {}
+    virtual void Draw(double delta_time) = 0;
 
     void Init();
     void Shutdown();

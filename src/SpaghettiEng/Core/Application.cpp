@@ -34,30 +34,28 @@
 #include "CoreLib/PlatformDetect/PlatformDetect.h"
 
 #include "SpaghettiEng/Core/Window.h"
+#include "SpaghettiEng/Core/KeyCodes.h"
 #include "SpaghettiEng/Core/WindowEvents.h"
 #include "SpaghettiEng/Core/ServiceLocator.h"
 
 #include "SpaghettiEng/Resource/ResourceCache.h"
 #include "SpaghettiEng/Resource/ResourceManager.h"
 
+#include "SpaghettiEng/Render/Camera/Camera.h"
 #include "SpaghettiEng/Render/Mesh/Mesh.h"
 #include "SpaghettiEng/Render/Mesh/MeshData.h"
 #include "SpaghettiEng/Scene/SceneManager.h"
 
-#include "SpaghettiEng/ImGuiUtils/ImGuiUtils.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLContext.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
 
-/*
-  {} []
-*/
 
+// {} []
 namespace Spg
 {
   namespace fs = std::filesystem;
 
-  
   Application* Application::s_instance = nullptr;
 
   //static method called in main before instantiating Application 
@@ -73,44 +71,23 @@ namespace Spg
     SPG_ASSERT(s_instance == nullptr);
     s_instance = this;
 
-    //SetAssetsPath();
-  
+    //Initialize services 
     m_service_locator.Register<Window>(app_name);
-    m_service_locator.Register<GLRenderer>();
     m_service_locator.Register<ResourceManager>();
     m_service_locator.Register<SceneManager>();
 
+    // Setup callback for window events
     Window& win = m_service_locator.Get<Window>();
     win.SetEventCallback( WinEvt::MakeCallback(this, &Application::OnWindowsEvent) );
     
+    // Load / Initialise resources
     auto& resource_manager = m_service_locator.Get<ResourceManager>();
     auto& mesh_cache = resource_manager.MakeResourceCache<Mesh>();
     auto& shader_cache = resource_manager.MakeResourceCache<GLShader>();
-
     MeshData::Generate(mesh_cache);
     GLShaderBuilder::BuildAll(resource_manager.GetAssetsPath(), shader_cache);
 
-    //Todo - initializing the renderer service requires shader_cache loaded - not ideal 
-    m_service_locator.Get<GLRenderer>().SetShaderCache(shader_cache); 
-
-    //==== Try out only =====================================
-    /*
-      auto handle = mesh_cache.GetHandle("grid");
-      auto* grid_mesh_ptr =  mesh_cache.GetPtr(handle);
-
-      auto s1h = shader_cache.GetHandle("Basic Shader");
-      auto& s1 = shader_cache.Get(s1h);
-
-      auto s2h = shader_cache.GetHandle("Text Shader");
-      auto& s2 = shader_cache.Get(s2h);
-    */
-    // =======================================================
-
-    //ImGuiUtils::Initialise(win);
     
-    //AppLayer* app_layer = new AppLayer(m_service_locator, "App Layer");
-    //m_layer_stack.PushOverlay(app_layer);
-
   #ifdef SPG_PRINT_GRAPHICS_SPECS
     win.GetGraphicsContext()->PrintSpecs();
   #endif
@@ -122,19 +99,61 @@ namespace Spg
     
   }
 
-  Application::~Application()
+  Application::~Application() {}
+
+  void Application::Run()
   {
-    ImGuiUtils::Shutdown();
+    SPG_WARN("Main loop starting");
+    auto delta_time = 0.0;
+    auto last_time = glfwGetTime();
+
+    auto& win = m_service_locator.Get<Window>();
+    
+    Start(); // Does nothing by default - Overridable by derived Application class
+
+    //for (Layer* layer : m_layer_stack)
+		//  layer->Init();  
+
+    while(m_running)
+    {
+      //if(win.ShouldClose())
+      // break;
+      auto now = glfwGetTime(); //in seconds
+      delta_time = now - last_time;
+      last_time = now;
+
+      win.Clear();
+
+      for (Layer* layer : m_layer_stack)
+		    layer->Update(delta_time);  
+     
+      if(!win.IsMinimised())
+      {
+        for (Layer* layer : m_layer_stack)
+		      layer->Render(delta_time);  
+      }
+
+      // This calls glfwPollEvents() - windows events are guaranteed to be triggered here, sycnhronously - there's no need to process input events inside the main loop or to queue input events
+      win.OnUpdate();
+    }
+
+    //for (Layer* layer : m_layer_stack)
+		//  layer->Shutdown();  
+
+    End(); // Does nothing by default - Overridable by derived Application class
   }
+
 
   void Application::OnWindowsEvent(WinEvt::Event& event)
   {
     // Chain of responsibility (not an event queue)
-    // WinEvt::Dispatcher d(event);
-    // d.Dsipatch<WinEvt::WindowClose>([this](WinEvt::WindowClose& e) {OnWindowClosed(e);});
-    // d.Dsipatch<WinEvt::MouseBtnPressed>([this](WinEvt::MouseBtnPressed& e) {OnMouseBtnPressed(e);});
-    // d.Dsipatch<WinEvt::KeyPressed>([this](WinEvt::KeyPressed& e) {OnKeyPressed(e);});
-
+  #if 0
+     WinEvt::Dispatcher d(event);
+    d.Dsipatch<WinEvt::WindowClose>([this](WinEvt::WindowClose& e) {OnWindowClosed(e);});
+    d.Dsipatch<WinEvt::MouseBtnPressed>([this](WinEvt::MouseBtnPressed& e) {OnMouseBtnPressed(e);});
+    d.Dsipatch<WinEvt::KeyPressed>([this](WinEvt::KeyPressed& e) {OnKeyPressed(e);});
+  #endif
+   
     //This works fine - no need for the dispatcher in WindowsEvent.h!!
     switch(event.type)
     {
@@ -152,83 +171,21 @@ namespace Spg
 
   void Application::OnWindowClosed(WinEvt::WindowClose& e)
   {
-    SPG_WARN("App Window closed **");
+    //SPG_WARN("App Window closed **");
     m_running = false;
     e.handled = true;   
   }
 
   void Application::OnKeyPressed(WinEvt::KeyPressed& e)
   {
-    SPG_WARN("Key pressed ** {} ", e.key);
-    if(e.key == GLFW_KEY_ESCAPE)
+    //SPG_WARN("Key pressed ** {} ", e.key);
+    //if(e.key == GLFW_KEY_ESCAPE)
+    if(e.key == Key::Escape)
     {
       m_running = false;
       e.handled = true;   
     }
   }
-
-  void Application::Run()
-  {
-    SPG_WARN("App loop starting");
-    auto delta_time = 0.0;
-    auto last_time = glfwGetTime();
-
-    Window& win = m_service_locator.Get<Window>();
-
-    while(m_running)
-    {
-      //if(win.ShouldClose())
-      // break;
-        
-      auto now = glfwGetTime(); //in seconds
-      delta_time = now - last_time;
-      last_time = now;
-
-      win.Clear();
-     
-      if(!win.IsMinimised())
-      {
-        for (Layer* layer : m_layer_stack)
-		      layer->Render(delta_time);  
-
-        // ImGuiUtils::PreRender();
-        // for (Layer* layer : m_layer_stack)
-		    //   layer->ImGuiRender();
-        // ImGuiUtils::PostRender();
-      }
-
-      // This calls glfwPollEvents() - windows events are guaranteed to be triggered here, sycnhronously - there's no need to process input events inside the main loop or to queue input events
-      win.OnUpdate();
-    }
-  }
-
-  //=============================================================================
-  // todo Move this to Assets modules
-  //=============================================================================
-  void Application::SetAssetsPath()
-  {
-    //Todo - this will need to be changed.  Currently depends on the location of this source file, which won't work when app is 'deployed'
-    fs::path this_file = fs::absolute(fs::path{__FILE__});
-    fs::path assets_path = this_file.parent_path() / fs::path{"../../../Assets"};
-    assets_path = fs::absolute(assets_path);
-    if (!fs::exists(assets_path)) {
-        SPG_ERROR("Assets path does not exist: {}", assets_path.string());
-        return;
-    }
-    if (!fs::is_directory(assets_path)) {
-        SPG_ERROR("Assets path is not a directory: {}", assets_path.string());
-        return;
-    }
-    try {
-        fs::current_path(assets_path);
-    } catch (const fs::filesystem_error& e) {
-        SPG_ERROR("Exception setting CWD to assets path. Msg: {} Error: {}", assets_path.string(), e.what());
-        return;
-    }
-    SPG_INFO("Current working directory successfully set to: {}", fs::current_path().string());
-  }
-  
-
 
   //=============================================================================
   // For checking external lib linkage

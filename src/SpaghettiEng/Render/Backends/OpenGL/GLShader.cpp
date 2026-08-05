@@ -11,10 +11,7 @@
 #include "SpaghettiEng/Resource/ResourceManager.h"
 #include "SpaghettiEng/Resource/ResourceCache.h"
 
-/*
-  {} []
-*/
-
+ // {} []
 using namespace std::string_literals;
 
 namespace Spg

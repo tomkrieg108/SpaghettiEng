@@ -1,7 +1,6 @@
 set(EDITOR_SOURCES 
   "./GeomApp.cpp" 
   "./DefaultLayer.cpp" 
-  "./DefaultLayerUI.cpp"
   "./UILayer.cpp"
   )
 

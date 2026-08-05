@@ -3,11 +3,10 @@
 
 #include <memory>
 
-#include "SpaghettiEng/Scene/Components.h"
 #include "SpaghettiEng/Scene/Entity.h"
 #include "SpaghettiEng/Scene/Registry.h"
-#include "SpaghettiEng/Scene/SceneCameraController.h"
 
+// {} []
 namespace Spg
 {
   
@@ -16,6 +15,7 @@ namespace Spg
 
   Scene::Scene(Scene&& scene) noexcept = default;
   Scene& Scene::operator=(Scene&& scene) noexcept = default;
+
 
 #if 0
   Entity Scene::CreateEmpty(const std::string& name)

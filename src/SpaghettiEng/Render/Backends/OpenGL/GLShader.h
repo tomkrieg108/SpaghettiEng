@@ -5,8 +5,11 @@
 #include <glm/glm.hpp>
 
 #include "CoreLib/Core.h"
+#include "SpaghettiEng/Resource/Resource.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLShaderUtils.h"
 
+
+// {} []
 namespace Spg
 {
 
@@ -20,7 +23,6 @@ namespace Spg
   struct GLShaderInfo
   {
     std::string file_name{ "" };
-    //fs::path filepath{""};
     ShaderType type = ShaderType::Unknown;
     uint32_t id = 0;
     bool compile_success = false;
@@ -111,5 +113,7 @@ namespace Spg
     std::unordered_map<std::string, UniformBlock> m_uniform_blocks;
     std::unordered_map<std::string, DataItem> m_attributes;
   };
+
+  using ShaderID = ResourceID<GLShader>;
 
 }

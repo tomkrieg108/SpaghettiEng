@@ -32,6 +32,7 @@ namespace Spg
     alignas(16) glm::vec3 ambient_color;
   };  
 
+  
   class GLRenderer
   {
   public:
@@ -52,6 +53,7 @@ namespace Spg
     GLRenderer();
     ~GLRenderer() = default;
 
+    //Todo - get rid of this ?
     void SetShaderCache(ResourceCache<GLShader>& shader_cache) ;
 
     void Draw(const GLVertexArray& vertex_array, const GLShader& shader, PrimitiveType draw_mode);
@@ -82,11 +84,17 @@ namespace Spg
 
    
   private:
-    ResourceCache<GLShader>* m_shader_cache;
+    
+    //==================================================
+    //Todo Renderer shouldn't need to store shaders - should be arguments
+    ResourceCache<GLShader>* m_shader_cache; 
     GLShader m_basic_shader; 
+    //===================================================
     std::unordered_map<uint32_t, Drawable> m_vao_map;
     uint32_t m_draw_calls = 0;
     uint32_t m_vertices_rendered = 0;
   };
   
+
+
 }

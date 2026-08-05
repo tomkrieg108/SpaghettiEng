@@ -9,7 +9,9 @@ namespace Spg
   class DefaultLayer : public Layer
   {
 
-  private:
+    friend class UILayer;
+
+  public:
 
     enum class MeshType
     {
@@ -66,9 +68,7 @@ namespace Spg
     ~DefaultLayer() = default;
 
     void Render(double time_step) override;
-    //void ImGuiRender() override;
     void OnEvent(WinEvt::Event& event) override;
-
     void SetCanvasSize(float canvas_size);
 
   private:
@@ -95,14 +95,15 @@ namespace Spg
   #endif  
     Camera2D& m_camera;
     CameraController2D& m_camera_controller;
-    Core::SpdLogger  ;
+    Core::SpdLogger  m_logger;
     bool m_pan_enabled = false;
     float m_canvas_size = 500.0f;
 
     //std::unordered_map<std::string, MeshGroup> m_mesh_list;
     std::unordered_map<std::string, Mesh> m_mesh_list;
-    static std::string s_active_mesh;
     Geom::MonotonePartitionAlgo m_monotone_spawner;
+
+    std::string m_active_mesh = "";
   };
 
 }

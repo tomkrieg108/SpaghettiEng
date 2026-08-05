@@ -19,7 +19,7 @@ namespace Spg
     public:
       GLTextRenderer(Camera2D& camera);
 
-      void Init(ResourceCache<GLShader>& shader_cache);
+      void Init(fs::path assets_path, ResourceCache<GLShader>& shader_cache);
       void SetShaderCache(ResourceCache<GLShader>& shader_cache) ;
       
       void Render(std::string text, float x, float y, float scale, glm::vec3 color);

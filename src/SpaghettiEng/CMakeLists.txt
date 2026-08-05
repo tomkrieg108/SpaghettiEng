@@ -13,16 +13,13 @@ target_sources(${LIB_ENG} PRIVATE
 
   "./Events/EventManager.cpp"
 
-  "./ImGuiUtils/ImGuiUtils.cpp"
-
   "./Render/Camera/Camera.cpp"
   "./Render/Camera/Camera2D.cpp"
   "./Render/Camera/CameraController2D.cpp"
 
-  "./Render/Renderer.cpp"
-  
   "./Render/Mesh/Mesh.cpp"
   "./Render/Mesh/MeshData.cpp"
+  "./Render/Mesh/Material.cpp"
 
   "./Render/Backends/OpenGL/GLShader.cpp"
   "./Render/Backends/OpenGL/GLShaderUtils.cpp"
@@ -30,12 +27,12 @@ target_sources(${LIB_ENG} PRIVATE
   "./Render/Backends/OpenGL/GLBuffer.cpp"
   "./Render/Backends/OpenGL/GLVertexArray.cpp"
   "./Render/Backends/OpenGL/GLRenderer.cpp"
+  "./Render/Backends/OpenGL/GLRenderer2.cpp"
 
   "./Scene/Entity.cpp"
-  "./Scene/SceneCameraController.cpp"
   "./Scene/Scene.cpp"
   "./Scene/SceneManager.cpp"
-  "./Scene/SceneVisuals.cpp"
+  "./Scene/Transform.cpp"
 
   )
 
@@ -63,16 +60,13 @@ target_sources(${LIB_ENG} PRIVATE
   "./Events/Events.h"
   "./Events/EventManager.h"
 
-  "./ImGuiUtils/ImGuiUtils.h"
-
   "./Render/Camera/Camera.h"
   "./Render/Camera/Camera2D.h"
   "./Render/Camera/CameraController2D.h"
 
-  "./Render/Renderer.h"
-  
   "./Render/Mesh/Mesh.h"
   "./Render/Mesh/MeshData.h"
+  "./Render/Mesh/Material.h"
   
   "./Render/Backends/OpenGL/GLShader.h"
   "./Render/Backends/OpenGL/GLShaderUtils.h"
@@ -81,6 +75,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Render/Backends/OpenGL/GLVertexArray.h"
   "./Render/Backends/OpenGL/GLBufferLayout.h"
   "./Render/Backends/OpenGL/GLRenderer.h"
+  "./Render/Backends/OpenGL/GLRenderer2.h"
   "./Render/Backends/OpenGL/GLTextRenderer.h"
 
   "./Scene/Components.h"
@@ -88,8 +83,7 @@ target_sources(${LIB_ENG} PRIVATE
   "./Scene/Registry.h"
   "./Scene/Scene.h"
   "./Scene/SceneManager.h"
-  "./Scene/SceneVisuals.h"
-  "./Scene/SceneCameraController.h"
+  "./Scene/Transform.h"
 )
 
 if(WIN32)

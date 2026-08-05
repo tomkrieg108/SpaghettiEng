@@ -20,8 +20,8 @@ namespace Spg
   static Mesh GenerateCoordsMesh();
 
   // Move the declarations into the cpp file later (and make static)
-  static std::vector<float> GenerateCoordsMeshData(float size = 1.0f);
-  static std::vector<float> GenerateGridMeshData(float size = 20.0f);
+  static std::vector<float> GenerateCoordsMeshData(float size);
+  static std::vector<float> GenerateGridMeshData(float size);
 
   static std::vector<float> GeneratePlaneMeshData(float size);
   static std::vector<float> GeneratePlaneMeshDataTM(float size);
@@ -39,9 +39,8 @@ namespace Spg
       auto grid_mesh = GenerateGridMesh();
       auto id1 = mesh_cache.Add(std::move(grid_mesh), "grid");
 
-      auto id2 = mesh_cache.Add(GenerateGridMesh(), "coords");
-
-      int a = 2;
+      auto coords_mesh = GenerateCoordsMesh();
+      auto id2 = mesh_cache.Add(std::move(coords_mesh), "coords");
     }
   }
  
@@ -52,9 +51,13 @@ namespace Spg
     layout.PushAttribute(MeshAttribute::Color);
 
     Mesh mesh;
-    mesh.type = MeshType::Grid;
+    mesh.name = "grid";
+    mesh.primitive = MeshPrimitive::Grid;
     mesh.layout = layout;
-    mesh.vertices = GenerateGridMeshData();
+    mesh.vertices = GenerateGridMeshData(7.0f);
+     SPG_ASSERT((mesh.vertices.size()*4) % layout.size_in_bytes == 0);
+    mesh.vertex_count = mesh.vertices.size()*4 / layout.size_in_bytes;
+    mesh.index_count = 0;
     return mesh;
   }
 
@@ -65,9 +68,13 @@ namespace Spg
     layout.PushAttribute(MeshAttribute::Color);
 
     Mesh mesh;
-    mesh.type = MeshType::Coords;
+    mesh.name = "coords";
+    mesh.primitive = MeshPrimitive::Coords;
     mesh.layout = layout;
-    mesh.vertices = GenerateCoordsMeshData();
+    mesh.vertices = GenerateCoordsMeshData(5.0f);
+    SPG_ASSERT((mesh.vertices.size()*4) % layout.size_in_bytes == 0);
+    mesh.vertex_count = mesh.vertices.size()*4 / layout.size_in_bytes;
+    mesh.index_count = 0;
     return mesh;
   }
 
@@ -78,15 +85,15 @@ namespace Spg
     {
       // positions        // colours (rgba) 
       0.0f, 0.0f,  0.0f,  1.0f, 0.0f, 0.0f, 1.0f, //x-start
-      size, 0.0f,  0.0f,  1.0f, 0.0f, 0.0f, 1.0f, //x-start
+      size, 0.0f,  0.0f,  1.0f, 0.0f, 0.0f, 1.0f, //x-end
       
       0.0f, 0.0f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, //y-start
-      0.0f, size,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, //y-start
+      0.0f, size,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, //y-end
 
       0.0f, 0.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, //z-start
-      0.0f, 0.0f,  size,  0.0f, 1.0f, 0.0f, 1.0f, //z-start
-      
+      0.0f, 0.0f,  size,  0.0f, 0.0f, 1.0f, 1.0f, //z-end
     };
+
     return vertices;
   }
 
@@ -94,7 +101,7 @@ namespace Spg
   {
     std::vector<float> vertices;
     const float unit_size = 1.0f;
-    const float col = size; //colour
+    const float col = 0.5f; //colour
     const float y = 0.01f; // Raise slightly
     float x, z;
 

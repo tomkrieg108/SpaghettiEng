@@ -122,12 +122,12 @@ namespace Spg
     
     //Text Rendering
   #ifdef _WIN32
-    if(m_mesh_list.find(s_active_mesh) == m_mesh_list.end()) {
+    if(m_mesh_list.find(m_active_mesh) == m_mesh_list.end()) {
       m_text_renderer.Render("Hello from TexRenderer!!", -50,-50,0.5f,glm::vec3(0,1,0));
       return;
     }
   
-    Mesh& mesh = m_mesh_list[s_active_mesh];
+    Mesh& mesh = m_mesh_list[m_active_mesh];
     for(auto& label : mesh.labels) {
       m_text_renderer.Render(label.text, label.pos.x, label.pos.y, 0.35f, {1,1,1});
     }
@@ -142,12 +142,12 @@ namespace Spg
     
     //Text Rendering
   #ifdef _WIN32
-    if(m_mesh_list.find(s_active_mesh) == m_mesh_list.end()) {
+    if(m_mesh_list.find(m_active_mesh) == m_mesh_list.end()) {
       m_text_renderer.Render("Hello from TexRenderer!!", -50,-50,0.5f,glm::vec3(0,1,0));
       return;
     }
   
-    Mesh& mesh = m_mesh_list[s_active_mesh];
+    Mesh& mesh = m_mesh_list[m_active_mesh];
     for(auto& label : mesh.labels) {
       m_text_renderer.Render(label.text, label.pos.x, label.pos.y, 0.35f, {1,1,1});
     }
@@ -165,8 +165,8 @@ namespace Spg
 
   void DefaultLayer::MonotoneAlgoInit()
   {
-    SPG_ASSERT(m_mesh_list.find(s_active_mesh) != m_mesh_list.end());
-    Mesh& mesh = m_mesh_list[s_active_mesh];
+    SPG_ASSERT(m_mesh_list.find(m_active_mesh) != m_mesh_list.end());
+    Mesh& mesh = m_mesh_list[m_active_mesh];
     SPG_ASSERT(mesh.type == MeshType::Polygon);
 
     //clear any child meshes & labels from previous run
