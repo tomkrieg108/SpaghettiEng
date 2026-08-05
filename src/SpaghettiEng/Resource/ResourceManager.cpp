@@ -2,7 +2,8 @@
 
 #include "CoreLib/Core.h"
 
-/*
+#if 1
+
 #if defined(_WIN32)
 #include <windows.h>
 #include <vector>
@@ -13,7 +14,10 @@
 #include <mach-o/dyld.h>
 #include <vector>
 #endif
-*/
+
+#endif
+
+#if 0
 
 #if defined(OS_WINDOWS)
 #include <windows.h>
@@ -24,6 +28,8 @@
 #elif defined(OS_IOS)
 #include <mach-o/dyld.h>
 #include <vector>
+#endif
+
 #endif
 
 #include <filesystem>
@@ -107,7 +113,7 @@ namespace Spg
 
   fs::path ResourceManager::GetExecutableDirectory()
   {
-#if defined(OS_WINDOWS)
+#if defined(_WIN32)
     std::vector<wchar_t> buffer(MAX_PATH);
     DWORD size;
     while ((size = GetModuleFileNameW(NULL, buffer.data(), buffer.size())) == buffer.size() && 
@@ -117,7 +123,7 @@ namespace Spg
     buffer.resize(size);
     return std::filesystem::path(buffer.begin(), buffer.end()).parent_path();
 
-#elif defined(OS_LINUX)
+#elif defined(__linux__)
     char buffer[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
     if (len != -1) {
@@ -125,7 +131,7 @@ namespace Spg
         return std::filesystem::path(buffer).parent_path();
     }
 
-#elif defined(OS_IOS)
+#elif defined(__APPLE__)
     std::vector<char> buffer(PATH_MAX);
     uint32_t size = buffer.size();
     if (_NSGetExecutablePath(buffer.data(), &size) == -1) {
