@@ -21,26 +21,21 @@
 namespace Spg
 {
   SimLayer::SimLayer(ServiceLocator& service_locator, const std::string& name):
-    Layer(service_locator,name)
+    Layer(service_locator,name),
+    m_window(service_locator.Get<Window>()),
+    m_renderer(service_locator.Get<GLRenderer2>()),
+    m_scene_mgr(m_service_locator.Get<SceneManager>())
   {
     Init();
   }
     
   void SimLayer::Init()
   {
-    m_window = m_service_locator.TryGet<Window>();
-    m_renderer =  m_service_locator.TryGet<GLRenderer2>();;
-    m_scene_mgr =  m_service_locator.TryGet<SceneManager>();
+    auto& scene = m_scene_mgr.GetActiveScene();
+    auto& scene_camera = m_scene_mgr.GetSceneCamera();
 
-    SPG_ASSERT(m_window != nullptr);
-    SPG_ASSERT(m_renderer != nullptr);
-    SPG_ASSERT(m_scene_mgr != nullptr);
-
-    auto& scene = m_scene_mgr->GetActiveScene();
-    auto& scene_camera = m_scene_mgr->GetSceneCamera();
-
-    scene_camera.SetAspectRatio(m_window->GetAspectRatio());
-    m_renderer->InitGpuData(scene);
+    scene_camera.SetAspectRatio(m_window.GetAspectRatio());
+    m_renderer.InitGpuData(scene);
   }
 
   void SimLayer::Shutdown()
@@ -49,9 +44,9 @@ namespace Spg
 
   void SimLayer::Render(double delta_time) 
   {
-    auto& scene = m_scene_mgr->GetActiveScene(); //* Requires unordered_map lookup
-    auto& scene_camera = m_scene_mgr->GetSceneCamera();
-    m_renderer->Draw(scene, scene_camera);
+    auto& scene = m_scene_mgr.GetActiveScene(); 
+    auto& scene_camera = m_scene_mgr.GetSceneCamera();
+    m_renderer.Draw(scene, scene_camera);
   }
 
   void SimLayer::Update(double delta_time)
@@ -59,15 +54,15 @@ namespace Spg
     const float move_speed = 5.0f;
     const float t = (float)(delta_time);
 
-    auto& scene = m_scene_mgr->GetActiveScene(); //* Requires unordered_map lookup
-    auto& scene_camera = m_scene_mgr->GetSceneCamera();
-    auto* input_state = m_window->GetInputState();
+    auto& scene = m_scene_mgr.GetActiveScene(); 
+    auto& scene_camera = m_scene_mgr.GetSceneCamera();
+    auto* input_state = m_window.GetInputState();
 
     if(input_state->IsKeyPressed(Key::W))
-      scene_camera.MoveForward(-move_speed * t); //* note the negative value needed to move forward
+      scene_camera.MoveForward(-move_speed * t); // negative value needed to move forward
 
     if(input_state->IsKeyPressed(Key::S))
-      scene_camera.MoveForward(move_speed * t); //* note the negative value needed to move forward
+      scene_camera.MoveForward(move_speed * t);
 
     if(input_state->IsKeyPressed(Key::A))
       scene_camera.MoveRight(-move_speed * t);
@@ -94,14 +89,14 @@ namespace Spg
 
   void SimLayer::OnWindowResize(WinEvt::WindowResize& e)
   {
-    auto& scene_camera = m_scene_mgr->GetSceneCamera();
-    scene_camera.SetAspectRatio(m_window->GetAspectRatio());
+    auto& scene_camera = m_scene_mgr.GetSceneCamera();
+    scene_camera.SetAspectRatio(m_window.GetAspectRatio());
   }
 
   void SimLayer::OnMouseMoved(WinEvt::MouseMoved& e)
   {
-    auto* input_state = m_window->GetInputState();
-    auto& scene_camera = m_scene_mgr->GetSceneCamera();
+    auto* input_state = m_window.GetInputState();
+    auto& scene_camera = m_scene_mgr.GetSceneCamera();
 
     if(input_state->IsMousebuttonPressed(Mouse::ButtonRight))
       scene_camera.RotateLocal(e.delta_x * 0.001f, e.delta_y * 0.05f);
@@ -109,7 +104,7 @@ namespace Spg
 
   void SimLayer::OnMouseScrolled(WinEvt::MouseScrolled& e)
   {
-    m_scene_mgr->GetSceneCamera().Zoom(-e.y_offset);
+    m_scene_mgr.GetSceneCamera().Zoom(-e.y_offset);
   }
 
   void SimLayer::OnMouseButtonPressed(WinEvt::MouseBtnPressed& e)

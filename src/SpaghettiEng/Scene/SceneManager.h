@@ -6,16 +6,26 @@
 #include <cstdint>
 
 #include "SpaghettiEng/Scene/Scene.h"
+#include "SpaghettiEng/Scene/Transform.h"
 #include "SpaghettiEng/Render/Camera/Camera.h"
 
 
-// {}
+// {} [] 
 namespace Spg
 {
   class ResourceManager;
 
   class SceneManager
   {
+    public:
+      struct SceneCamera
+      {
+        Camera camera;
+        Transform cam_transform;
+        
+      };
+
+
     public:
       SceneManager() = default;
       ~SceneManager() = default;
@@ -36,6 +46,7 @@ namespace Spg
       const Camera& GetSceneCamera() const {return m_scene_camera;}
 
     private:
+      //* Note: Getting active scene requires slowish map lookup (in the update loop) - 
       std::unordered_map<std::string, Scene> m_scenes;
       std::string m_active_sim_scene_name = std::string("");
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include <glm/glm.hpp>
 
 #include "MathLib/MathLib.h"
@@ -40,7 +42,7 @@ namespace Spg
 
     Camera();
     Camera(CameraType camera_type, float width, float height);
-    ~Camera() = default;
+    //~Camera() = default;
 
     glm::mat4 GetProjMatrix() const;
     glm::mat4 GetInverseProjMatrix() const;
@@ -98,4 +100,6 @@ namespace Spg
       glm::mat4 GetRotationMatY(float angle_deg) const;
       glm::mat4 GetRotationMatZ(float angle_deg) const;
   };
+
+  static_assert(std::is_trivially_copyable_v<Camera>,"Camera class not trivially copiable");
 }

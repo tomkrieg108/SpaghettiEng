@@ -100,28 +100,6 @@ namespace Spg
 }
 
 
-//Store reource by value?
-/*
-Is Storing by Value Okay? 
-
-Your reasoning for storing Mesh by value is completely valid. If your types are cheap to move (like std::vector), moving them into the map only copies a few pointers (24 bytes for a vector), not the heavy heap data.
-
-However, there are still subtle reasons why std::unique_ptr wins in engine architecture, and a few ways to solve your naming collision problem.
-
-(The Pointer Stability Trade-off)Yes, storing by value is functionally fine because std::unordered_map guarantees pointer stability. Node-based containers like std::unordered_map do not move elements in memory when the map resizes or rehashes. A pointer to a Mesh inside the map remains valid until that specific mesh is deleted.
-
-However, std::unique_ptr<T> is still highly recommended for three reasons:
-
-Polymorphism Support: If you ever want ResourceCache<Texture> to store a derived Texture2D or Cubemap, a value-based map will suffer from object slicing. A std::unique_ptr<Texture> allows polymorphism.
-
-API Flexibility: Returning a raw pointer (T*) from a map of std::unique_ptr<T> clearly signals "the cache owns this, you just look at it." If you store by value, you have to return a pointer to the internal map node (&it->second), which can feel slightly less clean architecture-wise.
-
-No-Throw Move Guarantees: For value-based storage to be fast, your resource types must have noexcept move constructors. If a custom resource lacks this, the map may fallback to expensive copies during internal operations.
-
-Verdict: If your resources are strictly final structs (no inheritance) and have clean move semantics, storing by value is perfectly acceptable.
-*/
-
-
 
 
 

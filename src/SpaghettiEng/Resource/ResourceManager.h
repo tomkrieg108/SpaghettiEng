@@ -101,7 +101,7 @@ namespace Spg
   private:
  
     template<typename T, typename... Args>
-    void Register(Args&&... args) 
+    T& Register(Args&&... args) 
     {
       // Enforce that we only register a type once
       auto [it, inserted] = m_map.emplace(
@@ -110,6 +110,8 @@ namespace Spg
       );
       if(!inserted)
           SPG_WARN("Resource: {} already exists ", typeid(T).name());
+      
+      return *static_cast<TypeWrapper<T>*>(it->second.get())->instance; 
     }
 
     template<typename T>

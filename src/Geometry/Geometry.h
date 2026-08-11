@@ -1,6 +1,9 @@
 #pragma once
 
-#include "MathLib/Geom/Geom.h"
+#include "Geometry/GeomBase.h"
+#include "Geometry/Line.h"
+#include "Geometry/Plane.h"
+#include "Geometry/GeomUtils.h"
 
 #include "Geometry/MeshPrimitives2D.h"
 #include "Geometry/DCEL.h"

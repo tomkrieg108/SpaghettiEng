@@ -1,9 +1,9 @@
 #pragma once
+#include "CoreLib/Core.h"
+
 #include "Geometry/RBTree.h"
 #include "Geometry/RBTreeTraversable.h"
-
-#include "CoreLib/Core.h"
-#include "MathLib/Geom/Geom.h"
+#include "Geometry/GeomUtils.h"
 
 namespace Geom
 {
@@ -45,7 +45,7 @@ namespace Geom
     //only used int Test() for validation
     struct Comp
     { 
-      bool operator () (const SpgMth::Point2d& p1, const SpgMth::Point2d& p2) const
+      bool operator () (const Geom::Point2d& p1, const Geom::Point2d& p2) const
       {
         if(p1.x < p2.x) 
           return true;
@@ -60,18 +60,18 @@ namespace Geom
 
     struct CompX
     {
-      bool operator () (const SpgMth::Point2d& p1, const SpgMth::Point2d& p2) const {return (p1.x < p2.x);}
+      bool operator () (const Geom::Point2d& p1, const Geom::Point2d& p2) const {return (p1.x < p2.x);}
     };
 
     struct CompY
     {
-      bool operator () (const SpgMth::Point2d& p1, const SpgMth::Point2d& p2) const {return p1.y < p2.y;}
+      bool operator () (const Geom::Point2d& p1, const Geom::Point2d& p2) const {return p1.y < p2.y;}
     };
 
   #ifdef RBTREE_BASE_TRAVERSABLE
     using SecondaryTree = Geom::RBTree<Geom::Point2d,void,CompY>;
   #else
-   using SecondaryTree = Geom::RBTreeTraversable<SpgMth::Point2d,void,CompY>;
+   using SecondaryTree = Geom::RBTreeTraversable<Geom::Point2d,void,CompY>;
   #endif
 
     using Iterator = typename SecondaryTree::Iterator;
@@ -83,7 +83,7 @@ namespace Geom
       Node* left = nullptr;
       Node* right = nullptr;
       bool is_leaf = false;
-      SpgMth::Point2d point; 
+      Geom::Point2d point; 
     };
 
     public:
@@ -97,23 +97,23 @@ namespace Geom
       };
 
       RangeTree2D() = default;
-      RangeTree2D( std::vector<SpgMth::Point2d>& points);
-      RangeTree2D(std::vector<SpgMth::Point2d>&& points) noexcept;
-      std::vector<SpgMth::Point2d> RangeQuery(const Range& range);
+      RangeTree2D( std::vector<Geom::Point2d>& points);
+      RangeTree2D(std::vector<Geom::Point2d>&& points) noexcept;
+      std::vector<Geom::Point2d> RangeQuery(const Range& range);
      
       static void Test();
 
     private:
-      Node* BuildTree(std::vector<SpgMth::Point2d> points);
+      Node* BuildTree(std::vector<Geom::Point2d> points);
       Node* FindSplitNode(float x_low, float x_high);
-      bool PointInRange(SpgMth::Point2d, const Range& range);
-      std::vector<SpgMth::Point2d> RangeQueryY(SecondaryTree& tree, const Range& range);
-      void SeachSubTreeSecondary(SecondaryTree& tree, Iterator itr, const Range& range,std::vector<SpgMth::Point2d>& points_out);
+      bool PointInRange(Geom::Point2d, const Range& range);
+      std::vector<Geom::Point2d> RangeQueryY(SecondaryTree& tree, const Range& range);
+      void SeachSubTreeSecondary(SecondaryTree& tree, Iterator itr, const Range& range,std::vector<Geom::Point2d>& points_out);
 
       // The following for validation only
-      void ReportSubTreeMain(Node* node, std::vector<SpgMth::Point2d>& out_points); 
-      std::vector<SpgMth::Point2d> BruteForceRangeQuery(const Range& range);
-      std::vector<SpgMth::Point2d> RangeQueryX(const Range& range); 
+      void ReportSubTreeMain(Node* node, std::vector<Geom::Point2d>& out_points); 
+      std::vector<Geom::Point2d> BruteForceRangeQuery(const Range& range);
+      std::vector<Geom::Point2d> RangeQueryX(const Range& range); 
       void ValidateTree(Node* node);
     
     private:

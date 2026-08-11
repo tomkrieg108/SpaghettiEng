@@ -1,5 +1,5 @@
 #include "Geometry/BSTree.h"
-#include "MathLib/Geom/Geom.h"
+#include "Geometry/GeomUtils.h"
 
 namespace Geom
 {
@@ -28,7 +28,7 @@ namespace Geom
     BSTNode* cur = m_root;   
     while(true) {
 
-      if(SpgMth::Equal(value, cur->value)) {
+      if(Geom::Equal(value, cur->value)) {
         return false;
       }
 

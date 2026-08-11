@@ -25,19 +25,15 @@ namespace Spg
     virtual void OnEvent(WinEvt::Event& event) override;
 
    private:
-    
     void OnWindowResize(WinEvt::WindowResize& e);
     void OnMouseMoved(WinEvt::MouseMoved& e);
     void OnMouseScrolled(WinEvt::MouseScrolled& e);
     void OnMouseButtonPressed(WinEvt::MouseBtnPressed& e);  
 
   private:
-
-    //non-owning pointers
-    Window* m_window = nullptr;
-    GLRenderer2* m_renderer = nullptr;
-    SceneManager* m_scene_mgr = nullptr;
-
+    const Window& m_window;
+    SceneManager& m_scene_mgr;
+    GLRenderer2& m_renderer;
   };
 
 }

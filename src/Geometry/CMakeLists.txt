@@ -25,6 +25,12 @@ add_library(${LIB_GEOM} STATIC
   "./DCEL.h"
   "./Voronoi.cpp"
   "./Voronoi.h"
+
+  "./GeomBase.h"
+  "./GeomUtils.cpp"
+  "./GeomUtils.h"
+  "./Line.h"
+  "./Plane.h"
 )
 
 target_include_directories(${LIB_GEOM} PUBLIC 

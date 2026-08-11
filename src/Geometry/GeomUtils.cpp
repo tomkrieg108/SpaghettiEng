@@ -1,15 +1,17 @@
-#include "MathLib/Geom/Geom.h"
-
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/norm.hpp> //for length2() (length squared)
+#include "Geometry/GeomUtils.h"
 
 #include <vector>
 #include <numbers> //for PI
 #include <numeric> //iota
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp> //for length2() (length squared)
+
 #include "CoreLib/Core.h"
 
-namespace SpgMth
+#include "Geometry/Line.h"
+
+namespace Geom
 {
 
   Point2d ComputeMidPoint(Point2d const& p1, Point2d const& p2)
@@ -45,16 +47,16 @@ namespace SpgMth
   RelativePos Orientation2d(const Point2d& a, const Point2d& b, const Point2d& c)
   { 
     float area = ComputeSignedArea(a, b, c);
-    if(SpgMth::Equal(area,0.0f,1000.0f))  
+    if(Geom::Equal(area,0.0f,1000.0f))  
       area = 0.0f;
 
     if (area > 0.0f) //CCW orientation
 		  return RelativePos::Left;
     if (area < 0.0f)
       return RelativePos::Right; //CW orientation
-    if (SpgMth::Equal(a,c))
+    if (Geom::Equal(a,c))
       return RelativePos::Origin;
-    if (SpgMth::Equal(b,c))
+    if (Geom::Equal(b,c))
       return RelativePos::Destination;
 
     glm::vec2 ab = b - a;
@@ -75,7 +77,7 @@ namespace SpgMth
   bool Collinear(const Point2d& a, const Point2d& b, const Point2d& c)
   {
     float det = ((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)); //det(a->b, a->c)
-    return SpgMth::Equal(det*0.5f,0);
+    return Geom::Equal(det*0.5f,0);
   }
 
   bool Collinear(const LineSeg2D& seg, const Point2d& p)
@@ -101,63 +103,63 @@ namespace SpgMth
 
   bool SegContainsPoint(const LineSeg2D& seg, Point2d p)
   {
-    if(SpgMth::Equal(seg.start.x, seg.end.x)) {//Vertical seg
+    if(Geom::Equal(seg.start.x, seg.end.x)) {//Vertical seg
       if ((p.y > std::min(seg.start.y, seg.end.y)) && (p.y < std::max(seg.start.y, seg.end.y)));
-        return SpgMth::Collinear(seg.start, seg.end, p);
+        return Geom::Collinear(seg.start, seg.end, p);
     }
     
-    if(SpgMth::Equal(seg.start.y, seg.end.y)) { //Horizontal seg
+    if(Geom::Equal(seg.start.y, seg.end.y)) { //Horizontal seg
       if ( (p.x > std::min(seg.start.x, seg.end.x)) && (p.x < std::max(seg.start.x, seg.end.x)));
-        return SpgMth::Collinear(seg.start, seg.end, p);
+        return Geom::Collinear(seg.start, seg.end, p);
     }
     
     if( (p.x > std::min(seg.start.x, seg.end.x)) && (p.x < std::max(seg.start.x, seg.end.x)) &&
         (p.y > std::min(seg.start.y, seg.end.y)) && (p.y < std::max(seg.start.y, seg.end.y)) )
     { //Diagonal seg
-      return SpgMth::Collinear(seg.start, seg.end, p);
+      return Geom::Collinear(seg.start, seg.end, p);
     }
     return false;  
   }
 
   bool SegIncludesPoint(const LineSeg2D& seg, Point2d p)
   {
-    if(SpgMth::Equal(seg.start, p))
+    if(Geom::Equal(seg.start, p))
       return true;
-    if(SpgMth::Equal(seg.end, p))
+    if(Geom::Equal(seg.end, p))
       return true;  
     return SegContainsPoint(seg,p);
   }
 
   bool IsHorizontal(const LineSeg2D& seg) {
-    return SpgMth::Equal(seg.start.y, seg.end.y);
+    return Geom::Equal(seg.start.y, seg.end.y);
   }
 
   bool IsVertical(const LineSeg2D& seg) {
-    return SpgMth::Equal(seg.start.x, seg.end.x);
+    return Geom::Equal(seg.start.x, seg.end.x);
   }
 
   bool Equal(const LineSeg2D& seg1, const LineSeg2D& seg2) 
   {
-    // bool eq1 = SpgMth::Equal(seg1.start, seg2.start) && Equal(seg1.end, seg2.end);
-    // bool eq2 = SpgMth::Equal(seg1.start, seg2.end) && Equal(seg1.end, seg2.start);
+    // bool eq1 = Geom::Equal(seg1.start, seg2.start) && Equal(seg1.end, seg2.end);
+    // bool eq2 = Geom::Equal(seg1.start, seg2.end) && Equal(seg1.end, seg2.start);
     // return eq1 || eq2;
 
     auto seg1_min_x = std::min(seg1.start.x,seg1.end.x);
     auto seg2_min_x = std::min(seg2.start.x,seg2.end.x); 
-    if(!SpgMth::Equal(seg1_min_x,seg2_min_x))
+    if(!Geom::Equal(seg1_min_x,seg2_min_x))
       return false;
     auto seg1_max_x = std::max(seg1.start.x,seg1.end.x);
     auto seg2_max_x = std::max(seg2.start.x,seg2.end.x);  
-    if(!SpgMth::Equal(seg1_max_x,seg2_max_x))
+    if(!Geom::Equal(seg1_max_x,seg2_max_x))
       return false;
 
     auto seg1_min_y = std::min(seg1.start.y,seg1.end.y);
     auto seg2_min_y = std::min(seg2.start.y,seg2.end.y); 
-    if(!SpgMth::Equal(seg1_min_y,seg2_min_y))
+    if(!Geom::Equal(seg1_min_y,seg2_min_y))
       return false;
     auto seg1_max_y = std::max(seg1.start.y,seg1.end.y);
     auto seg2_max_y = std::max(seg2.start.y,seg2.end.y);  
-    if(!SpgMth::Equal(seg1_max_y,seg2_max_y))
+    if(!Geom::Equal(seg1_max_y,seg2_max_y))
       return false;
 
     return true;  

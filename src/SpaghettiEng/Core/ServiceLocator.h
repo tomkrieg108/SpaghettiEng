@@ -17,17 +17,6 @@ namespace Spg
   {
   public:
       
-      /*
-        typeid(T) executes: This produces an expression of type const std::type_info&
-
-        Implicit match: The compiler looks at the return type, std::type_index
-
-        Constructor call: The compiler finds the constructor std::type_index(const std::type_info& rhs).
-
-        Conversion: The compiler automatically wraps the type_info inside a new std::type_index object and returns it.
-
-        std::type_index has a constructor that takes a const std::type_info&
-      */
       template<typename T>
       static std::type_index TypeKey()
       {
@@ -93,50 +82,7 @@ namespace Spg
   
 }
 
-//AI
-/*
 
-Why Managers belong in the Service Locator
-
-Putting your managers in the locator instead of making them individual singletons provides massive structural advantages:
-
-Explicit Lifecycles: Your ResourceManager or AudioManager might take a long time to load or require clean hardware teardowns. Storing them here means their allocation and destruction happen predictably when the locator itself is initialized or destroyed.
-
-Controlled Access: A singleton allows any code file in the entire project to casually load an asset or play a sound. By using a locator, a low-level math utility cannot accidentally call the AudioManager because it simply doesn't have a reference to the locator.
-
-Zero Global Pollution: You maintain a single entry point for all sub-systems, which keeps your codebase organized.The Hidden Trap: "Service Locator Pattern" vs "Dependency Injection"While this approach is completely reasonable, using a Service Locator introduces a subtle design trade-off that you should watch out for as your engine grows: it hides dependencies.
-
-The Hidden Trap: "Service Locator Pattern" vs "Dependency Injection"While this approach is completely reasonable, using a Service Locator introduces a subtle design trade-off that you should watch out for as your engine grows: it hides dependencies.
-
-The ProblemIf a high-level module (like a GameWorld class) takes the entire ServiceLocator as a parameter, it looks like this:
-
-void GameWorld::Update(ServiceLocator& locator) {
-    // Hidden internal dependencies:
-    auto& audio = locator.Get<AudioManager>();
-    auto& scene = locator.Get<SceneManager>();
-    
-    audio.PlayAmbientSound();
-}
-
-Looking at the function signature Update(ServiceLocator& locator), an outside developer has no idea what GameWorld actually needs to run. It could be using one manager, or it could be using all fifty. This makes the class harder to isolate and unit test.
-
-The Fix: "Locate at the Boundary"To get the best of both worlds, use the Service Locator at the highest level possible (the "boundary" of your module) to pull out the exact managers you need. Then, pass only those specific references down to the actual working classes.
-
-// 1. High-level module extracts exactly what is needed at the boundary
-void GameSystem::Initialize(ServiceLocator& locator) {
-    m_audioManager = &locator.Get<AudioManager>();
-    m_sceneManager = &locator.Get<SceneManager>();
-}
-
-// 2. Internal logic remains clean, explicit, and easy to test
-void GameSystem::Update() {
-    // No locator needed here anymore. Clear, explicit dependencies!
-    m_audioManager->PlayAmbientSound();
-}
-
-Your architecture is in an excellent spot to manage a complex system cleanly. If you'd like to dive deeper, let me know. Would you like to look at how to handle cross-dependencies (e.g., if SceneManager itself needs the ResourceManager inside the locator), see how to create read-only vs mutable views of your services, or implement a TryGet<T>() method that safely returns a pointer instead of asserting?
-
-*/
 
 //AI modification
 

@@ -4,11 +4,7 @@ add_library(${LIB_MATH} STATIC
   "./MathLib.h"
   "./MathLib.cpp"
 
-  "./Geom/Geom.h"
-  "./Geom/Line.h"
-  "./Geom/Plane.h"
-  "./Geom/Geom.cpp"
-
+  
   "./AML/AML.h"
   "./AML/AMLVector3.h"
   "./AML/AMLVector3.cpp"

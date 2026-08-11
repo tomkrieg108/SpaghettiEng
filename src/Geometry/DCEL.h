@@ -2,7 +2,10 @@
 
 #include "CoreLib/Core.h"
 #include "MathLib/MathLib.h"
-#include "MathLib/Geom/Geom.h"
+
+#include "Geometry/GeomBase.h"
+#include "Geometry/GeomUtils.h"
+#include "Geometry/Line.h"
 
 
 namespace Geom
@@ -20,7 +23,7 @@ namespace Geom
 
       struct Vertex
       {
-        SpgMth::Point2d point; // Setup as origin of the incident edge (by convention)
+        Geom::Point2d point; // Setup as origin of the incident edge (by convention)
         HalfEdge* incident_edge = nullptr;
         //for testing
         int32_t tag = -1; 
@@ -57,7 +60,7 @@ namespace Geom
 
       DCEL() = default;
       //For now, assume the input points form a simple polygon oriented CCW
-      DCEL(const std::vector<SpgMth::Point2d>& points);
+      DCEL(const std::vector<Geom::Point2d>& points);
 
       DCEL(const DCEL& other) = default;
 
@@ -98,17 +101,17 @@ namespace Geom
       ~DCEL(); //If implemented, doesn't auto generate move operators.
 
       void Clear();
-      void Init(const std::vector<SpgMth::Point2d>& points);
-      std::vector<HalfEdge*> InsertBoundingBox(SpgMth::BoundingBox& bb); //new
+      void Init(const std::vector<Geom::Point2d>& points);
+      std::vector<HalfEdge*> InsertBoundingBox(Geom::BoundingBox& bb); //new
      
       std::pair<HalfEdge*,HalfEdge*> MakeHalfEdgePair(); 
-      Vertex* MakeVertex(SpgMth::Point2d point);
+      Vertex* MakeVertex(Geom::Point2d point);
       Face* MakeFace();
       
-      void Connect(SpgMth::Point2d const& p, std::vector<HalfEdge*> he_list); //new
+      void Connect(Geom::Point2d const& p, std::vector<HalfEdge*> he_list); //new
       void Connect(HalfEdge*h1, HalfEdge*h2); //new
       void Connect(Vertex* v, HalfEdge* h); // new
-      Vertex* Split(SpgMth::Point2d const& p, HalfEdge* h);  //new
+      Vertex* Split(Geom::Point2d const& p, HalfEdge* h);  //new
 
       Diagonal GetDiagonal(Vertex* v1, Vertex* v2);
       void Join(Vertex* v1, Vertex* v2);
@@ -126,17 +129,17 @@ namespace Geom
       std::optional<std::vector<HalfEdge*>> GetEdgeLoop(HalfEdge* h); //new (Not used)
       std::optional<std::vector<Vertex*>> GetEdgeLoopVertices(HalfEdge* h); //new (Not used)
 
-      SpgMth::Point2d GetOriginPoint(HalfEdge* e) const {
+      Geom::Point2d GetOriginPoint(HalfEdge* e) const {
         return e->origin->point;
       }
-      SpgMth::Point2d GetDestinationPoint(HalfEdge* e) const {
+      Geom::Point2d GetDestinationPoint(HalfEdge* e) const {
         return e->twin->origin->point;
       }
-      SpgMth::LineSeg2D GetLineSeg2d(HalfEdge* e) const {
-          return SpgMth::LineSeg2D{GetOriginPoint(e),GetDestinationPoint(e)};
+      Geom::LineSeg2D GetLineSeg2d(HalfEdge* e) const {
+          return Geom::LineSeg2D{GetOriginPoint(e),GetDestinationPoint(e)};
       }
-      SpgMth::LineSeg2D GetLineSeg2d(Vertex* v_start, Vertex* v_end) const {
-        return SpgMth::LineSeg2D{v_start->point, v_end->point};
+      Geom::LineSeg2D GetLineSeg2d(Vertex* v_start, Vertex* v_end) const {
+        return Geom::LineSeg2D{v_start->point, v_end->point};
       }
       auto& GetVertices() {
         return m_vertices;
@@ -181,7 +184,7 @@ namespace Geom
 
       struct Vertex
       {
-        SpgMth::Point2d* point; // Setup as origin of the incident edge (by convention)
+        Geom::Point2d* point; // Setup as origin of the incident edge (by convention)
         HalfEdge* incident_edge = nullptr;
         //for testing
         int32_t tag = -1; 
@@ -219,7 +222,7 @@ namespace Geom
       DCEL() = default;
 
       // Assume the input points form a simple polygon oriented CCW
-      DCEL(const std::vector<SpgMth::Point2d>& points);
+      DCEL(const std::vector<Geom::Point2d>& points);
 
       DCEL (DCEL const& other) = delete;
       DCEL& operator = (DCEL const& other) = delete;
@@ -230,13 +233,13 @@ namespace Geom
       std::unique_ptr<DCEL> Clone() const; 
 
       std::pair<HalfEdge*,HalfEdge*> MakeHalfEdgePair(); 
-      Vertex* MakeVertex(SpgMth::Point2d const& point);
+      Vertex* MakeVertex(Geom::Point2d const& point);
       Face* MakeFace();
 
-      void InsertPointLoop(const std::vector<SpgMth::Point2d>& points);
+      void InsertPointLoop(const std::vector<Geom::Point2d>& points);
      
-      void Init(const std::vector<SpgMth::Point2d>& points);
-      void InsertBoundingBox(SpgMth::BoundingBox& bb);
+      void Init(const std::vector<Geom::Point2d>& points);
+      void InsertBoundingBox(Geom::BoundingBox& bb);
      
       void Connect(Vertex* v, std::vector<HalfEdge*> he_list);
       void Connect(HalfEdge*e1, HalfEdge*e2);
@@ -256,17 +259,17 @@ namespace Geom
       std::optional<std::vector<HalfEdge*>> GetEdgeLoop(HalfEdge* h);
       std::optional<std::vector<Vertex*>> GetEdgeLoopVertices(HalfEdge* h);
 
-      SpgMth::Point2d GetOriginPoint(HalfEdge* e) const {
+      Geom::Point2d GetOriginPoint(HalfEdge* e) const {
         return *(e->origin->point);
       }
-      SpgMth::Point2d GetDestinationPoint(HalfEdge* e) const {
+      Geom::Point2d GetDestinationPoint(HalfEdge* e) const {
         return *(e->twin->origin->point);
       }
-      SpgMth::LineSeg2D GetLineSeg2d(HalfEdge* e) const {
-          return SpgMth::LineSeg2D{GetOriginPoint(e),GetDestinationPoint(e)};
+      Geom::LineSeg2D GetLineSeg2d(HalfEdge* e) const {
+          return Geom::LineSeg2D{GetOriginPoint(e),GetDestinationPoint(e)};
       }
-      SpgMth::LineSeg2D GetLineSeg2d(Vertex* v_start, Vertex* v_end) const {
-        return SpgMth::LineSeg2D{*v_start->point, *v_end->point};
+      Geom::LineSeg2D GetLineSeg2d(Vertex* v_start, Vertex* v_end) const {
+        return Geom::LineSeg2D{*v_start->point, *v_end->point};
       }
       auto& GetVertices() {
         return m_vertices;
@@ -290,7 +293,7 @@ namespace Geom
       static void Test();
     
     private:
-      std::vector<std::unique_ptr<SpgMth::Point2d>> m_points;
+      std::vector<std::unique_ptr<Geom::Point2d>> m_points;
       std::vector<std::unique_ptr<Vertex>> m_vertices;
       std::vector<std::unique_ptr<HalfEdge>> m_half_edges;
       std::vector<std::unique_ptr<Face>> m_faces;

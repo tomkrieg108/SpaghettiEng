@@ -2,24 +2,25 @@
 
 #include <map>
 
+#include "Geometry/GeomUtils.h"
+#include "Geometry/Line.h"
 #include "Geometry/DCEL.h"
-#include "MathLib/Geom/Geom.h"
 
 
 namespace Geom
 {
   //todo - Utils?
-  static inline bool operator < (const SpgMth::Point2d& p1, const SpgMth::Point2d& p2)
+  static inline bool operator < (const Geom::Point2d& p1, const Geom::Point2d& p2)
   {
-    if(!SpgMth::Equal(p1.y, p2.y))
+    if(!Geom::Equal(p1.y, p2.y))
         return p1.y < p2.y;
       return p1.x > p2.x;  
   }
 
   //todo - Utils?
-  static inline bool operator > (const SpgMth::Point2d& p1, const SpgMth::Point2d& p2)
+  static inline bool operator > (const Geom::Point2d& p1, const Geom::Point2d& p2)
   {
-    if(!SpgMth::Equal(p1.y, p2.y))
+    if(!Geom::Equal(p1.y, p2.y))
         return p1.y > p2.y;
       return p1.x < p2.x;  
   }
@@ -46,25 +47,25 @@ namespace Geom
     {
       bool operator ()(const Event& e1, const Event& e2) const noexcept
       {
-        SpgMth::Point2d p1 = e1.vertex->point;
-        SpgMth::Point2d p2 = e2.vertex->point;
+        Geom::Point2d p1 = e1.vertex->point;
+        Geom::Point2d p2 = e2.vertex->point;
         return p1 > p2; //If true, p1 goes before p2.  If false p1 does not go before p2.
       }
     };
 
     struct EdgeComparator
     {
-      EdgeComparator(SpgMth::Point2d& event_point) : event_point{event_point} {}
-      float ComputeSweepLineXIntercept(const SpgMth::LineSeg2D& seg) const noexcept
+      EdgeComparator(Geom::Point2d& event_point) : event_point{event_point} {}
+      float ComputeSweepLineXIntercept(const Geom::LineSeg2D& seg) const noexcept
       {
         float y_sweep = event_point.y;
-        if(SpgMth::IsVertical(seg))
+        if(Geom::IsVertical(seg))
           return seg.start.x;  
-        if(SpgMth::IsHorizontal(seg))
+        if(Geom::IsHorizontal(seg))
           return std::min(seg.start.x,seg.end.x);  
-        if(SpgMth::Equal(seg.start.y, y_sweep))
+        if(Geom::Equal(seg.start.y, y_sweep))
           return seg.start.x;
-        if(SpgMth::Equal(seg.end.y, y_sweep))
+        if(Geom::Equal(seg.end.y, y_sweep))
           return seg.end.x;
         
         float x = (seg.start.x - seg.end.x) / (seg.start.y - seg.end.y) *(y_sweep - seg.end.y) + seg.end.x;
@@ -78,43 +79,43 @@ namespace Geom
     
       bool operator ()(const DCEL::HalfEdge& e1, const DCEL::HalfEdge& e2) const noexcept
       {
-        SpgMth::LineSeg2D seg1 {e1.origin->point, e1.next->origin->point };
-        SpgMth::LineSeg2D seg2 {e2.origin->point, e2.next->origin->point };
+        Geom::LineSeg2D seg1 {e1.origin->point, e1.next->origin->point };
+        Geom::LineSeg2D seg2 {e2.origin->point, e2.next->origin->point };
         float x1 = ComputeSweepLineXIntercept(seg1);
         float x2 = ComputeSweepLineXIntercept(seg2);
-        if(!SpgMth::Equal(x1,x2))
+        if(!Geom::Equal(x1,x2))
           return x1<x2; //If true, e1 goes before e2.  If false e1 does not go before e2.
         else {
           //todo - Utils?
           auto seg1_min_x = std::min(seg1.start.x,seg1.end.x);
           auto seg2_min_x = std::min(seg2.start.x,seg2.end.x); 
-          if(!SpgMth::Equal(seg1_min_x,seg2_min_x))
+          if(!Geom::Equal(seg1_min_x,seg2_min_x))
             return seg1_min_x < seg2_min_x;
           auto seg1_max_x = std::max(seg1.start.x,seg1.end.x);
           auto seg2_max_x = std::max(seg2.start.x,seg2.end.x);  
-          if(!SpgMth::Equal(seg1_max_x,seg2_max_x))
+          if(!Geom::Equal(seg1_max_x,seg2_max_x))
             return seg1_max_x < seg2_max_x;  
 
           auto seg1_min_y = std::min(seg1.start.y,seg1.end.y);
           auto seg2_min_y = std::min(seg2.start.y,seg2.end.y); 
-          if(!SpgMth::Equal(seg1_min_y,seg2_min_y))
+          if(!Geom::Equal(seg1_min_y,seg2_min_y))
             return seg1_min_y < seg2_min_y;
           auto seg1_max_y = std::max(seg1.start.y,seg1.end.y);
           auto seg2_max_y = std::max(seg2.start.y,seg2.end.y);  
-          if(!SpgMth::Equal(seg1_max_y,seg2_max_y))
+          if(!Geom::Equal(seg1_max_y,seg2_max_y))
             return seg1_max_y < seg2_max_y;  
           return false;   
         }
       }
 
-      SpgMth::Point2d& event_point;
+      Geom::Point2d& event_point;
     };
 
   public:
 
     MonotonePartitionAlgo();
-    MonotonePartitionAlgo(const std::vector<SpgMth::Point2d>& points);
-    void Set(const std::vector<SpgMth::Point2d>& points);
+    MonotonePartitionAlgo(const std::vector<Geom::Point2d>& points);
+    void Set(const std::vector<Geom::Point2d>& points);
     void Clear();
     void Step();
     bool FinishedProcessing() {
@@ -122,10 +123,10 @@ namespace Geom
     }
     void MakeMonotone();
     void Triangulate();
-    std::vector<SpgMth::Point2d> GetMonotonDiagonals() {
+    std::vector<Geom::Point2d> GetMonotonDiagonals() {
       return GetDiagonalEndPoints(m_monotone_diagonals);
     }
-    std::vector<SpgMth::Point2d> GetTriangulationDiagonals() {
+    std::vector<Geom::Point2d> GetTriangulationDiagonals() {
       return GetDiagonalEndPoints(m_triangulation_diagonals); 
     }
 
@@ -155,7 +156,7 @@ namespace Geom
     DCEL::HalfEdge* GetDepartingEdge(DCEL::Vertex* v); 
     bool PolygonInteriorOnRight(DCEL::Vertex* v);
     void TriangulateFace(DCEL::Face* face);
-    std::vector<SpgMth::Point2d> GetDiagonalEndPoints(DiagonalList& diagonal_list);
+    std::vector<Geom::Point2d> GetDiagonalEndPoints(DiagonalList& diagonal_list);
     
   private:
     void PrintEvent(Event e);
@@ -168,7 +169,7 @@ namespace Geom
     std::vector<Event> m_event_queue;  
     //retain the unsorted events (same order as the vertices supplied to DCEL).  Return in GetEventPoints().  Need this for rendering in the Geom App (correct colour of the vertex for given category)
     std::vector<Event> m_event_queue_unsorted; 
-    SpgMth::Point2d m_cur_event_point{FLT_MAX,FLT_MAX};
+    Geom::Point2d m_cur_event_point{FLT_MAX,FLT_MAX};
     //The set of active edges for the current algo state ("status structure")
     std::map<DCEL::HalfEdge, HelperPoint, EdgeComparator> m_T;
     //List of diagonals found

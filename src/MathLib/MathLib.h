@@ -18,10 +18,6 @@ namespace SpgMth
     using Vec3 = glm::vec3;
     using Vec4 = glm::vec4;
 
-    using Point2d = glm::vec2;
-    using Point3d = glm::vec3;
-    using Point4d = glm::vec4;
-
     using DVec2 = glm::dvec2;
     using DVec3 = glm::dvec3;
     using DVec4 = glm::dvec4;

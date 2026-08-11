@@ -21,7 +21,7 @@ namespace Spg
     struct Label
     {
       std::string text;
-      SpgMth::Point2d pos;
+      Geom::Point2d pos;
     };
     
     struct Mesh
@@ -47,7 +47,7 @@ namespace Spg
 
       Mesh& operator=(Mesh&&) = default;
 
-      std::vector<SpgMth::Point2d> vertices;
+      std::vector<Geom::Point2d> vertices;
       std::vector<Label> labels;
       MeshType type;
       bool active = true;

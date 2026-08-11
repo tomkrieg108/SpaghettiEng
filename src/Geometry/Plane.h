@@ -2,7 +2,7 @@
 
 #include "MathLib/MathLib.h"
 
-namespace SpgMth
+namespace Geom
 {
   template <typename coord_type>
   struct PlaneT

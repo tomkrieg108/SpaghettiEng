@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreLib/Core.h"
-#include "MathLib/Geom/Geom.h"
+#include "Geometry/GeomUtils.h"
 
 namespace Geom
 {
@@ -18,7 +18,7 @@ namespace Geom
       KDNode2D* left = nullptr;
       KDNode2D* right = nullptr;
       //Only storing 1 point in a leaf for now - could maybe store multiple so use vector
-      std::vector<SpgMth::Point2d> points; 
+      std::vector<Geom::Point2d> points; 
     };
 
   public:
@@ -31,11 +31,11 @@ namespace Geom
       float y_max = std::numeric_limits<float>::max();
     };
 
-    KDTree2D(std::vector<SpgMth::Point2d>&& points);
-    KDTree2D(const std::vector<SpgMth::Point2d>& points);
-    std::vector<SpgMth::Point2d> RangeSearch(const Range& input_range);
-    std::vector<SpgMth::Point2d> BruteForceRangeSearch(const Range& input_range); //For testing
-    std::vector<SpgMth::Point2d> CollectAllPoints();
+    KDTree2D(std::vector<Geom::Point2d>&& points);
+    KDTree2D(const std::vector<Geom::Point2d>& points);
+    std::vector<Geom::Point2d> RangeSearch(const Range& input_range);
+    std::vector<Geom::Point2d> BruteForceRangeSearch(const Range& input_range); //For testing
+    std::vector<Geom::Point2d> CollectAllPoints();
     void ValidateSearch(const Range& input_range);
 
     static void Test();
@@ -56,10 +56,10 @@ namespace Geom
     */
 
   private:
-    KDNode2D* BuildTree(uint32_t depth, std::vector<SpgMth::Point2d> points);
-    void AccumulateSubtreePoints(KDNode2D* node,std::vector<SpgMth::Point2d>& cur_points);
-    void SearchNode(KDNode2D* node, Range node_range, const Range& input_range, std::vector<SpgMth::Point2d>& points_found);
-    bool RangeContainsPoint(SpgMth::Point2d, const Range& range);
+    KDNode2D* BuildTree(uint32_t depth, std::vector<Geom::Point2d> points);
+    void AccumulateSubtreePoints(KDNode2D* node,std::vector<Geom::Point2d>& cur_points);
+    void SearchNode(KDNode2D* node, Range node_range, const Range& input_range, std::vector<Geom::Point2d>& points_found);
+    bool RangeContainsPoint(Geom::Point2d, const Range& range);
     bool RangeContainsRange(const Range& range, const Range& test_range);  //Is test_range fully contained in range?
     bool RangesIntersect(const Range& range1, const Range& range2);
 

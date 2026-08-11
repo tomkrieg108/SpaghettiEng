@@ -1,11 +1,13 @@
 #pragma once
 
-#include "MathLib/MathLib.h"
-
 #include <cstdint> //uint32_t
 #include <glm/glm.hpp>
 
-namespace SpgMth
+#include "MathLib/MathLib.h"
+
+#include "Geometry/GeomBase.h"
+
+namespace Geom
 {
   template <class coord_type, std::uint32_t dim = 3>
   struct Line
