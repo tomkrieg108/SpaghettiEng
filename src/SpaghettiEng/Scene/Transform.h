@@ -15,10 +15,12 @@ namespace Spg
     {
       glm::mat4 matrix = glm::mat4(1.0f);
      
-      glm::vec3 Position();
-      glm::vec3 Front();
-      glm::vec3 Up();
-      glm::vec3 Right();
+      glm::vec3 Position() const;
+      glm::vec3 Front() const;
+      glm::vec3 Up() const;
+      glm::vec3 Right() const;
+      glm::mat4 Inverse() const;
+
       void InvertXYAxes();
       void SetPosition(const glm::vec3& position);
       void LookAt(const glm::vec3& look_pos);
@@ -38,7 +40,6 @@ namespace Spg
   }
 
   static_assert(std::is_trivially_copyable_v<Transform>,"Transform class not trivially copiable");
-
 
   namespace Transform_V2
   {

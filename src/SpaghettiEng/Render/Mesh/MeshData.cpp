@@ -4,8 +4,11 @@
 #include <string>
 #include <cstdint>  //uint32_t
 #include <numbers>  //std::pi
+#include <cstddef> // std::byte
+#include <cstring> // memcpy
 
 #include "CoreLib/Core.h"
+
 #include "SpaghettiEng/Render/Mesh/Mesh.h"
 #include "SpaghettiEng/Resource/ResourceCache.h"
 
@@ -15,70 +18,96 @@
 
 namespace Spg
 {
+  static Mesh GenerateCoordsMesh(float size = 5.0f);
+  static Mesh GenerateGridMesh(float size = 20.0f);
 
-  static Mesh GenerateGridMesh();
-  static Mesh GenerateCoordsMesh();
+  static Mesh GeneratePlaneMesh(float size = 20.0f);
+  static Mesh GeneratePlaneMeshTM(float size = 20.0f);
 
-  // Move the declarations into the cpp file later (and make static)
-  static std::vector<float> GenerateCoordsMeshData(float size);
-  static std::vector<float> GenerateGridMeshData(float size);
+  static Mesh GenerateCubeMesh(float size = 0.5f);
+  static Mesh GenerateCubeMeshTM(float size = 0.5f);
 
-  static std::vector<float> GeneratePlaneMeshData(float size);
-  static std::vector<float> GeneratePlaneMeshDataTM(float size);
+  static Mesh GenerateSphereMeshTM();
 
-  static std::vector<float> GenerateCubeMeshData(float size);
-  static std::vector<float> GenerateCubeMeshDataTM(float size);
+  static std::vector<std::byte> ToRawBytes(const void* source_data, uint32_t source_bytes)
+  {
+    std::vector<std::byte> raw_data;
+    raw_data.resize(source_bytes);
+    memcpy(raw_data.data(), source_data, source_bytes);
+    return raw_data;  
+  }
 
-  static std::vector<float> GenerateSphereMeshData();
-  static std::vector<float> GenerateSphereMeshDataTM();
+  //Alternatively
+  #if 0
+    #include <vector>
+    #include <cstddef>
+    #include <cstring>
+    #include <type_traits>
+
+    template <typename T>
+    std::vector<std::byte> ToRawBytes(const std::vector<T>& source) {
+        // Safety check: ensure T is safe to copy like raw bytes
+        static_assert(std::is_trivially_copyable_v<T>, "Type T must be trivially copyable!");
+
+        const auto* byte_ptr = reinterpret_cast<const std::byte*>(source.data());
+        size_t total_bytes = source.size() * sizeof(T);
+
+        // Single-pass allocation and copy
+        return std::vector<std::byte>(byte_ptr, byte_ptr + total_bytes);
+    }
+    // Clean, safe, and zero-copy transfer due to NRVO
+    std::vector<std::byte> raw = ToRawBytes(vertices); 
+
+  #endif
+    
+  #if 0
+
+    struct Vertex {
+      float x, y, z;
+      float u, v;
+    };
+
+std::vector<std::byte> GenerateMeshDirect() {
+    // 1. Define your vertex count dynamically
+    size_t vertex_count = 100; 
+    
+    // 2. Safely calculate total byte size
+    size_t total_bytes = vertex_count * sizeof(Vertex);
+    
+    // 3. Allocate and zero out the memory block once
+    std::vector<std::byte> raw_bytes(total_bytes);
+    
+    // 4. Create a typed pointer mapping over the raw memory
+    auto* vertex_array = reinterpret_cast<Vertex*>(raw_bytes.data());
+    
+    // 5. Populate it safely using array syntax
+    for (size_t i = 0; i < vertex_count; ++i) {
+        vertex_array[i] = Vertex{ 1.0f, 2.0f, 3.0f, 0.0f, 0.0f };
+    }
+    
+    // Zero-copy move out of the function via NRVO
+    return raw_bytes; 
+}
+
+  #endif
 
   namespace MeshData
   {
     void Generate(ResourceCache<Mesh>& mesh_cache)
     {
-      auto grid_mesh = GenerateGridMesh();
-      auto id1 = mesh_cache.Add(std::move(grid_mesh), "grid");
+      mesh_cache.Add(GenerateGridMesh(), "grid");
+      mesh_cache.Add(GenerateCoordsMesh(), "coords");
+      mesh_cache.Add(GeneratePlaneMesh(),"plane");
+      mesh_cache.Add(GeneratePlaneMeshTM(),"plane_tm");
+      mesh_cache.Add(GenerateCubeMesh(), "cube");
+      mesh_cache.Add(GenerateCubeMeshTM(), "cube_tm");
 
-      auto coords_mesh = GenerateCoordsMesh();
-      auto id2 = mesh_cache.Add(std::move(coords_mesh), "coords");
+      //todo - crashes!
+      //mesh_cache.Add(GenerateSphereMeshTM(), "sphere_tm"); 
     }
   }
  
-  Mesh GenerateGridMesh()
-  {
-    MeshLayout layout;
-    layout.PushAttribute(MeshAttribute::Position);
-    layout.PushAttribute(MeshAttribute::Color);
-
-    Mesh mesh;
-    mesh.name = "grid";
-    mesh.primitive = MeshPrimitive::Grid;
-    mesh.layout = layout;
-    mesh.vertices = GenerateGridMeshData(7.0f);
-     SPG_ASSERT((mesh.vertices.size()*4) % layout.size_in_bytes == 0);
-    mesh.vertex_count = mesh.vertices.size()*4 / layout.size_in_bytes;
-    mesh.index_count = 0;
-    return mesh;
-  }
-
-  Mesh GenerateCoordsMesh()
-  {
-    MeshLayout layout;
-    layout.PushAttribute(MeshAttribute::Position);
-    layout.PushAttribute(MeshAttribute::Color);
-
-    Mesh mesh;
-    mesh.name = "coords";
-    mesh.primitive = MeshPrimitive::Coords;
-    mesh.layout = layout;
-    mesh.vertices = GenerateCoordsMeshData(5.0f);
-    SPG_ASSERT((mesh.vertices.size()*4) % layout.size_in_bytes == 0);
-    mesh.vertex_count = mesh.vertices.size()*4 / layout.size_in_bytes;
-    mesh.index_count = 0;
-    return mesh;
-  }
-
-  std::vector<float> GenerateCoordsMeshData(float size)
+  Mesh GenerateCoordsMesh(float size)
   {
     // Position, Colour (rgba)
     std::vector<float> vertices =
@@ -94,10 +123,16 @@ namespace Spg
       0.0f, 0.0f,  size,  0.0f, 0.0f, 1.0f, 1.0f, //z-end
     };
 
-    return vertices;
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttributeType::Position);
+    layout.PushAttribute(MeshAttributeType::Color);
+    
+    Mesh mesh{"coords", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Lines, layout};
+    mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
+    return mesh;
   }
 
-  std::vector<float> GenerateGridMeshData(float size)
+  Mesh GenerateGridMesh(float size)
   {
     std::vector<float> vertices;
     const float unit_size = 1.0f;
@@ -125,11 +160,16 @@ namespace Spg
       x += unit_size;
     }
 
-    return vertices;
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttributeType::Position);
+    layout.PushAttribute(MeshAttributeType::Color);
+    
+    Mesh mesh{"grid", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Lines, layout};
+    mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
+    return mesh;
   }
 
-  
-  std::vector<float> GeneratePlaneMeshData(float size = 20.0f)
+  Mesh GeneratePlaneMesh(float size)
   {
     std::vector<float> vertices =
     {
@@ -143,10 +183,16 @@ namespace Spg
       size, -size, -size,   0.0f, 1.0f, 0.0f,
     };
 
-    return vertices;
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttributeType::Position);
+    layout.PushAttribute(MeshAttributeType::Normal);
+    
+    Mesh mesh{"plane", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
+    mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
+    return mesh;
   }
 
-  std::vector<float> GeneratePlaneMeshDataTM(float size = 20.0f)
+  Mesh GeneratePlaneMeshTM(float size)
   {
     std::vector<float> vertices =
     {
@@ -160,10 +206,17 @@ namespace Spg
       size, -size, -size,   0.0f, 1.0f, 0.0f,  size, size
     };
 
-    return vertices;
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttributeType::Position);
+    layout.PushAttribute(MeshAttributeType::Normal);
+    layout.PushAttribute(MeshAttributeType::TexCoords);
+    
+    Mesh mesh{"plane_tm", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
+    mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
+    return mesh;
   }
 
-  std::vector<float> GenerateCubeMeshData(float size = 0.5f)
+  Mesh GenerateCubeMesh(float size)
   {
     // position (x,y,z), normals (x,y,z)
     std::vector<float> vertices = 
@@ -212,14 +265,20 @@ namespace Spg
       -size,  size, -size,  0.0f,  1.0f,  0.0f
     };
 
-    return vertices;
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttributeType::Position);
+    layout.PushAttribute(MeshAttributeType::Normal);
+    
+    Mesh mesh{"cube", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
+    mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
+    return mesh;
   }
 
-  std::vector<float> GenerateCubeMeshDataTM(float size = 0.5f)
+  Mesh GenerateCubeMeshTM(float size)
   {
     std::vector<float> vertices =
     {
-      // positions          // normals           // texture coords
+      // positions          // normals    // texture coords
       -size, -size, -size,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
       size, -size, -size,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
       size,  size, -size,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
@@ -263,23 +322,23 @@ namespace Spg
       -size,  size, -size,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
     };
 
-    return vertices;
-  }
-
-
-  std::vector<float> GenerateSphereMeshData()
-  {
-    std::vector<float> indices;
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttributeType::Position);
+    layout.PushAttribute(MeshAttributeType::Normal);
+    layout.PushAttribute(MeshAttributeType::TexCoords);
     
-    return indices;
+    Mesh mesh{"cube_tm", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
+    mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
+    return mesh;
   }
 
-  std::vector<float> GenerateSphereMeshDataTM()
+  Mesh GenerateSphereMeshTM()
   {
     std::vector<float> positions;
     std::vector<float> uv;
     std::vector<float> normals;
-    std::vector<float> data;
+
+    std::vector<float> vertices;
     std::vector<uint32_t> indices;
     uint32_t index_count = 0;
 
@@ -328,23 +387,30 @@ namespace Spg
 
     for (unsigned int i = 0; i < positions.size(); ++i)
     {
-      data.push_back(positions[i]);
-      data.push_back(positions[i+1]);
-      data.push_back(positions[i+2]);
+      vertices.push_back(positions[i]);
+      vertices.push_back(positions[i+1]);
+      vertices.push_back(positions[i+2]);
       if (normals.size() > 0)
       {
-        data.push_back(normals[i]);
-        data.push_back(normals[i+1]);
-        data.push_back(normals[i+2]);
+        vertices.push_back(normals[i]);
+        vertices.push_back(normals[i+1]);
+        vertices.push_back(normals[i+2]);
       }
       if (uv.size() > 0)
       {
-        data.push_back(uv[i]);
-        data.push_back(uv[i+1]);
+        vertices.push_back(uv[i]);
+        vertices.push_back(uv[i+1]);
       }
     }
 
-    return data;
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttributeType::Position);
+    layout.PushAttribute(MeshAttributeType::Normal);
+    layout.PushAttribute(MeshAttributeType::TexCoords);
+    
+    Mesh mesh{"sphere_tm", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
+    mesh.SetData(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)), std::move(indices));
+    return mesh;
   }
 
 }

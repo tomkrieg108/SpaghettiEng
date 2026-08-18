@@ -3,7 +3,6 @@
 #include "CoreLib/Core.h"
 
 #include "SpaghettiEng/Core/ServiceLocator.h"
-#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer2.h"
 
 #include "SpaghettiEng/Core/Window.h"
 #include "SpaghettiEng/Core/KeyCodes.h"
@@ -14,8 +13,15 @@
 
 #include "SpaghettiEng/Render/Camera/Camera.h"
 #include "SpaghettiEng/Render/Mesh/Mesh.h"
-#include "SpaghettiEng/Render/Mesh/MeshData.h"
+#include "SpaghettiEng/Render/Mesh/Material.h"
+//#include "SpaghettiEng/Render/Mesh/MeshData.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer2.h"
+
+#include "SpaghettiEng/Scene/Entity.h"
+#include "SpaghettiEng/Scene/Registry.h"
+#include "SpaghettiEng/Scene/Scene.h"
 #include "SpaghettiEng/Scene/SceneManager.h"
+#include "SpaghettiEng/Scene/Transform.h"
 
 // {} []
 namespace Spg
@@ -24,7 +30,7 @@ namespace Spg
     Layer(service_locator,name),
     m_window(service_locator.Get<Window>()),
     m_renderer(service_locator.Get<GLRenderer2>()),
-    m_scene_mgr(m_service_locator.Get<SceneManager>())
+    m_scene_mgr(service_locator.Get<SceneManager>())
   {
     Init();
   }
@@ -33,9 +39,19 @@ namespace Spg
   {
     auto& scene = m_scene_mgr.GetActiveScene();
     auto& scene_camera = m_scene_mgr.GetSceneCamera();
-
     scene_camera.SetAspectRatio(m_window.GetAspectRatio());
-    m_renderer.InitGpuData(scene);
+
+    //m_renderer.InitGpuData(scene);
+    // Load mesh data to GPU
+    auto& reg = scene.GetRegistry();
+    auto mesh_view = reg.GetAllEntitiesWith<MeshHandle>();
+
+    //* NOTE ent and mesh_view are raw EnTT data types - not encapsulated in registry
+    for(auto ent : mesh_view)
+    {
+      auto& mesh_handle = reg.GetComponent<MeshHandle>(Entity{ent});
+      m_renderer.InitGpuData(mesh_handle.mesh_id);
+    }
   }
 
   void SimLayer::Shutdown()
@@ -46,7 +62,21 @@ namespace Spg
   {
     auto& scene = m_scene_mgr.GetActiveScene(); 
     auto& scene_camera = m_scene_mgr.GetSceneCamera();
-    m_renderer.Draw(scene, scene_camera);
+    auto& camera_transform = m_scene_mgr.GetSceneCameraTransform();
+   
+    //Draw scene
+    auto& reg = scene.GetRegistry();
+    auto view = reg.GetAllEntitiesWith<MeshHandle, Material>();
+
+    //* NOTE ent and view are raw EnTT data types - not encapsulated in registry
+    for(auto [ent, mesh, mat] : view.each())
+    {
+      Entity entity{ent};
+      const auto& mesh_handle = reg.GetComponent<MeshHandle>(entity);
+      const auto& material = reg.GetComponent<Material>(entity);
+      m_renderer.Draw(mesh_handle.mesh_id, material, 
+        scene_camera, camera_transform);
+    }
   }
 
   void SimLayer::Update(double delta_time)
@@ -55,21 +85,20 @@ namespace Spg
     const float t = (float)(delta_time);
 
     auto& scene = m_scene_mgr.GetActiveScene(); 
-    auto& scene_camera = m_scene_mgr.GetSceneCamera();
+    auto& camera_transform = m_scene_mgr.GetSceneCameraTransform();
     auto* input_state = m_window.GetInputState();
 
     if(input_state->IsKeyPressed(Key::W))
-      scene_camera.MoveForward(-move_speed * t); // negative value needed to move forward
+      camera_transform.MoveForward(-move_speed * t); // negative value needed to move forward
 
     if(input_state->IsKeyPressed(Key::S))
-      scene_camera.MoveForward(move_speed * t);
+      camera_transform.MoveForward(move_speed * t);
 
     if(input_state->IsKeyPressed(Key::A))
-      scene_camera.MoveRight(-move_speed * t);
+      camera_transform.MoveRight(-move_speed * t);
 
     if(input_state->IsKeyPressed(Key::D))
-      scene_camera.MoveRight(move_speed * t);
-
+      camera_transform.MoveRight(move_speed * t);
   }
 
   void SimLayer::OnEvent(WinEvt::Event& event)
@@ -96,15 +125,16 @@ namespace Spg
   void SimLayer::OnMouseMoved(WinEvt::MouseMoved& e)
   {
     auto* input_state = m_window.GetInputState();
-    auto& scene_camera = m_scene_mgr.GetSceneCamera();
+    auto& camera_transform = m_scene_mgr.GetSceneCameraTransform();
 
     if(input_state->IsMousebuttonPressed(Mouse::ButtonRight))
-      scene_camera.RotateLocal(e.delta_x * 0.001f, e.delta_y * 0.05f);
+      camera_transform.RotateLocal(e.delta_x * 0.001f, e.delta_y * 0.05f);
   }
 
   void SimLayer::OnMouseScrolled(WinEvt::MouseScrolled& e)
   {
-    m_scene_mgr.GetSceneCamera().Zoom(-e.y_offset);
+    auto& camera_camera = m_scene_mgr.GetSceneCamera();
+    camera_camera.Zoom(-e.y_offset);
   }
 
   void SimLayer::OnMouseButtonPressed(WinEvt::MouseBtnPressed& e)

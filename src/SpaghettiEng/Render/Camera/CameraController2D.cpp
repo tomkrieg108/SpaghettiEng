@@ -1,9 +1,35 @@
+
+#include "SpaghettiEng/Render/Camera/CameraController2D.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "CameraController2D.h"
 
+#include "SpaghettiEng/Core/KeyCodes.h"
+#include "SpaghettiEng/Core/MouseCodes.h"
+#include "SpaghettiEng/Core/InputState.h"
+#include "SpaghettiEng/Core/WindowEvents.h"
+
+
+#include "SpaghettiEng/Render/Camera/Camera2D.h"
+
+// {} [] 
 namespace Spg
 {
+
+#if 0
+  void InputHandler::Update(double delta_time, const InputState& input_state, 
+    Transform& transform)
+  {
+
+  }
+
+  void InputHandler::OnEvent(WinEvt::Event& event, const InputState& input_state, 
+    Transform& transform)
+  {
+
+  }
+#endif
+
   CameraController2D::CameraController2D(Camera2D& camera) :
     m_camera{camera}
   {

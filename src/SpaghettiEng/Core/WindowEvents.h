@@ -27,7 +27,6 @@ namespace Spg
       bool handled = false;
     };
 
-
     struct WindowClose : public Event
     {
         WindowClose() {type = GetStaticType(); }

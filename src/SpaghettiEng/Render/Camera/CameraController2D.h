@@ -1,9 +1,44 @@
 #pragma once
 
-#include "Camera2D.h"
+//#include "Camera2D.h"
+#include "SpaghettiEng/Core/WindowEvents.h"
 
+// {} [] 
 namespace Spg
 {
+   class Camera2D;
+  // class Camera;
+  // class Transform;
+  // class InputState;
+  // class Window;
+
+#if 0
+  class TransformController
+  {
+    public:
+
+    private:
+
+  };
+
+  class CameraController
+  {
+    public:
+      
+      void Update(double delta_time, const Window& window, 
+                  Transform& transform);
+      void OnEvent(WinEvt::Event& event,  const Window& window, 
+                  Transform& transform, Camera& camera);
+
+
+    private:
+      void OnWindowResize(WinEvt::WindowResize& e);
+      void OnMouseMoved(WinEvt::MouseMoved& e);
+      void OnMouseScrolled(WinEvt::MouseScrolled& e);
+      void OnMouseButtonPressed(WinEvt::MouseBtnPressed& e); 
+  };
+#endif  
+
   class CameraController2D
   {
     public:

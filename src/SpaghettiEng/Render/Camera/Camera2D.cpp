@@ -49,6 +49,7 @@ namespace Spg
       m_transform[3] = glm::vec4{ position, 1.0f };
   }
 
+#if 1
   glm::vec3 Camera2D::Front() const
   {
     glm::vec3 z = (glm::vec3)m_transform[2];
@@ -65,6 +66,7 @@ namespace Spg
     return (glm::vec3)m_transform[1]; //local y
   }
   
+  //This is used!
   void Camera2D::LookAt(glm::vec3& look_pos)
   {
     glm::vec3 pos = (glm::vec3)m_transform[3];
@@ -92,5 +94,6 @@ namespace Spg
     m_transform[1] = glm::vec4{ y, 0.0f };
     m_transform[2] = glm::vec4{ z, 0.0f };
   }
+#endif
 
 }

@@ -14,7 +14,6 @@ namespace Geom
   using Point3d = glm::vec3;
   using Point4d = glm::vec4;
 
-  // ==== From GeomBase.h ========================================
   enum class RelativePos 
   {
     Left, Right, Beyond, Behind, Between, Origin, Destination

@@ -1,8 +1,76 @@
 #pragma once
 #include "CoreLib/Core.h"
 
+// {} []
+
 namespace Spg
 {
+
+  /*
+  Option 1: Category Enums (The Simple & Safe Approach)
+  Instead of one massive enum, give each category its own enum. You then add a Category enum to your base class so your event dispatcher can quickly route them to the right system.
+  
+  Why it works: 
+  Your main event loop looks at event.category. If it's Category::Window, it casts or routes it to your window manager, which then switches on WindowType.
+  */
+
+  namespace Event_Opt1
+  {
+    enum class Category { Window, Input, Network, Audio };
+
+    enum class WindowType { Close, Resize, Move, FocusChange };
+    enum class InputType  { MouseMoved, MouseBtnPressed, KeyPressed };
+    enum class AudioType  { TrackEnded, BufferUnderrun };
+
+    struct Base {
+        Category category;
+        bool handled = false;
+        
+    protected:
+        Base(Category cat) : category(cat) {}
+    };
+
+    struct Close : public Base {
+        Close() : Base(Category::Window) {}
+        static WindowType GetStaticType() { return WindowType::Close; }
+    };
+  } 
+
+  //===============================================================
+
+  /*
+    Option 2: The "Type ID" System (The Scalable Engine Approach)
+    If you want total separation where different modules can add events without changing any centralized enums, you can drop enums entirely and use an internal ID system.
+  
+    Why it works: 
+    Complete decoupling. Your audio system or network system can create events in their own files, and they instantly get a unique TypeId without touching a global enum list.
+  
+  */
+
+  namespace Event_op2 {
+    using TypeId = uintptr_t;
+
+    // Helper to generate a unique ID per class type at compile-time
+    template<typename T>
+    inline TypeId GetTypeId() {
+        static const int dummy = 0;
+        return reinterpret_cast<TypeId>(&dummy);
+    }
+
+    struct Base {
+        bool handled = false;
+        virtual TypeId GetType() const = 0;
+        virtual ~Base() = default;
+    };
+}
+
+// Inside your window module file:
+struct WindowClose : public Event_op2::Base {
+    Event_op2::TypeId GetType() const override { return Event_op2::GetTypeId<WindowClose>(); }
+};
+
+
+
   enum class EventType : uint32_t
   {
     WindowClose, WindowResize, WindowMove, WindowFocusChange, WindowHoverChange, WindowIconifyChange,

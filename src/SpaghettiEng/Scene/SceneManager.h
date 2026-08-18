@@ -17,14 +17,13 @@ namespace Spg
 
   class SceneManager
   {
-    public:
+    private:
+    
       struct SceneCamera
       {
         Camera camera;
-        Transform cam_transform;
-        
+        Transform transform;
       };
-
 
     public:
       SceneManager() = default;
@@ -42,15 +41,15 @@ namespace Spg
 
       void BuildDefaultScene(const ResourceManager& resource_manager);
       
-      Camera& GetSceneCamera() {return m_scene_camera;}
-      const Camera& GetSceneCamera() const {return m_scene_camera;}
+      Transform& GetSceneCameraTransform() {return m_scene_camera.transform;}
+      Camera& GetSceneCamera() {return m_scene_camera.camera;}
 
     private:
       //* Note: Getting active scene requires slowish map lookup (in the update loop) - 
       std::unordered_map<std::string, Scene> m_scenes;
       std::string m_active_sim_scene_name = std::string("");
 
-      Camera m_scene_camera;
+      SceneCamera m_scene_camera;
   };
 
 }

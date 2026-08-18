@@ -26,22 +26,25 @@ namespace Spg
     Camera2D();
     ~Camera2D() = default;
 
-    glm::vec2 GetPosition() const;
     glm::mat4 GetProjMatrix() const;
     glm::mat4 GetViewMatrix() const;
     glm::mat4& GetTransform();
 
     Camera2D::Params GetParams() const;
     void SetParams(const Camera2D::Params& params);
+    void SetPosition(glm::vec3& position);
+     glm::vec2 GetPosition() const;
 
+  #if 1
     glm::vec3 Front() const;
     glm::vec3 Up() const;
     glm::vec3 Right() const;
 
     //Todo - these in controller class?
-    void SetPosition(glm::vec3& position);
+   
     void LookAt(glm::vec3& look_pos);
     void LookAt(glm::vec3& look_pos, glm::vec3& up);
+  #endif
 
   private:  
     Params m_params;

@@ -13,6 +13,7 @@ namespace Spg
 
   namespace WinEvt { struct Event; }
   
+  
   class Layer
   {
 

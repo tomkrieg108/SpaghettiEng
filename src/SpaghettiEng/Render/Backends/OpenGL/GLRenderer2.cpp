@@ -1,7 +1,5 @@
 #include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer2.h"
 
-// #include <vector>
-// #include <array>
 #include <unordered_map>
 #include <cstdint> 
 
@@ -12,16 +10,11 @@
 
 #include "SpaghettiEng/Resource/ResourceCache.h"
 #include "SpaghettiEng/Resource/ResourceManager.h"
-
 #include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
 #include "SpaghettiEng/Render/Camera/Camera.h"
 #include "SpaghettiEng/Render/Mesh/Mesh.h"
 #include "SpaghettiEng/Render/Mesh/Material.h"
-
-#include "SpaghettiEng/Scene/Entity.h"
-#include "SpaghettiEng/Scene/Registry.h"
-#include "SpaghettiEng/Scene/Scene.h"
-#include "SpaghettiEng/Scene/SceneManager.h"
+#include "SpaghettiEng/Scene/Transform.h"
 
 // {} []
 namespace Spg
@@ -43,7 +36,6 @@ namespace Spg
   {
     const auto& mesh = m_resource_mgr.GetResourceCache<Mesh>().Get(mesh_id);
     
-    //GLuint vbo;
     uint32_t vao, vbo;
 
     glGenVertexArrays(1, &vao); //V3.0+
@@ -51,17 +43,15 @@ namespace Spg
 
     glGenBuffers(1,&vbo); //v2.0+
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    auto size = mesh.vertices.size()*4;
-    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size()*4, (void *)mesh.vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mesh.vertex_buffer.size(), (void *)mesh.vertex_buffer.data(), GLUsage(mesh));
 
     const auto& layout = mesh.layout;
-
     uint32_t attribute_idx = 0;
-    for(auto& el : layout.element_list) 
+    for(auto& attr : layout.attribute_list) 
     {
-      glVertexAttribPointer(attribute_idx, AttributeComponentCount(el.attribute),
-        GL_FLOAT, GL_FALSE, layout.size_in_bytes, 
-        (void*)(el.offset_in_bytes));
+      glVertexAttribPointer(attribute_idx, AttributeComponentCount(attr.attribute_type),
+        GLAttributeBaseType(attr), GL_FALSE, layout.size_in_bytes, 
+        (void*)(attr.offset_in_bytes));  
 
       glEnableVertexAttribArray(attribute_idx);
       ++attribute_idx;
@@ -71,20 +61,8 @@ namespace Spg
     m_vao_map[mesh_id.index] = VertexArray{vao,vbo,0};
   }
 
-  void GLRenderer2::InitGpuData(const Scene& scene)
-  {
-    auto& reg = scene.GetRegistry();
-    auto mesh_view = reg.GetAllEntitiesWith<MeshHandle>();
-
-    //* NOTE ent and mesh_view are raw EnTT data types - not encapsulated in registry
-    for(auto ent : mesh_view)
-    {
-      auto& mesh_handle = reg.GetComponent<MeshHandle>(Entity{ent});
-      InitGpuData(mesh_handle.mesh_id);
-    }
-  }
-
-  void GLRenderer2::Draw(MeshID mesh_id, const Material& material,const Camera& camera)
+   void GLRenderer2::Draw(MeshID mesh_id, const Material& material, 
+      const Camera& camera, const Transform& camera_transform)
   {
     auto& shader = m_resource_mgr.GetResourceCache<GLShader>().Get(material.shader_id);
     const auto& mesh = m_resource_mgr.GetResourceCache<Mesh>().Get(mesh_id);
@@ -94,34 +72,56 @@ namespace Spg
     auto model = glm::mat4(1.0f);
     shader.SetUniformMat4f("u_model", model);
     shader.SetUniformMat4f("u_proj", camera.GetProjMatrix());
-    shader.SetUniformMat4f("u_view", camera.GetViewMatrix());
-
+    shader.SetUniformMat4f("u_view", camera_transform.Inverse());
+   
     auto it = m_vao_map.find(mesh_id.index);
     SPG_ASSERT(it != m_vao_map.end());
     auto vert_arr = it->second;
     glBindVertexArray(vert_arr.vao);
-    glDrawArrays(GL_LINES, 0, mesh.vertex_count);
+    glDrawArrays(GLTopology(mesh), 0, mesh.vertex_count);
 
     glBindVertexArray(0);
     shader.Unbind();
-  }
+  } 
 
-  void GLRenderer2::Draw(const Scene& scene, const Camera& camera)
+  // ==== static Utility functions ====================================
+  uint32_t GLRenderer2::GLAttributeBaseType(const MeshAttribute& mesh_attribute)
   {
-    auto& reg = scene.GetRegistry();
-    auto view = reg.GetAllEntitiesWith<MeshHandle, Material>();
-
-    //* NOTE ent and view are raw EnTT data types - not encapsulated in registry
-    for(auto [ent, mesh, mat] : view.each())
+    switch(mesh_attribute.base_type)
     {
-      Entity entity{ent};
-      const auto& mesh_handle = reg.GetComponent<MeshHandle>(entity);
-      const auto& material = reg.GetComponent<Material>(entity);
-      Draw(mesh_handle.mesh_id, material, camera);
+      case MeshAttributeBaseType::Float: return GL_FLOAT; 
+      case MeshAttributeBaseType::Int: return GL_INT;
+      case MeshAttributeBaseType::UInt: return GL_UNSIGNED_INT; 
+      case MeshAttributeBaseType::Bool: return GL_BOOL; 
     }
-  }
+    SPG_ERROR("Unknown GL base type: {} ", (uint32_t)mesh_attribute.base_type);
+    return 0;
+  } 
 
-}
+  uint32_t GLRenderer2::GLTopology(const Mesh& mesh)
+  {
+    switch(mesh.topology)
+    {
+      case MeshTopology::Triangles: return GL_TRIANGLES;
+      case MeshTopology::Lines: return GL_LINES;
+      case MeshTopology::Points: return GL_POINTS;
+    }
+    SPG_ERROR("Unknown GL mesh topology: {} ", (uint32_t)mesh.topology);
+    return 0;
+  } 
+
+  uint32_t GLRenderer2::GLUsage(const Mesh& mesh)
+  {
+    switch(mesh.usage)
+    {
+      case MeshUsage::Static: return GL_STATIC_DRAW;
+      case MeshUsage::Dynamic: return GL_DYNAMIC_DRAW;
+    }
+    SPG_ERROR("Unknown GL mesh usage: {} ", (uint32_t)mesh.usage);
+    return 0;
+  } 
+  
+} //namespace Spg
 
 namespace AI
 {

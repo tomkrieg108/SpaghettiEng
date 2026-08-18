@@ -35,25 +35,38 @@ namespace Spg
     }
 
 
-    glm::vec3 Transform::Position()
+    glm::vec3 Transform::Position() const
     {
       return (glm::vec3)matrix[3];
     }
 
-    glm::vec3 Transform::Front()
+    glm::vec3 Transform::Front() const
     {
       glm::vec3 z = (glm::vec3)matrix[2];
       return -z;  //camera looks in -ve z dir
     }
 
-    glm::vec3 Transform::Up()
+    glm::vec3 Transform::Up() const
     {
       return (glm::vec3)matrix[1]; //local y
     }
 
-    glm::vec3 Transform::Right()
+    glm::vec3 Transform::Right() const
     {
       return (glm::vec3)matrix[0]; //local x
+    }
+
+    /** 
+    Note: Calculate faster by splitting the matrix into product of rotation component and position component. Inverse of rot component is it's transpose.  Inverse of pos component will be negated vals (in col 4)
+    */
+    glm::mat4 Transform::Inverse() const
+    {
+      // glm::vec3 camera_pos   = glm::vec3(5.0f, 3.0f, 2.0f);
+      // glm::vec3 camera_target = glm::vec3(0.0f, 0.0f, 0.0f);
+      // glm::vec3 camera_up    = glm::vec3(0.0f, 1.0f, 0.0f);
+      // glm::mat4 view = glm::lookAt(camera_pos, camera_target, camera_up);
+      // return view;
+      return glm::inverse(matrix);
     }
 
     void Transform::InvertXYAxes()

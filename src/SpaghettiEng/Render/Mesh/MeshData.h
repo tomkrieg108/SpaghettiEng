@@ -1,9 +1,5 @@
 # pragma once
-
-/*
-  {}
-  []
-*/
+// {} []
 
 namespace Spg
 {

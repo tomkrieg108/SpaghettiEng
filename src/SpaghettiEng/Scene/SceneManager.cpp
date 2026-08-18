@@ -55,6 +55,7 @@ namespace Spg
 
     auto grid_mesh_id = mesh_cache.GetResourceID("grid");
     auto coords_mesh_id = mesh_cache.GetResourceID("coords");
+    auto cube_mesh_id = mesh_cache.GetResourceID("cube");
     auto shader_id = shader_cache.GetResourceID("Basic Shader");
 
     Entity grid_entity = scene_reg.CreateEntity();
@@ -69,6 +70,14 @@ namespace Spg
     scene_reg.AddComponent<MeshHandle>(coords_entity, coords_mesh_id);
     scene_reg.AddComponent<Material>(coords_entity, shader_id);
 
+    Entity cube_entity = scene_reg.CreateEntity();
+    scene_reg.AddComponent<TagComponent>(cube_entity, TagComponent{"Cube"});
+    scene_reg.AddComponent<Transform>(cube_entity);
+    scene_reg.AddComponent<MeshHandle>(cube_entity, cube_mesh_id);
+    scene_reg.AddComponent<Material>(cube_entity, shader_id);
+
+    m_scene_camera.transform.SetPosition(glm::vec3(5,3,2));
+    m_scene_camera.transform.LookAt(glm::vec3(0,0,0));
 
     // Entity camera_entity = scene.GetRegistry().CreateEntity();
     // scene.GetRegistry().AddComponent<TagComponent>(camera_entity, TagComponent{"Scene Camera"});

@@ -27,7 +27,7 @@ namespace Spg
 
     scene_mgr.BuildDefaultScene(resource_mgr);
     
-    m_service_locator.Register<GLRenderer2>(resource_mgr); //todo = not ideal to pass in mgr
+    m_service_locator.Register<GLRenderer2>(resource_mgr); 
     
     auto* sim_layer = new SimLayer(m_service_locator, "Sim Layer");
     auto* editor_layer = new EditorLayer(m_service_locator, "Editor Layer");
