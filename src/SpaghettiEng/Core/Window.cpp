@@ -34,7 +34,7 @@ namespace Spg
       glfwTerminate();
       return;
     }
-    //Todo. Linux does not work with V4.5 (V4.2 max?)
+    //Todo. Linux WSL does not work with V4.6 (V4.2 max).  May be possible to unlock 4.6
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

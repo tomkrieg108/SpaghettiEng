@@ -5,7 +5,7 @@
 #include "SpaghettiEng/Core/ServiceLocator.h"
 #include "SpaghettiEng/Render/Camera/Camera.h"
 #include "SpaghettiEng/Scene/SceneManager.h"
-#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer2.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
 
 #include "SpgApp/SimLayer.h"
 #include "SpgApp/EditorLayer.h"
@@ -22,12 +22,13 @@ namespace Spg
   SpgApp::SpgApp(const std::string& title) :
     Spg::Application(title)
   {
+    auto& window = m_service_locator.Get<Window>();
     auto& resource_mgr = m_service_locator.Get<ResourceManager>();
     auto& scene_mgr = m_service_locator.Get<SceneManager>();
 
     scene_mgr.BuildDefaultScene(resource_mgr);
     
-    m_service_locator.Register<GLRenderer2>(resource_mgr); 
+    m_service_locator.Register<GLRenderer>(window, scene_mgr, resource_mgr); 
     
     auto* sim_layer = new SimLayer(m_service_locator, "Sim Layer");
     auto* editor_layer = new EditorLayer(m_service_locator, "Editor Layer");

@@ -1,17 +1,91 @@
-#include "SpaghettiEng/Scene/Transform.h"
+#include "SpaghettiEng/Math/Transform.h"
 
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/mat3x3.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+//For V2 only
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtx/vector_angle.hpp>
-
-#include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 // {} []
+
 namespace Spg
 {
-  inline namespace Transform_v1
+  inline namespace Transform_V2
+  {
+    void Transform::SetOrientation(const glm::vec3& euler_angles_xyz_deg)
+    {
+      glm::vec3 angles = glm::radians(euler_angles_xyz_deg);
+      // Create individual quaternions for each axis rotation
+      glm::quat qx = glm::angleAxis(angles.x, glm::vec3(1.0f, 0.0f, 0.0f));
+      glm::quat qy = glm::angleAxis(angles.y, glm::vec3(0.0f, 1.0f, 0.0f));
+      glm::quat qz = glm::angleAxis(angles.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+      //orientation = qx * qy * qz;
+      orientation = qz * qy * qx;
+    } 
+
+    void Transform::Translate(const glm::vec3& delta_pos) 
+    {
+      position += delta_pos;
+    }
+
+    void Transform::Turn(float pitch, float yaw)
+    {
+      glm::quat qx = glm::angleAxis(pitch, glm::vec3(1.0f, 0.0f, 0.0f));
+      glm::quat qy = glm::angleAxis(yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+
+      orientation = qy * orientation * qx;
+
+      orientation = glm::normalize(orientation);
+    } 
+
+    void Transform::LookAt(const glm::vec3& look_pos)
+    {
+      glm::vec3 z = -glm::normalize(look_pos - position); // negative front
+      glm::vec3 up = glm::vec3(0, 1, 0);
+      // Check if z is parallel to the global up vector
+      if (glm::abs(glm::dot(z, up)) > 0.999f) {
+        // Choose a different "up" vector to avoid degeneracy
+        up = glm::vec3(0, 0, 1); // Global X-axis as a fallback
+      }
+      glm::vec3 x = glm::normalize(glm::cross(up,z));
+      glm::vec3 y = glm::normalize(glm::cross(z, x));
+
+      glm::mat3 m(x,y,z);
+
+      orientation = glm::quat_cast(m);
+      //glm::quat q2 = glm::quatLookAt(z, up); Alternatively (does the same as above)
+    }
+
+    glm::mat4 Transform::ToMat4() const
+    {
+      glm::mat4 m = glm::mat4_cast(orientation);
+      m[0][0] = scale[0];
+      m[1][1] = scale[1];
+      m[2][0] = scale[2];
+      m[3] = glm::vec4{ position, 1.0f };
+      return m;
+    }
+
+    glm::mat4 Transform::Inverse()
+    {
+      return glm::inverse(ToMat4());
+    }
+
+    
+
+  }
+
+  //===========================================================================
+
+
+  namespace Transform_v1
   {
     //* Note: from gl_app - refactor later!
     static glm::mat4 GetRotationMatX(float angle_deg);
@@ -127,28 +201,6 @@ namespace Spg
 
     void Transform::Turn(float delta_yaw, float delta_pitch)
     {
-      glm::vec3 camera_front = glm::vec3{matrix[2]};
-      glm::vec3 world_up = glm::vec3(0, 1, 0);
-
-      float pitch_angle = glm::orientedAngle(camera_front, world_up, glm::cross(camera_front, world_up));
-      pitch_angle = glm::degrees(pitch_angle);
-      //angle reduces as you look down, positive z (coming out of screen) goes up.  Increases as look up, pos z goes down.  Probably the opposite if reverse order the of vectors in cross(), but haven't tried
-      //note that both mouse up and right give pos values - see input.cpp
-
-      glm::mat4 rot_y = GetRotationMatY(-delta_yaw);
-      matrix = rot_y * matrix;  //rotate about Y world axis
-
-      if (pitch_angle > 175 && delta_pitch > 0)
-        return;
-      if (pitch_angle < 5 && delta_pitch < 0)
-        return;
-
-      glm::mat4 rot_x = GetRotationMatX(delta_pitch);
-      matrix = matrix * rot_x;  //rotate about X local axis (lool up & down)
-    }
-
-    void Transform::RotateLocal(float delta_yaw, float delta_pitch)
-    {
       //glm::vec3 camera_front = camera.GetFront(camera_transform);
       glm::vec3 camera_front = glm::vec3{ matrix[2] };
       glm::vec3 world_up = glm::vec3{ 0, 1, 0 };
@@ -156,6 +208,7 @@ namespace Spg
 
       glm::vec3 rot_axis = glm::vec3{ glm::inverse(matrix) * world_up_4 }; //global Y Axis in camera space
       matrix = glm::rotate(matrix, -delta_yaw, rot_axis);
+      //matrix = glm::rotate(matrix, -delta_yaw, world_up); //* wrong!
 
       //angle reduces as you look down, positive z (coming out of screen) goes up.  Increases as look up, pos z goes down.  Probably the opposite if reverse order the of vectors in cross(), but haven't tried
       //note that both mouse up and right give pos values - see input.cpp
@@ -235,4 +288,4 @@ namespace Spg
     }
   } 
 
-} 
+}

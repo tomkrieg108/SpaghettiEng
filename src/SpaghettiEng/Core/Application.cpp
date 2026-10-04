@@ -1,6 +1,7 @@
 
 //#define SPG_LIB_LINK_CHECK
 //#define SPG_PRINT_GRAPHICS_SPECS
+#define SPG_PRINT_SHADER_INFO
 
 //Paired header
 #include "SpaghettiEng/Core/Application.h"
@@ -48,7 +49,7 @@
 
 #include "SpaghettiEng/Render/Backends/OpenGL/GLContext.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
-#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLSimpleRenderer.h"
 
 
 // {} []
@@ -95,6 +96,16 @@ namespace Spg
   #ifdef SPG_LIB_LINK_CHECK 
     PrintPlatformInfo();
     PrintExternalLibInfo();
+  #endif
+
+  #ifdef SPG_PRINT_SHADER_INFO
+    for(auto& shader : shader_cache)
+      shader.PrintInfo();
+    
+    // shader_cache.Get(shader_cache.GetResourceID("Basic Shader")).PrintInfo();
+    // shader_cache.Get(shader_cache.GetResourceID("Basic UB Shader")).PrintInfo();
+    // shader_cache.Get(shader_cache.GetResourceID("Basic Lighting Shader")).PrintInfo();
+    // shader_cache.Get(shader_cache.GetResourceID("Text Shader")).PrintInfo();
   #endif
     
   }

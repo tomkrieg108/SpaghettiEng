@@ -1,6 +1,6 @@
 #include "SpaghettiEng/Scene/SceneManager.h"
 
-//#include <memory>
+#include <glm/vec3.hpp>
 
 #include "CoreLib/Core.h"
 
@@ -12,7 +12,8 @@
 #include "SpaghettiEng/Resource/Resource.h"
 #include "SpaghettiEng/Resource/ResourceCache.h"
 #include "SpaghettiEng/Resource/ResourceManager.h"
-#include "SpaghettiEng/Scene/Transform.h"
+//#include "SpaghettiEng/Scene/Transform.h"
+#include "SpaghettiEng/Math/Transform.h"
 #include "SpaghettiEng/Scene/Components.h"
 #include "SpaghettiEng/Render/Mesh/Mesh.h"
 #include "SpaghettiEng/Render/Mesh/Material.h"
@@ -56,36 +57,39 @@ namespace Spg
     auto grid_mesh_id = mesh_cache.GetResourceID("grid");
     auto coords_mesh_id = mesh_cache.GetResourceID("coords");
     auto cube_mesh_id = mesh_cache.GetResourceID("cube");
-    auto shader_id = shader_cache.GetResourceID("Basic Shader");
+    //auto sphere_mesh_id = mesh_cache.GetResourceID("sphere_tm");
+    auto sphere_mesh_id = mesh_cache.GetResourceID("sphere");
+
+    // auto shader_id = shader_cache.GetResourceID("Basic Shader");
+    auto basic_shader_id = shader_cache.GetResourceID("Basic UB Shader");
+    auto basic_lighting_shader_id = shader_cache.GetResourceID("Basic Lighting Shader");
 
     Entity grid_entity = scene_reg.CreateEntity();
     scene_reg.AddComponent<TagComponent>(grid_entity, TagComponent{"Grid"});
     scene_reg.AddComponent<Transform>(grid_entity);
     scene_reg.AddComponent<MeshHandle>(grid_entity, grid_mesh_id);
-    scene_reg.AddComponent<Material>(grid_entity, shader_id);
+    scene_reg.AddComponent<Material>(grid_entity, Material{.shader_id = basic_shader_id});
 
     Entity coords_entity = scene_reg.CreateEntity();
     scene_reg.AddComponent<TagComponent>(coords_entity, TagComponent{"Coords"});
     scene_reg.AddComponent<Transform>(coords_entity);
     scene_reg.AddComponent<MeshHandle>(coords_entity, coords_mesh_id);
-    scene_reg.AddComponent<Material>(coords_entity, shader_id);
+    scene_reg.AddComponent<Material>(coords_entity, basic_shader_id);
 
-    Entity cube_entity = scene_reg.CreateEntity();
-    scene_reg.AddComponent<TagComponent>(cube_entity, TagComponent{"Cube"});
-    scene_reg.AddComponent<Transform>(cube_entity);
-    scene_reg.AddComponent<MeshHandle>(cube_entity, cube_mesh_id);
-    scene_reg.AddComponent<Material>(cube_entity, shader_id);
+    // Entity cube_entity = scene_reg.CreateEntity();
+    // scene_reg.AddComponent<TagComponent>(cube_entity, TagComponent{"Cube"});
+    // scene_reg.AddComponent<Transform>(cube_entity);
+    // scene_reg.AddComponent<MeshHandle>(cube_entity, cube_mesh_id);
+    // scene_reg.AddComponent<Material>(cube_entity, basic_lighting_shader_id, glm::vec3(1,0,0));
 
-    m_scene_camera.transform.SetPosition(glm::vec3(5,3,2));
-    m_scene_camera.transform.LookAt(glm::vec3(0,0,0));
+    Entity sphere_entity = scene_reg.CreateEntity();
+    scene_reg.AddComponent<TagComponent>(sphere_entity, TagComponent{"Sphere_tm"});
+    scene_reg.AddComponent<Transform>(sphere_entity);
+    scene_reg.AddComponent<MeshHandle>(sphere_entity, sphere_mesh_id);
+    scene_reg.AddComponent<Material>(sphere_entity, basic_lighting_shader_id, glm::vec3(0,0.5,0));
 
-    // Entity camera_entity = scene.GetRegistry().CreateEntity();
-    // scene.GetRegistry().AddComponent<TagComponent>(camera_entity, TagComponent{"Scene Camera"});
-    // scene.GetRegistry().AddComponent<Transform>(camera_entity);
-    // scene.GetRegistry().AddComponent<Camera>(camera_entity);
-    
+    m_scene_camera_transform.SetPosition(glm::vec3(5,3,2));
+    m_scene_camera_transform.LookAt(glm::vec3(0,0,0));
   }
-
- 
 
 }

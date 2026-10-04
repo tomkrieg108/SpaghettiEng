@@ -89,7 +89,7 @@ namespace Spg
 
   private:
     Window& m_window;
-    GLRenderer& m_renderer;
+    GLSimpleRenderer& m_renderer;
   #ifdef _WIN32
     GLTextRenderer& m_text_renderer;
   #endif  

@@ -13,6 +13,9 @@ target_sources(${LIB_ENG} PRIVATE
 
   "./Events/EventManager.cpp"
 
+  "./Math/Quaternion.cpp"
+  "./Math/Transform.cpp"
+
   "./Render/Camera/Camera.cpp"
   "./Render/Camera/Camera2D.cpp"
   "./Render/Camera/CameraController2D.cpp"
@@ -26,8 +29,8 @@ target_sources(${LIB_ENG} PRIVATE
   "./Render/Backends/OpenGL/GLContext.cpp"
   "./Render/Backends/OpenGL/GLBuffer.cpp"
   "./Render/Backends/OpenGL/GLVertexArray.cpp"
+  "./Render/Backends/OpenGL/GLSimpleRenderer.cpp"
   "./Render/Backends/OpenGL/GLRenderer.cpp"
-  "./Render/Backends/OpenGL/GLRenderer2.cpp"
 
   "./Scene/Entity.cpp"
   "./Scene/Scene.cpp"
@@ -60,6 +63,9 @@ target_sources(${LIB_ENG} PRIVATE
   "./Events/Events.h"
   "./Events/EventManager.h"
 
+  "./Math/Quaternion.h"
+  "./Math/Transform.h"
+
   "./Render/Camera/Camera.h"
   "./Render/Camera/Camera2D.h"
   "./Render/Camera/CameraController2D.h"
@@ -74,8 +80,8 @@ target_sources(${LIB_ENG} PRIVATE
   "./Render/Backends/OpenGL/GLBuffer.h"
   "./Render/Backends/OpenGL/GLVertexArray.h"
   "./Render/Backends/OpenGL/GLBufferLayout.h"
+  "./Render/Backends/OpenGL/GLSimpleRenderer.h"
   "./Render/Backends/OpenGL/GLRenderer.h"
-  "./Render/Backends/OpenGL/GLRenderer2.h"
   "./Render/Backends/OpenGL/GLTextRenderer.h"
 
   "./Scene/Components.h"

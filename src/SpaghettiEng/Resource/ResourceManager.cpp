@@ -44,6 +44,7 @@ namespace Spg
 
   namespace fs = std::filesystem;
 
+  //todo - might want to Initialize and store all resources here - shaders, models, textures etc.  Currently, for shaders, this is done in shader.cpp
   
   ResourceManager::ResourceManager()
   {

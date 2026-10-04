@@ -9,7 +9,7 @@ namespace Spg
 {
   class Window;
   class ServiceLocator;
-  class GLRenderer2;
+  class GLRenderer;
   class SceneManager;
 
   class SimLayer : public Layer
@@ -33,7 +33,7 @@ namespace Spg
   private:
     const Window& m_window;
     SceneManager& m_scene_mgr;
-    GLRenderer2& m_renderer;
+    GLRenderer& m_renderer;
   };
 
 }

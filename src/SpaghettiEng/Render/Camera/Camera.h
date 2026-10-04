@@ -17,7 +17,7 @@ namespace Spg
     struct PerspectiveParams
     {
       float aspect_ratio = 1.0f;
-      float fov = 60.0f; 
+      float fov = 45.0f; 
     };
 
     struct OrthoParams

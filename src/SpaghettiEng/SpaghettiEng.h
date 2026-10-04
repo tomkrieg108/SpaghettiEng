@@ -19,5 +19,5 @@
 #include "SpaghettiEng/Render/Backends/OpenGL/GLBuffer.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLVertexArray.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
-#include "SpaghettiEng/Render/Backends/OpenGL/GLRenderer.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLSimpleRenderer.h"
 #include "SpaghettiEng/Render/Backends/OpenGL/GLTextRenderer.h"

@@ -37,6 +37,8 @@ namespace Spg
   {
     //Todo - read in all shaders in the Shaders folder - define shaders in a JSON file
 
+    //Todo Might want to do all this in ResourceManager.cpp
+
     fs::path shader_path = assets_path / "Shaders";
     SPG_ASSERT(fs::exists(shader_path));
     SPG_ASSERT(fs::is_directory(shader_path));
@@ -45,16 +47,28 @@ namespace Spg
 
     auto basic_shader = shader_builder.Add(ShaderType::Vertex, "basic.vs")
                                       .Add(ShaderType::Fragment, "basic.fs")
-                                      .Build("Basic Shader");                               
+                                      .Build("Basic Shader");    
+                                      
+    auto basic_ub_shader = shader_builder.Add(ShaderType::Vertex, "basic_ub.vs")
+                                      .Add(ShaderType::Fragment, "basic_ub.fs")
+                                      .Build("Basic UB Shader");
+                                      
+    auto basic_lighting_shader = shader_builder.Add(ShaderType::Vertex, "basic_lighting.vs")
+                                      .Add(ShaderType::Fragment, "basic_lighting.fs")
+                                      .Build("Basic Lighting Shader");                                  
 
     auto text_shader = shader_builder.Add(ShaderType::Vertex, "text.vs")
                                      .Add(ShaderType::Fragment, "text.fs")
                                      .Build("Text Shader");    
                                      
     SPG_ASSERT(basic_shader.BuildSuccessFul());
-    SPG_ASSERT(text_shader.BuildSuccessFul());                                 
+    SPG_ASSERT(basic_ub_shader.BuildSuccessFul());
+    SPG_ASSERT(basic_lighting_shader.BuildSuccessFul());
+    SPG_ASSERT(text_shader.BuildSuccessFul());                                    
 
     shader_cache.Add(std::move(basic_shader), basic_shader.GetName());
+    shader_cache.Add(std::move(basic_ub_shader), basic_ub_shader.GetName());
+    shader_cache.Add(std::move(basic_lighting_shader), basic_lighting_shader.GetName());
     shader_cache.Add(std::move(text_shader), text_shader.GetName());
   }
 
@@ -325,10 +339,6 @@ namespace Spg
 
   void GLShader::PrintInfo()
   {
-#ifndef SPG_DEBUG
-		return;
-#endif
-
     int length = 0;
 		glGetProgramiv(m_program_id, GL_INFO_LOG_LENGTH, &length);
     if(length > 0) 

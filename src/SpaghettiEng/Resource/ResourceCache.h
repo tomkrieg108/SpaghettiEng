@@ -89,6 +89,11 @@ namespace Spg
       return it->second; 
     }
 
+    auto begin() { return m_resources.begin(); }
+    auto end() { return m_resources.end(); }
+    auto begin() const { return m_resources.cbegin(); }
+    auto end()	const { return m_resources.cend(); }
+
     private:
       std::vector<T> m_resources;
       std::vector<uint32_t> m_generations;

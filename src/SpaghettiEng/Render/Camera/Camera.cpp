@@ -1,11 +1,12 @@
+#include "SpaghettiEng/Render/Camera/Camera.h"
 
-#define GLM_ENABLE_EXPERIMENTAL
+// #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_access.hpp>
-#include <glm/gtx/vector_angle.hpp>
+// #include <glm/gtc/matrix_access.hpp>
+// #include <glm/gtx/vector_angle.hpp>
 
 #include "CoreLib/Logger.h"
-#include "SpaghettiEng/Render/Camera/Camera.h"
+
 
 namespace Spg
 {

@@ -19,11 +19,11 @@ namespace Spg
   GeomApp::GeomApp(const std::string& title) : 
     Application(title)
   {
-    m_service_locator.Register<GLRenderer>();
+    m_service_locator.Register<GLSimpleRenderer>();
 
     auto& resource_manager = m_service_locator.Get<ResourceManager>();
     auto& shader_cache = resource_manager.GetResourceCache<GLShader>();
-    m_service_locator.Get<GLRenderer>().SetShaderCache(shader_cache); 
+    m_service_locator.Get<GLSimpleRenderer>().SetShaderCache(shader_cache); 
 
     m_service_locator.Register<Camera2D>();
     auto& camera = m_service_locator.Get<Camera2D>();

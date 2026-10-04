@@ -38,7 +38,7 @@ namespace Spg
 
       //Refs to all the stuff from default layer - HACK!!
       DefaultLayer* m_default_layer;
-      GLRenderer& m_renderer;
+      GLSimpleRenderer& m_renderer;
       std::unordered_map<std::string, Mesh>& m_mesh_list;
       Geom::MonotonePartitionAlgo& m_monotone_spawner;
       std::string& m_active_mesh;

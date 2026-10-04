@@ -30,7 +30,7 @@ namespace Spg
 
   enum class MeshTopology 
   {
-    Triangles, Lines, Points
+    Triangles, TriangleStrip, Lines, Points
   };
 
   enum class MeshUsage

@@ -1,0 +1,84 @@
+#pragma once
+
+//#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
+#include "SpaghettiEng/Render/Backends/OpenGL/GLShader.h"
+#include "SpaghettiEng/Render/Backends/OpenGL/GLVertexArray.h"
+#include "SpaghettiEng/Render/Camera/Camera2D.h"
+
+#include "SpaghettiEng/Resource/ResourceCache.h"
+
+/*
+  {} []
+*/
+
+namespace Spg
+{
+ 
+  class GLSimpleRenderer
+  {
+  public:
+
+    enum class PrimitiveType
+    {
+      Triangle, Line, LineStrip, LineLoop, Point
+    };
+
+    struct Drawable
+    {
+      GLVertexArray VAO;
+      GLSimpleRenderer::PrimitiveType draw_mode;
+      bool enabled = false;
+    }; 
+
+  public:
+    GLSimpleRenderer();
+    ~GLSimpleRenderer() = default;
+
+    //Todo - get rid of this ?
+    void SetShaderCache(ResourceCache<GLShader>& shader_cache) ;
+
+    void Draw(const GLVertexArray& vertex_array, const GLShader& shader, PrimitiveType draw_mode);
+
+  
+    uint32_t Submit(const std::vector<float>& data, PrimitiveType draw_mode);
+    uint32_t Submit(const std::vector<glm::vec2>& position_data, glm::vec3 colour, PrimitiveType draw_mode);
+    uint32_t Submit(const std::vector<glm::vec2>& position_data, const std::vector<glm::vec3>& colour_data, PrimitiveType draw_mode);
+
+    void UpdatePosition(uint32_t render_id, glm::vec2 position_data, uint32_t index);
+    void UpdateColour(uint32_t render_id, glm::vec3 colour, uint32_t index);
+
+    void UpdatePosition(uint32_t render_id, const std::vector<glm::vec2>& position_data);
+    void UpdateColour(uint32_t render_id, const std::vector<glm::vec3>& colour);
+
+    void Update(uint32_t render_id, const std::vector<glm::vec2>& position_data, const std::vector<glm::vec3>& colour_data, const std::vector<uint32_t> indices);
+
+    void Disable(uint32_t render_id);
+    void Enable(uint32_t render_id);
+    void Delete(uint32_t render_id);
+
+    void Draw(const Camera2D& camera);
+
+    static void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
+    static void SetClearColor(const glm::vec4& color);
+    static void ClearBuffers();
+    static void SetLineWidth(float width);
+
+   
+  private:
+    
+    //==================================================
+    //Todo Renderer shouldn't need to store shaders - should be arguments
+    ResourceCache<GLShader>* m_shader_cache; 
+    GLShader m_basic_shader; 
+    //===================================================
+    std::unordered_map<uint32_t, Drawable> m_vao_map;
+    uint32_t m_draw_calls = 0;
+    uint32_t m_vertices_rendered = 0;
+  };
+  
+
+
+}

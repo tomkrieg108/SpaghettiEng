@@ -21,7 +21,7 @@ namespace Spg
   DefaultLayer::DefaultLayer(ServiceLocator& app_context, const std::string& name) : 
     Layer(app_context, name),
     m_window(app_context.Get<Window>()),
-    m_renderer(app_context.Get<GLRenderer>()),
+    m_renderer(app_context.Get<GLSimpleRenderer>()),
     m_camera(app_context.Get<Camera2D>()),
     m_camera_controller(app_context.Get<CameraController2D>())
   #ifdef _WIN32
@@ -186,7 +186,7 @@ namespace Spg
     point_mesh->vertices = vertices;
     point_mesh->type = MeshType::PointSet;
     point_mesh->active = true;
-    point_mesh->render_id = m_renderer.Submit(point_mesh->vertices,glm::vec4(1,1,0,1),GLRenderer::PrimitiveType::Point);
+    point_mesh->render_id = m_renderer.Submit(point_mesh->vertices,glm::vec4(1,1,0,1),GLSimpleRenderer::PrimitiveType::Point);
     //mesh.children["Points"] = std::make_unique<Mesh>(std::move(point_mesh));
     mesh.children["Points"] = point_mesh;
     
@@ -224,7 +224,7 @@ namespace Spg
     sweep_line_mesh->vertices = std::vector{ glm::vec2(-500.0f, sweep_y),  glm::vec2(500.0f, sweep_y)};
     sweep_line_mesh->active;
     sweep_line_mesh->type = MeshType::LineSet;
-    sweep_line_mesh->render_id = m_renderer.Submit(sweep_line_mesh->vertices, glm::vec4(0,1,1,1),GLRenderer::PrimitiveType::Line);
+    sweep_line_mesh->render_id = m_renderer.Submit(sweep_line_mesh->vertices, glm::vec4(0,1,1,1),GLSimpleRenderer::PrimitiveType::Line);
     //mesh.children["Sweepline"] = std::make_unique<Mesh>(std::move(sweep_line_mesh));
     mesh.children["Sweepline"] = sweep_line_mesh;
 
@@ -255,7 +255,7 @@ namespace Spg
   void DefaultLayer::Create2DGrid()
   {
     auto grid_data = Geom::GenerateGridMesh_XY(500.0f,50.0f);  
-    auto render_id = m_renderer.Submit(grid_data, GLRenderer::PrimitiveType::Line);
+    auto render_id = m_renderer.Submit(grid_data, GLSimpleRenderer::PrimitiveType::Line);
   }
 
   void DefaultLayer::GeomTest()

@@ -7,6 +7,9 @@
 #include <cstddef> // std::byte
 #include <cstring> // memcpy
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
 #include "CoreLib/Core.h"
 
 #include "SpaghettiEng/Render/Mesh/Mesh.h"
@@ -28,6 +31,7 @@ namespace Spg
   static Mesh GenerateCubeMeshTM(float size = 0.5f);
 
   static Mesh GenerateSphereMeshTM();
+  static Mesh GenerateSphereMesh();
 
   static std::vector<std::byte> ToRawBytes(const void* source_data, uint32_t source_bytes)
   {
@@ -101,9 +105,8 @@ std::vector<std::byte> GenerateMeshDirect() {
       mesh_cache.Add(GeneratePlaneMeshTM(),"plane_tm");
       mesh_cache.Add(GenerateCubeMesh(), "cube");
       mesh_cache.Add(GenerateCubeMeshTM(), "cube_tm");
-
-      //todo - crashes!
-      //mesh_cache.Add(GenerateSphereMeshTM(), "sphere_tm"); 
+      mesh_cache.Add(GenerateSphereMeshTM(), "sphere_tm"); 
+      mesh_cache.Add(GenerateSphereMesh(), "sphere"); 
     }
   }
  
@@ -164,7 +167,7 @@ std::vector<std::byte> GenerateMeshDirect() {
     layout.PushAttribute(MeshAttributeType::Position);
     layout.PushAttribute(MeshAttributeType::Color);
     
-    Mesh mesh{"grid", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Lines, layout};
+    Mesh mesh{"grid", MeshPrimitive::Grid, MeshUsage::Static, MeshTopology::Lines, layout};
     mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
     return mesh;
   }
@@ -187,7 +190,7 @@ std::vector<std::byte> GenerateMeshDirect() {
     layout.PushAttribute(MeshAttributeType::Position);
     layout.PushAttribute(MeshAttributeType::Normal);
     
-    Mesh mesh{"plane", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
+    Mesh mesh{"plane", MeshPrimitive::Plane, MeshUsage::Static, MeshTopology::Triangles, layout};
     mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
     return mesh;
   }
@@ -211,7 +214,7 @@ std::vector<std::byte> GenerateMeshDirect() {
     layout.PushAttribute(MeshAttributeType::Normal);
     layout.PushAttribute(MeshAttributeType::TexCoords);
     
-    Mesh mesh{"plane_tm", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
+    Mesh mesh{"plane_tm", MeshPrimitive::Plane, MeshUsage::Static, MeshTopology::Triangles, layout};
     mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
     return mesh;
   }
@@ -269,7 +272,7 @@ std::vector<std::byte> GenerateMeshDirect() {
     layout.PushAttribute(MeshAttributeType::Position);
     layout.PushAttribute(MeshAttributeType::Normal);
     
-    Mesh mesh{"cube", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
+    Mesh mesh{"cube", MeshPrimitive::Cube, MeshUsage::Static, MeshTopology::Triangles, layout};
     mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
     return mesh;
   }
@@ -327,16 +330,16 @@ std::vector<std::byte> GenerateMeshDirect() {
     layout.PushAttribute(MeshAttributeType::Normal);
     layout.PushAttribute(MeshAttributeType::TexCoords);
     
-    Mesh mesh{"cube_tm", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
+    Mesh mesh{"cube_tm", MeshPrimitive::Cube, MeshUsage::Static, MeshTopology::Triangles, layout};
     mesh.SetVertexBuffer(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)));
     return mesh;
   }
 
   Mesh GenerateSphereMeshTM()
   {
-    std::vector<float> positions;
-    std::vector<float> uv;
-    std::vector<float> normals;
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec2> uv;
+    std::vector<glm::vec3> normals;
 
     std::vector<float> vertices;
     std::vector<uint32_t> indices;
@@ -346,6 +349,84 @@ std::vector<std::byte> GenerateMeshDirect() {
     const uint32_t X_SEGMENTS = 64;
     const uint32_t Y_SEGMENTS = 64;
 
+    for (uint32_t x = 0; x <= X_SEGMENTS; ++x)
+    {
+      for (uint32_t y = 0; y <= Y_SEGMENTS; ++y)
+      {
+        float xSegment = (float)x / (float)X_SEGMENTS;
+        float ySegment = (float)y / (float)Y_SEGMENTS;
+        float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+        float yPos = std::cos(ySegment * PI);
+        float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+        
+        positions.push_back(glm::vec3(xPos, yPos, zPos));
+        uv.push_back(glm::vec2(xSegment, ySegment));
+        normals.push_back(glm::vec3(xPos, yPos, zPos));
+      }
+    }
+
+    bool oddRow = false;
+    for (uint32_t y = 0; y < Y_SEGMENTS; ++y)
+    {
+      if (!oddRow) // even rows: y == 0, y == 2; and so on
+      {
+        for (uint32_t x = 0; x <= X_SEGMENTS; ++x)
+        {
+          indices.push_back(y * (X_SEGMENTS + 1) + x);
+          indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+        }
+      }
+
+      else
+      {
+        for (int32_t x = X_SEGMENTS; x >= 0; --x)
+        {
+          indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+          indices.push_back(y * (X_SEGMENTS + 1) + x);
+        }
+      }
+      oddRow = !oddRow;
+    }
+    index_count = static_cast<uint32_t>(indices.size());
+
+    for (uint32_t i = 0; i < positions.size(); ++i)
+    {
+      vertices.push_back(positions[i].x);
+      vertices.push_back(positions[i].y);
+      vertices.push_back(positions[i].z);
+      if (normals.size() > 0)
+      {
+        vertices.push_back(normals[i].x);
+        vertices.push_back(normals[i].y);
+        vertices.push_back(normals[i].z);
+      }
+      if (uv.size() > 0)
+      {
+        vertices.push_back(uv[i].x);
+        vertices.push_back(uv[i].y);
+      }
+    }
+
+    MeshLayout layout;
+    layout.PushAttribute(MeshAttributeType::Position);
+    layout.PushAttribute(MeshAttributeType::Normal);
+    layout.PushAttribute(MeshAttributeType::TexCoords);
+    
+    Mesh mesh{"sphere_tm", MeshPrimitive::Sphere, MeshUsage::Static, MeshTopology::TriangleStrip, layout};
+    mesh.SetData(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)), std::move(indices));
+    return mesh;
+  }
+
+  Mesh GenerateSphereMesh()
+  {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec2> uv;
+    std::vector<glm::vec3> normals;
+    std::vector<unsigned int> indices;
+
+    const unsigned int X_SEGMENTS = 64;
+    const unsigned int Y_SEGMENTS = 64;
+    const float PI = 3.14159265359f;
     for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
     {
       for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
@@ -356,9 +437,9 @@ std::vector<std::byte> GenerateMeshDirect() {
         float yPos = std::cos(ySegment * PI);
         float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
 
-        positions.insert(std::cend(positions),{xPos, yPos, zPos});
-        uv.insert(std::cend(uv),{xSegment, ySegment});
-        normals.insert(std::cend(normals),{xPos, yPos, zPos});
+        positions.push_back(glm::vec3(xPos, yPos, zPos));
+        uv.push_back(glm::vec2(xSegment, ySegment));
+        normals.push_back(glm::vec3(xPos, yPos, zPos));
       }
     }
 
@@ -383,23 +464,24 @@ std::vector<std::byte> GenerateMeshDirect() {
       }
       oddRow = !oddRow;
     }
-    index_count = static_cast<uint32_t>(indices.size());
+    unsigned int indexCount = static_cast<unsigned int>(indices.size());
 
+    std::vector<float> data;
     for (unsigned int i = 0; i < positions.size(); ++i)
     {
-      vertices.push_back(positions[i]);
-      vertices.push_back(positions[i+1]);
-      vertices.push_back(positions[i+2]);
+      data.push_back(positions[i].x);
+      data.push_back(positions[i].y);
+      data.push_back(positions[i].z);
       if (normals.size() > 0)
       {
-        vertices.push_back(normals[i]);
-        vertices.push_back(normals[i+1]);
-        vertices.push_back(normals[i+2]);
+        data.push_back(normals[i].x);
+        data.push_back(normals[i].y);
+        data.push_back(normals[i].z);
       }
       if (uv.size() > 0)
       {
-        vertices.push_back(uv[i]);
-        vertices.push_back(uv[i+1]);
+        data.push_back(uv[i].x);
+        data.push_back(uv[i].y);
       }
     }
 
@@ -408,9 +490,78 @@ std::vector<std::byte> GenerateMeshDirect() {
     layout.PushAttribute(MeshAttributeType::Normal);
     layout.PushAttribute(MeshAttributeType::TexCoords);
     
-    Mesh mesh{"sphere_tm", MeshPrimitive::Coords, MeshUsage::Static, MeshTopology::Triangles, layout};
-    mesh.SetData(ToRawBytes(vertices.data(), vertices.size()*sizeof(float)), std::move(indices));
+    Mesh mesh{"sphere_tm", MeshPrimitive::Sphere, MeshUsage::Static, MeshTopology::TriangleStrip, layout};
+    mesh.SetData(ToRawBytes(data.data(), data.size()*sizeof(float)), std::move(indices));
     return mesh;
-  }
+
+  } 
 
 }
+
+/*
+
+//Vertex Math (The Logic)
+//Ensure your loops precisely map the grid from pole to pole and seam to seam:
+
+std::vector<float> vertices;
+int sectors = 36; // Longitude segments
+int stacks = 18;  // Latitude segments
+float radius = 1.0f;
+
+float x, y, z, xy;                              // vertex position
+float sectorStep = 2 * M_PI / sectors;
+float stackStep = M_PI / stacks;
+float sectorAngle, stackAngle;
+
+// Loop through stacks (Latitude: +90 to -90 degrees)
+for(int i = 0; i <= stacks; ++i) {
+    stackAngle = M_PI / 2 - i * stackStep;      // starting from pi/2 to -pi/2
+    xy = radius * cosf(stackAngle);             // r * cos(u)
+    z = radius * sinf(stackAngle);              // r * sin(u)
+
+    // Loop through sectors (Longitude: 0 to 360 degrees)
+    // Note: We use <= sectors (not <) so the seam vertices duplicate positions 
+    // but hold unique UV coordinates to prevent texture wrapping glitches.
+    for(int j = 0; j <= sectors; ++j) {
+        sectorAngle = j * sectorStep;           // starting from 0 to 2*pi
+
+        // Vertex position (x, y, z)
+        x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
+        y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(z);
+    }
+}
+
+
+
+*/
+
+//2. Index Generation (The Triangle Assembly)
+////A common cause for a "dent" is connecting the wrong vertices at the row boundaries. The grid wrapping must cleanly stitch row i to row i+1:
+/*
+std::vector<unsigned int> indices;
+for(int i = 0; i < stacks; ++i) {
+    int k1 = i * (sectors + 1);     // beginning of current stack
+    int k2 = k1 + sectors + 1;      // beginning of next stack
+
+    for(int j = 0; j < sectors; ++j, ++k1, ++k2) {
+        // 2 triangles per sector grid quad
+        // k1 => k2 => k1+1
+        if(i != 0) {
+            indices.push_back(k1);
+            indices.push_back(k2);
+            indices.push_back(k1 + 1);
+        }
+
+        // k1+1 => k2 => k2+1
+        if(i != (stacks - 1)) {
+            indices.push_back(k1 + 1);
+            indices.push_back(k2);
+            indices.push_back(k2 + 1);
+        }
+    }
+}
+
+*/
